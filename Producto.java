@@ -1,36 +1,55 @@
 public class Producto{
-    private String nombre;
+    private String idProducto;
+    private String marca;
     private double precio;
-    private int cantidad;
+    private int stock;
+    private String descripcion;
+    private String categoria;
 
-    public Producto(String nombre, double precio, int cantidad) {
-        this.nombre = nombre;
+    public Producto(String idProducto, String marca, double precio, int stock, 
+        String descripcion, String categoria) {
+        this.idProducto = idProducto;
+        this.marca = marca;
         this.precio = precio;
-        this.cantidad = cantidad;
+        this.stock = stock;
+        this.descripcion = descripcion;
+        this.categoria = categoria;
     }
 
-    // Getters and Setters
-    public String getNombre() {
-        return nombre;
+    public String getIdProducto() {
+        return idProducto;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public String getMarca() {
+        return marca;
     }
 
     public double getPrecio() {
         return precio;
     }
 
-    public void setPrecio(double precio) {
-        this.precio = precio;
+    public int getStock() {
+        return stock;
     }
 
-    public int getCantidad() {
-        return cantidad;
+    public String getDescripcion() {
+        return descripcion;
     }
 
-    public void setCantidad(int cantidad) {
-        this.cantidad = cantidad;
+    public String getCategoria() {
+        return categoria;
     }
+
+    public void setPrecio(double NuevoPrecio) {
+        this.precio = NuevoPrecio;
+    }
+
+    public void setStock(int NuevoStock) {
+        this.stock = NuevoStock;
+    }
+
+    public int modificarStock(int cantidadParaModificar){
+        return 1;
+    }
+    
 }
