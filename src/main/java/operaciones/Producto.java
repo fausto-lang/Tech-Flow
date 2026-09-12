@@ -3,15 +3,17 @@ public class Producto{
     private String marca;
     private double precio;
     private int stock;
+    private String nombre;
     private String descripcion;
     private String categoria;
 
-    public Producto(String idProducto, String marca, double precio, int stock, 
-        String descripcion, String categoria) {
+    public Producto(String idProducto, String marca, double precio, String descripcion, int stock,
+        String nombre, String categoria) {
         this.idProducto = idProducto;
         this.marca = marca;
         this.precio = precio;
         this.stock = stock;
+        this.nombre = nombre;
         this.descripcion = descripcion;
         this.categoria = categoria;
     }
@@ -30,6 +32,10 @@ public class Producto{
 
     public int getStock() {
         return stock;
+    }
+
+    public String getNombre() {
+        return nombre;
     }
 
     public String getDescripcion() {
@@ -51,5 +57,5 @@ public class Producto{
     public int modificarStock(int cantidadParaModificar){
         return 1;
     }
-    
+
 }
