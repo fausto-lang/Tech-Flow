@@ -21,7 +21,7 @@ public class VentaTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        // Mini tabla simulada universal para salidas (salidas.csv)
+        // simulacion de salidas (salidas.csv)
         archivoSalidasMock = tempDir.resolve("salidas.csv").toFile();
         try (FileWriter writer = new FileWriter(archivoSalidasMock)) {
             writer.write("idVenta,idProducto,cliente(CI),nombreProducto,cantidad,precioUnitario,fechaVenta\n");
@@ -29,7 +29,7 @@ public class VentaTest {
             writer.write("VEN-2,Prod-02,87654321,Teclado Mecánico RGB,1,150.00,2024-06-06\n");
         }
 
-        // Mini tabla simulada universal para inventario (inventario.csv)
+        // simulacion de  inventario (inventario.csv)
         archivoInventarioMock = tempDir.resolve("inventario.csv").toFile();
         try (FileWriter writer = new FileWriter(archivoInventarioMock)) {
             writer.write("idProducto,nombre,marca,categoria,descripcion,precio,stock\n");
@@ -57,8 +57,8 @@ public class VentaTest {
 
     @Test
     void calcularTotalSinDescuentoTest() {
-        Producto p1 = new Producto("Prod-01", "Auriculares Inalámbricos Pro", "Sony", "Audio", "Desc", 299.99, 2);
-        Producto p2 = new Producto("Prod-02", "Teclado Mecánico RGB", "Redragon", "Periféricos", "Desc", 150.00, 1);
+        Producto p1 = new Producto("Prod-01", "Auriculares Inalámbricos Pro", "Sony", "Audio", "Desc", 299.99f, 2);
+        Producto p2 = new Producto("Prod-02", "Teclado Mecánico RGB", "Redragon", "Periféricos", "Desc", 150.00f, 1);
         
         Venta venta = new Venta("12345678", Arrays.asList(p1, p2));
         double total = venta.calcularTotal();
@@ -125,4 +125,7 @@ public class VentaTest {
         String ultimoId = venta.obtenerUltimoIdVenta(new File("no_existe.csv"));
         assertNull(ultimoId);
     }
+
+
+
 } 

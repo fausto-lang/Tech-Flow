@@ -19,7 +19,7 @@ public class Venta {
 
     public Venta( String clienteCi, List<Producto> productosVendidos) {
         this.idVenta = generarIdVenta();
-        this.fechaVenta = LocalDate.now();
+        this.fechaVenta = LocalDate.now() ;
         this.clienteCi = clienteCi;
         this.productosVendidos = productosVendidos;
     }
