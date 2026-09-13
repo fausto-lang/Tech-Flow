@@ -92,7 +92,7 @@ public class VentaTest {
     @Test
     void constructorVacioTest() {
         Venta venta = new Venta();
-        assertNull(venta.getProductosVendidos());
+        assertNull(venta.getProductosVendidos()) ;
     }
 
     @Test
