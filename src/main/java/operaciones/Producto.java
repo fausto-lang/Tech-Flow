@@ -1,11 +1,13 @@
-public class Producto{
-    private String idProducto;
-    private String marca;
+package operaciones;
+
+public class Producto {
+    private final String idProducto;
+    private final String marca;
     private double precio;
     private int stock;
-    private String nombre;
-    private String descripcion;
-    private String categoria;
+    private final String nombre;
+    private final String descripcion;
+    private final String categoria;
 
     public Producto(String idProducto, String marca, double precio, String descripcion, int stock,
         String nombre, String categoria) {
