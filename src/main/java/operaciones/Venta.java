@@ -1,3 +1,5 @@
+package operaciones;
+
 import java.time.LocalDate;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
@@ -62,11 +64,22 @@ public class Venta {
     }
     ///metodo para factura 
     public double calcularTotal() {
-        // Lógica para calcular el total de la venta
+        if (productosVendidos == null) {
+            return 0.0;
+        }
+
+        double total = 0.0;
+        for (Producto producto : productosVendidos) {
+            total += producto.getPrecio() * producto.getStock();
+        }
+        return total;
     }
     //metodo para descuenmto cuando list<prodcuto> .size() es amyor a 10
     public double aplicarDescuento(double total) {
-        // Lógica para aplicar descuento si la cantidad de productos vendidos es mayor a 10
+        if (productosVendidos != null && productosVendidos.size() > 10) {
+            return total * 0.9;
+        }
+        return total;
     }
     public  List<Producto> getProductosVendidos() {
         return productosVendidos;
