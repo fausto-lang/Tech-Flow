@@ -15,9 +15,9 @@ public class Main {
 
         while (true) {
             System.out.println("========== TECH-FLOW ==========");
-            System.out.println("1. Entrada (suma stock)");
-            System.out.println("2. Venta (resta stock)");
-            System.out.println("3. Gestion (listar productos)");
+            System.out.println("1. Entrada ");
+            System.out.println("2. Venta ");
+            System.out.println("3. Gestion (Ver )");
             System.out.println("0. Salir");
             System.out.print("Opcion: ");
             String opcion = scanner.nextLine().trim();
@@ -36,7 +36,7 @@ public class Main {
                     scanner.close();
                     return;
                 default:
-                    System.out.println("Opcion invalida");
+                    System.out.println("Opcion no valida");
                     break;
             }
         }
@@ -72,11 +72,11 @@ public class Main {
             Proveedor proveedor = new Proveedor(nombreProv, codigoProv, contacto);
             Producto producto = new Producto(idProd, marca, precio, descripcion, 0, nombreProd, categoria);
             entrada.registrarPedido(proveedor, producto, cantidad, fecha);
-            System.out.println("Entrada registrada, stock actualizado");
+            System.out.println(" stock actualizado");
         } catch (NumberFormatException e) {
-            System.out.println("Numero o fecha invalida: " + e.getMessage());
+            System.out.println("fecha invalida: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Error al registrar entrada: " + e.getMessage());
+            System.out.println("Error registar entrada: " + e.getMessage());
         }
     }
 
@@ -146,13 +146,13 @@ public class Main {
             }
         }
 
-        System.out.println("Presiona q para volver al menu");
+        System.out.println(" q volver al menu");
         while (true) {
             String tecla = scanner.nextLine().trim();
             if (tecla.equalsIgnoreCase("q")) {
                 break;
             }
-            System.out.println("Presiona q para volver al menu");
+            System.out.println(" q volver al menu");
         }
     }
 
