@@ -12,7 +12,6 @@ import java.util.Map;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
-/** Registra las entregas de los proveedores y actualiza los archivos de inventario. */
 public class EntradaProducto {
 
 	private static final String[] ENTRADAS_COLUMNAS = {
@@ -44,10 +43,6 @@ public class EntradaProducto {
 		this.rutaProveedores = Path.of(rutaProveedores);
 	}
 
-	/**
-	 * Añade la cantidad recibida al producto existente o crea su registro si es nuevo.
-	 * Cada llamada también deja constancia de la entrega en proveedores.csv.
-	 */
 	public void registrarPedido(Proveedor proveedor, Producto producto, int cantidad,
 			LocalDate fechaEntrega) throws IOException {
 		if (proveedor == null || producto == null) {
