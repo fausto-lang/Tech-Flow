@@ -1,16 +1,18 @@
-idVenta,idProducto,cliente(CI),nombreProducto,cantidad,precioUnitario,fechaVenta   
-VEN-1,Prod-1,12345678,Auriculares Inalámbricos Pro,2,299.99,2024-06-05
-VEN-1,Prod-2,12345678,Smartphone Apex X1,1,799.00,2024-06-05
-VEN-2,Prod-9,87654321,Parlante Bluetooth BassGo,1,129.00,2024-06-06
-VEN-3,Prod-10,45678912,Disco Duro Externo 1TB SSD,2,99.99,2024-06-07
-VEN-3,Prod-15,45678912,Monitor 24 Full HD,1,179.99,2024-06-07
-VEN-3,Prod-16,45678912,Audífonos Gamer Kraken,1,89.99,2024-06-07
-VEN-4,Prod-12,98765432,Smartphone Nova 11,1,649.00,2024-06-08
-VEN-4,Prod-14,98765432,Smartwatch Watch GT 3,1,199.99,2024-06-08
-VEN-5,Prod-13,34567891,Laptop ZenBook 15,1,1499.00,2024-06-09
-VEN-5,Prod-19,34567891,Router Wi-Fi 6 Mesh,1,159.99,2024-06-09
-VEN-6,Prod-17,65432198,Cámara Mirrorless Alpha,1,899.99,2024-06-10
-VEN-6,Prod-20,65432198,Tarjeta Gráfica RTX 4060,1,429.99,2024-06-10
-VEN-7,Prod-11,11223344,Barra de Sonido Dolby,1,399.99,2024-06-11
-VEN-7,Prod-1,11223344,Auriculares Inalámbricos Pro,1,299.99,2024-06-11
-VEN-7,Prod-18,11223344,Impresora Multifuncional EcoTank,1,299.99,2024-06-11
+idVenta,idProducto,"cliente(CI)",nombreProducto,cantidad,precioUnitario,fechaVenta
+VEN-1,Prod-1,12345678,"Auriculares Inalámbricos Pro",2,299.99,2024-06-05
+VEN-1,Prod-2,12345678,"Smartphone Apex X1",1,799.00,2024-06-05
+VEN-2,Prod-9,87654321,"Parlante Bluetooth BassGo",1,129.00,2024-06-06
+VEN-3,Prod-10,45678912,"Disco Duro Externo 1TB SSD",2,99.99,2024-06-07
+VEN-3,Prod-15,45678912,"Monitor 24 Full HD",1,179.99,2024-06-07
+VEN-3,Prod-16,45678912,"Audífonos Gamer Kraken",1,89.99,2024-06-07
+VEN-4,Prod-12,98765432,"Smartphone Nova 11",1,649.00,2024-06-08
+VEN-4,Prod-14,98765432,"Smartwatch Watch GT 3",1,199.99,2024-06-08
+VEN-5,Prod-13,34567891,"Laptop ZenBook 15",1,1499.00,2024-06-09
+VEN-5,Prod-19,34567891,"Router Wi-Fi 6 Mesh",1,159.99,2024-06-09
+VEN-6,Prod-17,65432198,"Cámara Mirrorless Alpha",1,899.99,2024-06-10
+VEN-6,Prod-20,65432198,"Tarjeta Gráfica RTX 4060",1,429.99,2024-06-10
+VEN-7,Prod-11,11223344,"Barra de Sonido Dolby",1,399.99,2024-06-11
+VEN-7,Prod-1,11223344,"Auriculares Inalámbricos Pro",1,299.99,2024-06-11
+VEN-7,Prod-18,11223344,"Impresora Multifuncional EcoTank",1,299.99,2024-06-11
+VEN-8,Prod-01,8848452,"Auriculares Inalámbricos Pro",3,299.99,2026-09-15
+

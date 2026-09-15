@@ -22,6 +22,10 @@ public class GestionProducto {
         this.productos = new ArrayList<>();
     }
 
+    public List<Producto> getProductos() {
+        return productos;
+    }
+
     public void cargarProductosCSV() {
 
        try {

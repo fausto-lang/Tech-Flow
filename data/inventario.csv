@@ -1,16 +1,16 @@
 idProducto,nombre,marca,categoria,descripcion,precio,stock
-Prod-01,Auriculares Inalámbricos Pro,Sony,Audio,Auriculares de diadema con cancelación de ruido activa y Bluetooth 5.2,299.99,10
-Prod-02,Smartphone Apex X1,Samsung,Celulares,"Pantalla AMOLED de 6.5 pulgadas, 128GB de almacenamiento y cámara triple",799.00,5
-Prod-03,Laptop UltraBook,Lenovo,Computación,"Procesador de alto rendimiento, 16GB RAM y diseño ultradelgado",1299.00,3
-Prod-09,Parlante Bluetooth BassGo,JBL,Audio,"Resistente al agua IPX7, 12 horas de reproducción continua y sonido envolvente",129.00,18
-Prod-10,Disco Duro Externo 1TB SSD,Kingston,Almacenamiento,Unidad de estado sólido portátil USB-C de alta velocidad y 1TB,99.99,30
-Prod-11,Barra de Sonido Dolby,Sony,Audio,Sistema de sonido envolvente con subwoofer inalámbrico y conectividad HDMI ARC,399.99,7
-Prod-12,Smartphone Nova 11,Huawei,Celulares,"Diseño elegante, pantalla OLED de alta tasa de refresco y carga rápida",649.00,10
-Prod-13,Laptop ZenBook 15,Asus,Computación,"Pantalla NanoEdge de 15.6 pulgadas, procesador potente y gran autonomía",1499.00,4
-Prod-14,Smartwatch Watch GT 3,Huawei,Wearables,"Monitoreo avanzado de salud, GPS integrado y batería de larga duración",199.99,14
-Prod-15,Monitor 24 Full HD,Dell,Monitores,Panel IPS con resolución Full HD y tecnología antirreflejo,179.99,12
-Prod-16,Audífonos Gamer Kraken,Razer,Audio,"Sonido envolvente 7.1, almohadillas cómodas y micrófono retráctil",89.99,22
-Prod-17,Cámara Mirrorless Alpha,Sony,Fotografía,"Sensor de alta resolución, enfoque automático rápido y diseño compacto",899.99,6
-Prod-18,Impresora Multifuncional EcoTank,Epson,Impresión,Sistema de tanque de tinta de alta capacidad y bajo costo por impresión,299.99,9
-Prod-19,Router Wi-Fi 6 Mesh,TP-Link,Redes,Cobertura total para todo el hogar con tecnología Wi-Fi 6 de alta velocidad,159.99,16
-Prod-20,Tarjeta Gráfica RTX 4060,Nvidia,Componentes,Arquitectura avanzada para gaming en 1080p y trazado de rayos,429.99,8
+Prod-01,"Auriculares Inalámbricos Pro",Sony,Audio,"Auriculares de diadema con cancelación de ruido activa y Bluetooth 5.2",299.99,7
+Prod-02,"Smartphone Apex X1",Samsung,Celulares,"Pantalla AMOLED de 6.5 pulgadas, 128GB de almacenamiento y cámara triple",799.00,5
+Prod-03,"Laptop UltraBook",Lenovo,Computación,"Procesador de alto rendimiento, 16GB RAM y diseño ultradelgado",1299.00,3
+Prod-09,"Parlante Bluetooth BassGo",JBL,Audio,"Resistente al agua IPX7, 12 horas de reproducción continua y sonido envolvente",129.00,18
+Prod-10,"Disco Duro Externo 1TB SSD",Kingston,Almacenamiento,"Unidad de estado sólido portátil USB-C de alta velocidad y 1TB",99.99,30
+Prod-11,"Barra de Sonido Dolby",Sony,Audio,"Sistema de sonido envolvente con subwoofer inalámbrico y conectividad HDMI ARC",399.99,7
+Prod-12,"Smartphone Nova 11",Huawei,Celulares,"Diseño elegante, pantalla OLED de alta tasa de refresco y carga rápida",649.00,10
+Prod-13,"Laptop ZenBook 15",Asus,Computación,"Pantalla NanoEdge de 15.6 pulgadas, procesador potente y gran autonomía",1499.00,4
+Prod-14,"Smartwatch Watch GT 3",Huawei,Wearables,"Monitoreo avanzado de salud, GPS integrado y batería de larga duración",199.99,14
+Prod-15,"Monitor 24 Full HD",Dell,Monitores,"Panel IPS con resolución Full HD y tecnología antirreflejo",179.99,12
+Prod-16,"Audífonos Gamer Kraken",Razer,Audio,"Sonido envolvente 7.1, almohadillas cómodas y micrófono retráctil",89.99,22
+Prod-17,"Cámara Mirrorless Alpha",Sony,Fotografía,"Sensor de alta resolución, enfoque automático rápido y diseño compacto",899.99,6
+Prod-18,"Impresora Multifuncional EcoTank",Epson,Impresión,"Sistema de tanque de tinta de alta capacidad y bajo costo por impresión",299.99,9
+Prod-19,"Router Wi-Fi 6 Mesh",TP-Link,Redes,"Cobertura total para todo el hogar con tecnología Wi-Fi 6 de alta velocidad",159.99,16
+Prod-20,"Tarjeta Gráfica RTX 4060",Nvidia,Componentes,"Arquitectura avanzada para gaming en 1080p y trazado de rayos",429.99,8
