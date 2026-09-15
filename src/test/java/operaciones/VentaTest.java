@@ -46,7 +46,7 @@ public class VentaTest {
         archivoVacio.createNewFile();
 
         Venta venta = new Venta();
-        String idVenta = venta.generarIdVenta();
+        String idVenta = venta.generarIdVenta(archivoVacio);
         assertEquals("VEN-1", idVenta);
     }
 

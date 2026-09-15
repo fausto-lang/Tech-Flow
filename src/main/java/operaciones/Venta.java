@@ -14,7 +14,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 public class Venta {
 
-    private static final String RUTA_SALIDAS = "salidas.csv";
+    private static final String RUTA_SALIDAS = "data/salidas.csv";
     private static final String RUTA_INVENTARIO = "data/inventario.csv";
 
     private static final String[] SALIDAS_COLUMNAS = {
@@ -41,7 +41,11 @@ public class Venta {
     }
     //metodo que genera el id de venta en base al csv ventas o salida
     String generarIdVenta() {
-        File archivo = new File(RUTA_SALIDAS);
+        return generarIdVenta(new File(RUTA_SALIDAS));
+    }
+
+    //metodo que genera el id de venta a partir de un archivo concreto (usado en tests)
+    String generarIdVenta(File archivo) {
         if (!archivo.exists() || archivo.length() == 0) {
             return "VEN-1";
         }
@@ -218,10 +222,15 @@ public class Venta {
 
         for (Object filaLeida : leidas) {
             Map<?, ?> original = (Map<?, ?>) filaLeida;
+            //normaliza las claves por si la cabecera trae espacios sobrantes (p.ej. "fechaVenta   ")
+            Map<String, String> valores = new LinkedHashMap<>();
+            for (Map.Entry<?, ?> entrada : original.entrySet()) {
+                valores.put(String.valueOf(entrada.getKey()).trim(),
+                        entrada.getValue() == null ? "" : entrada.getValue().toString());
+            }
             Map<String, String> normalizada = new LinkedHashMap<>();
             for (String columna : columnas) {
-                Object valor = original.get(columna);
-                normalizada.put(columna, valor == null ? "" : valor.toString());
+                normalizada.put(columna, valores.getOrDefault(columna, ""));
             }
             filas.add(normalizada);
         }
