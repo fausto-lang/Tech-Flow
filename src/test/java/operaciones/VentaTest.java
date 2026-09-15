@@ -1,3 +1,4 @@
+package operaciones;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -6,6 +7,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -57,18 +59,23 @@ public class VentaTest {
 
     @Test
     void calcularTotalSinDescuentoTest() {
-        Producto p1 = new Producto("Prod-01", "Auriculares Inalámbricos Pro", "Sony", "Audio", "Desc", 299.99f, 2);
-        Producto p2 = new Producto("Prod-02", "Teclado Mecánico RGB", "Redragon", "Periféricos", "Desc", 150.00f, 1);
+        Producto p1 = new Producto("Prod-01", "Sony", 299.99, "Desc", 2, "Auriculares Inalámbricos Pro", "Audio");
+        Producto p2 = new Producto("Prod-02", "Redragon", 150.00, "Desc", 1, "Teclado Mecánico RGB", "Periféricos");
         
         Venta venta = new Venta("12345678", Arrays.asList(p1, p2));
         double total = venta.calcularTotal();
         
-        assertEquals(749.98, total);
+        assertEquals(749.98, total, 0.01);
     }
 
     @Test
     void aplicarDescuentoConMasDeDiezProductosTest() {
-        Venta venta = new Venta();
+        List<Producto> productos = new ArrayList<>();
+        for (int i = 1; i <= 11; i++) {
+            productos.add(new Producto("Prod-" + i, "Marca", 100.0, "Desc", 1, "Nombre " + i, "Categoria"));
+        }
+
+        Venta venta = new Venta("12345678", productos);
         double totalConDescuento = venta.aplicarDescuento(1000.0);
         assertTrue(totalConDescuento < 1000.0);
     }
@@ -82,7 +89,7 @@ public class VentaTest {
 
     @Test
     void ventaConClienteYProductosValidosTest() {
-        Producto p1 = new Producto("Prod-1", "Auriculares Inalámbricos Pro", "Sony", "Audio", "Desc", 299.99, 1);
+        Producto p1 = new Producto("Prod-1", "Sony", 299.99, "Desc", 1, "Auriculares Inalámbricos Pro", "Audio");
         Venta venta = new Venta("12345678", List.of(p1));
         
         assertNotNull(venta.getProductosVendidos());
