@@ -39,6 +39,13 @@ public class Venta {
         this.clienteCi = clienteCi;
         this.productosVendidos = productosVendidos;
     }
+
+    Venta(String idVenta, LocalDate fechaVenta, String clienteCi, List<Producto> productosVendidos) {
+        this.idVenta = idVenta;
+        this.fechaVenta = fechaVenta;
+        this.clienteCi = clienteCi;
+        this.productosVendidos = productosVendidos;
+    }
     //metodo que genera el id de venta en base al csv ventas o salida
     String generarIdVenta() {
         return generarIdVenta(new File(RUTA_SALIDAS));
