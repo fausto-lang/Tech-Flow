@@ -16,10 +16,14 @@ public class Venta {
 
     private static final String RUTA_SALIDAS = "data/salidas.csv";
     private static final String RUTA_INVENTARIO = "data/inventario.csv";
+    private static final String RUTA_CLIENTES = "data/clientes.csv";
 
     private static final String[] SALIDAS_COLUMNAS = {
         "idVenta", "idProducto", "cliente(CI)", "nombreProducto",
         "cantidad", "precioUnitario", "fechaVenta"
+    };
+    private static final String[] CLIENTES_COLUMNAS = {
+        "ci", "nombreCliente", "idProducto", "nombreProducto", "cantidad", "fechaCompra"
     };
     private static final String[] INVENTARIO_COLUMNAS = {
         "idProducto", "nombre", "marca", "categoria", "descripcion", "precio", "stock"
@@ -28,22 +32,34 @@ public class Venta {
     private String idVenta;
     private LocalDate fechaVenta;
     private String clienteCi;
+    private String nombreCliente;
     private List<Producto> productosVendidos;
 
     public Venta(){}
 
 
     public Venta( String clienteCi, List<Producto> productosVendidos) {
+        this(clienteCi, null, productosVendidos);
+    }
+
+    public Venta(String clienteCi, String nombreCliente, List<Producto> productosVendidos) {
         this.idVenta = generarIdVenta();
         this.fechaVenta = LocalDate.now() ;
         this.clienteCi = clienteCi;
+        this.nombreCliente = nombreCliente;
         this.productosVendidos = productosVendidos;
     }
 
     Venta(String idVenta, LocalDate fechaVenta, String clienteCi, List<Producto> productosVendidos) {
+        this(idVenta, fechaVenta, clienteCi, null, productosVendidos);
+    }
+
+    Venta(String idVenta, LocalDate fechaVenta, String clienteCi, String nombreCliente,
+            List<Producto> productosVendidos) {
         this.idVenta = idVenta;
         this.fechaVenta = fechaVenta;
         this.clienteCi = clienteCi;
+        this.nombreCliente = nombreCliente;
         this.productosVendidos = productosVendidos;
     }
     //metodo que genera el id de venta en base al csv ventas o salida
@@ -76,7 +92,12 @@ public class Venta {
                 .with(esquema)
                 .readValues(archivo)) {
             while (registros.hasNext()) {
-                ultimoId = registros.next().get("idVenta");
+                String idLeido = registros.next().get("idVenta");
+                //ignora las filas vacias (p.ej. lineas en blanco al final del csv)
+                if (idLeido == null || idLeido.isBlank()) {
+                    continue;
+                }
+                ultimoId = idLeido.trim();
             }
         } catch (Exception e) {
             return null;
@@ -92,6 +113,7 @@ public class Venta {
             return;
         }
         escribirEnventaCsv();
+        escribirClientesCsv();
         actualizarStockProductos();
         generarfactura();
     }
@@ -116,6 +138,44 @@ public class Venta {
     }
     public  List<Producto> getProductosVendidos() {
         return productosVendidos;
+    }
+
+    //metodo que devuelve el cliente de la venta con sus productos comprados
+    public Cliente getCliente() {
+        Cliente cliente = new Cliente(nombreCliente, clienteCi);
+        if (productosVendidos != null) {
+            for (Producto producto : productosVendidos) {
+                cliente.agregarCompra(producto);
+            }
+        }
+        return cliente;
+    }
+
+    //metodo que añade las compras del cliente al csv clientes (una fila por producto)
+    void escribirClientesCsv() throws IOException {
+        escribirClientesCsv(new File(RUTA_CLIENTES));
+    }
+
+    void escribirClientesCsv(File archivo) throws IOException {
+        if (productosVendidos == null || productosVendidos.isEmpty()) {
+            return;
+        }
+
+        List<Map<String, String>> clientes = leerFilas(archivo.getPath(), CLIENTES_COLUMNAS);
+        Cliente cliente = getCliente();
+
+        for (Producto producto : cliente.getCompras()) {
+            Map<String, String> fila = new LinkedHashMap<>();
+            fila.put("ci", cliente.getCi());
+            fila.put("nombreCliente", cliente.getNombre() == null ? "" : cliente.getNombre());
+            fila.put("idProducto", producto.getIdProducto());
+            fila.put("nombreProducto", producto.getNombre());
+            fila.put("cantidad", String.valueOf(producto.getStock()));
+            fila.put("fechaCompra", fechaVenta.toString());
+            clientes.add(fila);
+        }
+
+        escribirFilas(archivo.getPath(), clientes, CLIENTES_COLUMNAS);
     }
     public void generarfactura(){
         if (productosVendidos == null || productosVendidos.isEmpty()) {
@@ -239,9 +299,23 @@ public class Venta {
             for (String columna : columnas) {
                 normalizada.put(columna, valores.getOrDefault(columna, ""));
             }
+            //descarta filas totalmente vacias para no ensuciar el csv al reescribirlo
+            if (filaVacia(normalizada)) {
+                continue;
+            }
             filas.add(normalizada);
         }
         return filas;
+    }
+
+    //metodo que indica si una fila quedo totalmente vacia (sin ningun valor)
+    private static boolean filaVacia(Map<String, String> fila) {
+        for (String valor : fila.values()) {
+            if (valor != null && !valor.isBlank()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     //metodo que escribe las filas en un csv con el esquema de columnas indicado

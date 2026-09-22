@@ -14,3 +14,15 @@ añadir manejio de excwspciones
 añadir test 
 Blindar codigo al amximo 
 
+## Clientes (data/clientes.csv)
+
+La clase `Cliente` (nombre, CI y lista de compras) se registra automaticamente cuando se
+registra una venta (`Venta.registarVenta()`, opcion 2 del menu, que pide nombre y CI del cliente).
+El csv guarda **una fila por cada producto comprado**, sin acumular cantidades entre fechas:
+
+```
+ci,nombreCliente,idProducto,nombreProducto,cantidad,fechaCompra
+```
+
+`Cliente.cargarClientesCSV("data/clientes.csv")` agrupa esas filas por CI y el menu las
+muestra en la opcion 4. Los Precios y marcas no se guardan en este csv.

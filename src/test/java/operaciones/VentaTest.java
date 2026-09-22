@@ -58,6 +58,23 @@ public class VentaTest {
     }
 
     @Test
+    void obtenerUltimoIdVentaIgnoraLineasVaciasTest() throws IOException {
+        File archivoConLineaVacia = tempDir.resolve("salidas_linea_vacia.csv").toFile();
+        try (FileWriter writer = new FileWriter(archivoConLineaVacia)) {
+            writer.write("idVenta,idProducto,cliente(CI),nombreProducto,cantidad,precioUnitario,fechaVenta\n");
+            writer.write("VEN-1,Prod-01,12345678,Auriculares,2,299.99,2024-06-05\n");
+            writer.write("VEN-8,Prod-01,12345678,Auriculares,3,299.99,2026-09-15\n");
+            writer.write("\n");
+        }
+
+        Venta venta = new Venta();
+
+        //la linea vacia del final no debe romper el ultimo id ni generar un id repetido
+        assertEquals("VEN-8", venta.obtenerUltimoIdVenta(archivoConLineaVacia));
+        assertEquals("VEN-9", venta.generarIdVenta(archivoConLineaVacia));
+    }
+
+    @Test
     void calcularTotalSinDescuentoTest() {
         Producto p1 = new Producto("Prod-01", "Sony", 299.99, "Desc", 2, "Auriculares Inalámbricos Pro", "Audio");
         Producto p2 = new Producto("Prod-02", "Redragon", 150.00, "Desc", 1, "Teclado Mecánico RGB", "Periféricos");
@@ -118,6 +135,48 @@ public class VentaTest {
     void escribirEnVentaCsvMockTest() {
         Venta venta = new Venta();
         assertDoesNotThrow(venta::escribirEnventaCsv);
+    }
+
+    @Test
+    void escribirClientesCsvUnaFilaPorProductoTest() throws IOException {
+        Producto p1 = new Producto("Prod-01", "Sony", 299.99, "Desc", 2, "Auriculares Inalámbricos Pro", "Audio");
+        Producto p2 = new Producto("Prod-02", "Redragon", 150.00, "Desc", 1, "Teclado Mecánico RGB", "Periféricos");
+
+        Venta venta = new Venta("12345678", "Ana Perez", Arrays.asList(p1, p2));
+        File archivoClientes = tempDir.resolve("clientes.csv").toFile();
+
+        venta.escribirClientesCsv(archivoClientes);
+
+        List<String> lineas = java.nio.file.Files.readAllLines(archivoClientes.toPath());
+        assertEquals(3, lineas.size());
+        assertEquals("ci,nombreCliente,idProducto,nombreProducto,cantidad,fechaCompra", lineas.get(0));
+
+        Cliente cliente = Cliente.cargarClientesCSV(archivoClientes.getPath()).get(0);
+        assertEquals("12345678", cliente.getCi());
+        assertEquals("Ana Perez", cliente.getNombre());
+        assertEquals(2, cliente.getCompras().size());
+        assertEquals("Prod-01", cliente.getCompras().get(0).getIdProducto());
+        assertEquals(2, cliente.getCompras().get(0).getStock());
+        assertEquals("Prod-02", cliente.getCompras().get(1).getIdProducto());
+    }
+
+    @Test
+    void getClienteDevuelveClienteConSusComprasTest() {
+        Producto p1 = new Producto("Prod-01", "Sony", 299.99, "Desc", 2, "Auriculares", "Audio");
+        Venta venta = new Venta("12345678", "Ana Perez", List.of(p1));
+
+        Cliente cliente = venta.getCliente();
+
+        assertEquals("Ana Perez", cliente.getNombre());
+        assertEquals("12345678", cliente.getCi());
+        assertEquals(1, cliente.getCompras().size());
+    }
+
+    @Test
+    void escribirClientesCsvMockTest() {
+        Venta venta = new Venta();
+        File archivoClientes = tempDir.resolve("clientes_vacio.csv").toFile();
+        assertDoesNotThrow(() -> venta.escribirClientesCsv(archivoClientes));
     }
 
     @Test

@@ -7,6 +7,7 @@ import java.util.Scanner;
 public class Main {
 
     private static final String RUTA_INVENTARIO = "data/inventario.csv";
+    private static final String RUTA_CLIENTES = "data/clientes.csv";
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -18,6 +19,7 @@ public class Main {
             System.out.println("1. Entrada ");
             System.out.println("2. Venta ");
             System.out.println("3. Gestion (Ver )");
+            System.out.println("4. Clientes (listar clientes)");
             System.out.println("0. Salir");
             System.out.print("Opcion: ");
             String opcion = scanner.nextLine().trim();
@@ -31,6 +33,9 @@ public class Main {
                     break;
                 case "3":
                     listarProductos(scanner, gestion);
+                    break;
+                case "4":
+                    listarClientes(scanner);
                     break;
                 case "0":
                     scanner.close();
@@ -84,6 +89,8 @@ public class Main {
         try {
             System.out.print("CI cliente: ");
             String ci = scanner.nextLine().trim();
+            System.out.print("Nombre cliente: ");
+            String nombreCliente = scanner.nextLine().trim();
             System.out.print("ID producto: ");
             String idProd = scanner.nextLine().trim();
             System.out.print("Cantidad: ");
@@ -115,7 +122,7 @@ public class Main {
                     cantidad,
                     base.getNombre(),
                     base.getCategoria());
-            Venta venta = new Venta(ci, List.of(vendido));
+            Venta venta = new Venta(ci, nombreCliente, List.of(vendido));
             venta.registarVenta();
             System.out.println("Venta registrada, stock actualizado");
         } catch (NumberFormatException e) {
@@ -153,6 +160,38 @@ public class Main {
                 break;
             }
             System.out.println(" q volver al menu");
+        }
+    }
+
+    private static void listarClientes(Scanner scanner) {
+        List<Cliente> clientes = Cliente.cargarClientesCSV(RUTA_CLIENTES);
+
+        if (clientes.isEmpty()) {
+            System.out.println("Sin clientes registrados");
+        } else {
+            System.out.println("========== CLIENTES ==========");
+            for (Cliente cliente : clientes) {
+                System.out.printf("CI: %-12s Nombre: %s%n", cliente.getCi(), cliente.getNombre());
+                int totalProductos = 0;
+                for (Producto producto : cliente.getCompras()) {
+                    totalProductos += producto.getStock();
+                    System.out.printf("   - %-10s %-30s x%d%n",
+                            producto.getIdProducto(),
+                            recortar(producto.getNombre(), 30),
+                            producto.getStock());
+                }
+                System.out.printf("   Compras: %d producto(s), %d unidad(es)%n",
+                        cliente.getCompras().size(), totalProductos);
+            }
+        }
+
+        System.out.println("Presiona q para volver al menu");
+        while (true) {
+            String tecla = scanner.nextLine().trim();
+            if (tecla.equalsIgnoreCase("q")) {
+                break;
+            }
+            System.out.println("Presiona q para volver al menu");
         }
     }
 
