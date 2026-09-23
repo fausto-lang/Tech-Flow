@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
@@ -281,29 +282,25 @@ public class Venta {
         }
 
         CsvSchema esquema = CsvSchema.emptySchema().withHeader();
-        List<?> leidas = new CsvMapper()
+        try (MappingIterator<Map<String, String>> registros = new CsvMapper()
                 .readerFor(Map.class)
                 .with(esquema)
-                .readValues(archivo)
-                .readAll();
-
-        for (Object filaLeida : leidas) {
-            Map<?, ?> original = (Map<?, ?>) filaLeida;
-            //normaliza las claves por si la cabecera trae espacios sobrantes (p.ej. "fechaVenta   ")
-            Map<String, String> valores = new LinkedHashMap<>();
-            for (Map.Entry<?, ?> entrada : original.entrySet()) {
-                valores.put(String.valueOf(entrada.getKey()).trim(),
-                        entrada.getValue() == null ? "" : entrada.getValue().toString());
+                .readValues(archivo)) {
+            while (registros.hasNext()) {
+                Map<?, ?> original = registros.next();
+                Map<String, String> valores = new LinkedHashMap<>();
+                for (Map.Entry<?, ?> entrada : original.entrySet()) {
+                    valores.put(String.valueOf(entrada.getKey()).trim(),
+                            entrada.getValue() == null ? "" : entrada.getValue().toString());
+                }
+                Map<String, String> normalizada = new LinkedHashMap<>();
+                for (String columna : columnas) {
+                    normalizada.put(columna, valores.getOrDefault(columna, ""));
+                }
+                if (!filaVacia(normalizada)) {
+                    filas.add(normalizada);
+                }
             }
-            Map<String, String> normalizada = new LinkedHashMap<>();
-            for (String columna : columnas) {
-                normalizada.put(columna, valores.getOrDefault(columna, ""));
-            }
-            //descarta filas totalmente vacias para no ensuciar el csv al reescribirlo
-            if (filaVacia(normalizada)) {
-                continue;
-            }
-            filas.add(normalizada);
         }
         return filas;
     }
@@ -333,7 +330,9 @@ public class Venta {
         }
         CsvSchema esquema = constructorEsquema.setUseHeader(true).build();
 
-        new CsvMapper().writer(esquema).writeValues(archivo).writeAll(filas);
+        try (SequenceWriter escritor = new CsvMapper().writer(esquema).writeValues(archivo)) {
+            escritor.writeAll(filas);
+        }
     }
 
 }

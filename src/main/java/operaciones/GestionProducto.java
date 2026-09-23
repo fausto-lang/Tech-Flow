@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
@@ -33,13 +34,12 @@ public class GestionProducto {
 
            CsvSchema schema = CsvSchema.emptySchema().withHeader();
 
-           List<?> filas = mapper
+           try (MappingIterator<Map<String, String>> registros = mapper
                 .readerFor(Map.class)
                 .with(schema)
-                .readValues(new File(rutaArchivoCSV))
-                .readAll();
-
-            for (Object filaObjeto : filas) {
+                .readValues(new File(rutaArchivoCSV))) {
+            while (registros.hasNext()) {
+                Object filaObjeto = registros.next();
                 Map<?, ?> fila = (Map<?, ?>) filaObjeto;
 
                 Producto producto = new Producto(
@@ -53,6 +53,7 @@ public class GestionProducto {
                     );
                  productos.add(producto);
              }
+           }
 
         } catch (Exception e) {
              System.out.println("Error al cargar productos: " + e.getMessage());
@@ -168,14 +169,13 @@ public class GestionProducto {
 
         try {
             CsvSchema schema = CsvSchema.emptySchema().withHeader();
-            List<?> leidas = new CsvMapper()
+            List<Map<String, String>> filas = new ArrayList<>();
+            try (MappingIterator<Map<String, String>> registros = new CsvMapper()
                 .readerFor(Map.class)
                 .with(schema)
-                .readValues(ruta.toFile())
-                .readAll();
-
-            List<Map<String, String>> filas = new ArrayList<>();
-            for (Object filaObjeto : leidas) {
+                .readValues(ruta.toFile())) {
+            while (registros.hasNext()) {
+                Object filaObjeto = registros.next();
                 Map<?, ?> original = (Map<?, ?>) filaObjeto;
                 Map<String, String> fila = new LinkedHashMap<>();
                 for (Map.Entry<?, ?> entrada : original.entrySet()) {
@@ -183,6 +183,7 @@ public class GestionProducto {
                         entrada.getValue() == null ? "" : entrada.getValue().toString().trim());
                 }
                 filas.add(fila);
+            }
             }
             return filas;
         } catch (IOException e) {
