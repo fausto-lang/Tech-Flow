@@ -1,4 +1,5 @@
 package operaciones;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ public class Proveedor {
         this.nombreProveedor = nombreProveedor;
         this.codigoProveedor = codigoProveedor;
         this.contactoProveedor = contactoProveedor;
-        this.productos = productos;
+        this.productos = productos != null ? productos : new ArrayList<>();
     }
 
     public Proveedor(String nombreProveedor, String codigoProveedor, int contactoProveedor) {
@@ -46,7 +47,7 @@ public class Proveedor {
     public void setCodigoProveedor(String codigoProveedor) {
         this.codigoProveedor = codigoProveedor;
     }
-    //esta es la logica para entregar un producto si la lista de productos esta vacia.
+
     public void entregarProducto(Producto producto) {
         if (producto != null) {
             this.productos.add(producto);

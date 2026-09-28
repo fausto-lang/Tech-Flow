@@ -36,53 +36,45 @@ public class Venta {
     private String nombreCliente;
     private List<Producto> productosVendidos;
 
-    public Venta(){}
-
-
-    public Venta( String clienteCi, List<Producto> productosVendidos) {
-        this(clienteCi, null, productosVendidos);
-    }
+    public Venta() {}
 
     public Venta(String clienteCi, String nombreCliente, List<Producto> productosVendidos) {
         this.idVenta = generarIdVenta();
-        this.fechaVenta = LocalDate.now() ;
+        this.fechaVenta = LocalDate.now();
         this.clienteCi = clienteCi;
         this.nombreCliente = nombreCliente;
         this.productosVendidos = productosVendidos;
     }
 
-    Venta(String idVenta, LocalDate fechaVenta, String clienteCi, List<Producto> productosVendidos) {
-        this(idVenta, fechaVenta, clienteCi, null, productosVendidos);
-    }
-
-    Venta(String idVenta, LocalDate fechaVenta, String clienteCi, String nombreCliente,
-            List<Producto> productosVendidos) {
+    public Venta(String idVenta, LocalDate fechaVenta, String clienteCi, List<Producto> productosVendidos) {
         this.idVenta = idVenta;
         this.fechaVenta = fechaVenta;
         this.clienteCi = clienteCi;
-        this.nombreCliente = nombreCliente;
+        this.nombreCliente = null;
         this.productosVendidos = productosVendidos;
     }
-    //metodo que genera el id de venta en base al csv ventas o salida
+
     String generarIdVenta() {
         return generarIdVenta(new File(RUTA_SALIDAS));
     }
 
-    //metodo que genera el id de venta a partir de un archivo concreto (usado en tests)
     String generarIdVenta(File archivo) {
         if (!archivo.exists() || archivo.length() == 0) {
             return "VEN-1";
         }
 
         String ultimoId = obtenerUltimoIdVenta(archivo);
-
         if (ultimoId == null || ultimoId.isBlank()) {
             return "VEN-1";
         }
 
-        return "VEN-" + (Integer.parseInt(ultimoId.substring(4)) + 1);
+        try {
+            return "VEN-" + (Integer.parseInt(ultimoId.substring(4)) + 1);
+        } catch (Exception e) {
+            return "VEN-1";
+        }
     }
-    //metodo que obtiene el ultimo id de venta del csv ventas o salida
+
     String obtenerUltimoIdVenta(File archivo) {
         CsvSchema esquema = CsvSchema.emptySchema().withHeader();
         CsvMapper mapper = new CsvMapper();
@@ -94,11 +86,9 @@ public class Venta {
                 .readValues(archivo)) {
             while (registros.hasNext()) {
                 String idLeido = registros.next().get("idVenta");
-                //ignora las filas vacias (p.ej. lineas en blanco al final del csv)
-                if (idLeido == null || idLeido.isBlank()) {
-                    continue;
+                if (idLeido != null && !idLeido.isBlank()) {
+                    ultimoId = idLeido.trim();
                 }
-                ultimoId = idLeido.trim();
             }
         } catch (Exception e) {
             return null;
@@ -106,11 +96,13 @@ public class Venta {
 
         return ultimoId;
     }
+
     public void registarVenta() throws IOException {
         if (productosVendidos == null || productosVendidos.isEmpty()) {
             return;
         }
         if (!validarStockProductos()) {
+            System.out.println("❌ No hay suficiente stock para realizar la venta.");
             return;
         }
         escribirEnventaCsv();
@@ -118,30 +110,27 @@ public class Venta {
         actualizarStockProductos();
         generarfactura();
     }
-    ///metodo para factura
-    public double calcularTotal() {
-        if (productosVendidos == null) {
-            return 0.0;
-        }
 
+    public double calcularTotal() {
+        if (productosVendidos == null) return 0.0;
         double total = 0.0;
         for (Producto producto : productosVendidos) {
             total += producto.getPrecio() * producto.getStock();
         }
         return total;
     }
-    //metodo para descuenmto cuando list<prodcuto> .size() es amyor a 10
+
     public double aplicarDescuento(double total) {
         if (productosVendidos != null && productosVendidos.size() > 10) {
             return total * 0.9;
         }
         return total;
     }
-    public  List<Producto> getProductosVendidos() {
+
+    public List<Producto> getProductosVendidos() {
         return productosVendidos;
     }
 
-    //metodo que devuelve el cliente de la venta con sus productos comprados
     public Cliente getCliente() {
         Cliente cliente = new Cliente(nombreCliente, clienteCi);
         if (productosVendidos != null) {
@@ -152,17 +141,10 @@ public class Venta {
         return cliente;
     }
 
-    //metodo que añade las compras del cliente al csv clientes (una fila por producto)
     void escribirClientesCsv() throws IOException {
-        escribirClientesCsv(new File(RUTA_CLIENTES));
-    }
+        if (productosVendidos == null || productosVendidos.isEmpty()) return;
 
-    void escribirClientesCsv(File archivo) throws IOException {
-        if (productosVendidos == null || productosVendidos.isEmpty()) {
-            return;
-        }
-
-        List<Map<String, String>> clientes = leerFilas(archivo.getPath(), CLIENTES_COLUMNAS);
+        List<Map<String, String>> clientes = leerFilas(RUTA_CLIENTES, CLIENTES_COLUMNAS);
         Cliente cliente = getCliente();
 
         for (Producto producto : cliente.getCompras()) {
@@ -176,17 +158,16 @@ public class Venta {
             clientes.add(fila);
         }
 
-        escribirFilas(archivo.getPath(), clientes, CLIENTES_COLUMNAS);
+        escribirFilas(RUTA_CLIENTES, clientes, CLIENTES_COLUMNAS);
     }
-    public void generarfactura(){
-        if (productosVendidos == null || productosVendidos.isEmpty()) {
-            return;
-        }
+
+    public void generarfactura() {
+        if (productosVendidos == null || productosVendidos.isEmpty()) return;
 
         double total = calcularTotal();
         double totalConDescuento = aplicarDescuento(total);
 
-        System.out.println("========== FACTURA ==========");
+        System.out.println("\n========== FACTURA ==========");
         System.out.println("ID Venta:    " + idVenta);
         System.out.println("Fecha:       " + fechaVenta);
         System.out.println("Cliente CI:  " + clienteCi);
@@ -199,13 +180,11 @@ public class Venta {
         System.out.println("-----------------------------");
         System.out.printf("Total:       %.2f%n", total);
         System.out.printf("A pagar:     %.2f%n", totalConDescuento);
-        System.out.println("=============================");
+        System.out.println("=============================\n");
     }
-    ///metodo que añade las ventas al csv ventas o salida
+
     void escribirEnventaCsv() throws IOException {
-        if (productosVendidos == null || productosVendidos.isEmpty()) {
-            return;
-        }
+        if (productosVendidos == null || productosVendidos.isEmpty()) return;
 
         List<Map<String, String>> salidas = leerFilas(RUTA_SALIDAS, SALIDAS_COLUMNAS);
 
@@ -223,11 +202,9 @@ public class Venta {
 
         escribirFilas(RUTA_SALIDAS, salidas, SALIDAS_COLUMNAS);
     }
-    //metodo que actuañliza eel stock en el csv de inventario
+
     void actualizarStockProductos() throws IOException {
-        if (productosVendidos == null || productosVendidos.isEmpty()) {
-            return;
-        }
+        if (productosVendidos == null || productosVendidos.isEmpty()) return;
 
         List<Map<String, String>> inventario = leerFilas(RUTA_INVENTARIO, INVENTARIO_COLUMNAS);
 
@@ -243,11 +220,9 @@ public class Venta {
 
         escribirFilas(RUTA_INVENTARIO, inventario, INVENTARIO_COLUMNAS);
     }
-    //metodo par avalidar si stock en inventario.csv es 0 pues reurn false
+
     boolean validarStockProductos() {
-        if (productosVendidos == null || productosVendidos.isEmpty()) {
-            return false;
-        }
+        if (productosVendidos == null || productosVendidos.isEmpty()) return false;
 
         try {
             List<Map<String, String>> inventario = leerFilas(RUTA_INVENTARIO, INVENTARIO_COLUMNAS);
@@ -263,9 +238,7 @@ public class Venta {
                         break;
                     }
                 }
-                if (!encontrado) {
-                    return false;
-                }
+                if (!encontrado) return false;
             }
             return true;
         } catch (IOException e) {
@@ -273,13 +246,10 @@ public class Venta {
         }
     }
 
-    //metodo que lee todas las filas de un csv normalizandolas a las columnas indicadas
     private List<Map<String, String>> leerFilas(String ruta, String[] columnas) throws IOException {
         List<Map<String, String>> filas = new ArrayList<>();
         File archivo = new File(ruta);
-        if (!archivo.exists() || archivo.length() == 0) {
-            return filas;
-        }
+        if (!archivo.exists() || archivo.length() == 0) return filas;
 
         CsvSchema esquema = CsvSchema.emptySchema().withHeader();
         try (MappingIterator<Map<String, String>> registros = new CsvMapper()
@@ -288,41 +258,21 @@ public class Venta {
                 .readValues(archivo)) {
             while (registros.hasNext()) {
                 Map<?, ?> original = registros.next();
-                Map<String, String> valores = new LinkedHashMap<>();
-                for (Map.Entry<?, ?> entrada : original.entrySet()) {
-                    valores.put(String.valueOf(entrada.getKey()).trim(),
-                            entrada.getValue() == null ? "" : entrada.getValue().toString());
-                }
                 Map<String, String> normalizada = new LinkedHashMap<>();
                 for (String columna : columnas) {
-                    normalizada.put(columna, valores.getOrDefault(columna, ""));
+                    Object valor = original.get(columna);
+                    normalizada.put(columna, valor == null ? "" : valor.toString().trim());
                 }
-                if (!filaVacia(normalizada)) {
-                    filas.add(normalizada);
-                }
+                filas.add(normalizada);
             }
         }
         return filas;
     }
 
-    //metodo que indica si una fila quedo totalmente vacia (sin ningun valor)
-    private static boolean filaVacia(Map<String, String> fila) {
-        for (String valor : fila.values()) {
-            if (valor != null && !valor.isBlank()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    //metodo que escribe las filas en un csv con el esquema de columnas indicado
-    private void escribirFilas(String ruta, List<Map<String, String>> filas, String[] columnas)
-            throws IOException {
+    private void escribirFilas(String ruta, List<Map<String, String>> filas, String[] columnas) throws IOException {
         File archivo = new File(ruta);
         File carpeta = archivo.getAbsoluteFile().getParentFile();
-        if (carpeta != null) {
-            carpeta.mkdirs();
-        }
+        if (carpeta != null) carpeta.mkdirs();
 
         CsvSchema.Builder constructorEsquema = CsvSchema.builder();
         for (String columna : columnas) {
@@ -334,5 +284,4 @@ public class Venta {
             escritor.writeAll(filas);
         }
     }
-
 }

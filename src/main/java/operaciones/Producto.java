@@ -10,7 +10,7 @@ public class Producto {
     private final String categoria;
 
     public Producto(String idProducto, String marca, double precio, String descripcion, int stock,
-        String nombre, String categoria) {
+            String nombre, String categoria) {
         this.idProducto = idProducto;
         this.marca = marca;
         this.precio = precio;
@@ -48,16 +48,11 @@ public class Producto {
         return categoria;
     }
 
-    public void setPrecio(double NuevoPrecio) {
-        this.precio = NuevoPrecio;
+    public void setPrecio(double nuevoPrecio) {
+        this.precio = nuevoPrecio;
     }
 
-    public void setStock(int NuevoStock) {
-        this.stock = NuevoStock;
+    public void setStock(int nuevoStock) {
+        this.stock = nuevoStock;
     }
-
-    public int modificarStock(int cantidadParaModificar){
-        return 1;
-    }
-
 }
