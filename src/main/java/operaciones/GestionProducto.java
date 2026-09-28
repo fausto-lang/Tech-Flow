@@ -2,204 +2,193 @@ package operaciones;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 public class GestionProducto {
 
-    private List<Producto> productos;
-    private String rutaArchivoCSV;
+    private static final String RUTA_INVENTARIO = "data/inventario.csv";
+    private static final String RUTA_PROVEEDORES = "data/proveedores.csv";
+    private static final String RUTA_SALIDAS = "data/salidas.csv";
+    private static final String RUTA_CLIENTES = "data/clientes.csv";
 
-    public GestionProducto(String rutaArchivoCSV) {
-        this.rutaArchivoCSV = rutaArchivoCSV;
-        this.productos = new ArrayList<>();
-    }
+    private static final String[] INVENTARIO_COLUMNAS = {
+        "idProducto", "nombre", "marca", "categoria", "descripcion", "precio", "stock"
+    };
+    private static final String[] PROVEEDORES_COLUMNAS = {
+        "codigoProveedor", "nombreProveedor", "contactoProveedor", "fechaEntrega"
+    };
+    private static final String[] CLIENTES_COLUMNAS = {
+        "ci", "nombreCliente", "idProducto", "nombreProducto", "cantidad", "fechaCompra"
+    };
 
-    public List<Producto> getProductos() {
-        return productos;
-    }
-
-    public void cargarProductosCSV() {
-
-       try {
-           CsvMapper mapper = new CsvMapper();
-
-           CsvSchema schema = CsvSchema.emptySchema().withHeader();
-
-           List<?> filas = mapper
-                .readerFor(Map.class)
-                .with(schema)
-                .readValues(new File(rutaArchivoCSV))
-                .readAll();
-
-            for (Object filaObjeto : filas) {
-                Map<?, ?> fila = (Map<?, ?>) filaObjeto;
-
-                Producto producto = new Producto(
-                    (String) fila.get("idProducto"),
-                    (String) fila.get("marca"),
-                    Double.parseDouble((String) fila.get("precio")),
-                    (String) fila.get("descripcion"),
-                    Integer.parseInt((String) fila.get("stock")),
-                    (String) fila.get("nombre"),
-                    (String) fila.get("categoria")
-                    );
-                 productos.add(producto);
-             }
-
-        } catch (Exception e) {
-             System.out.println("Error al cargar productos: " + e.getMessage());
-    }
-}
-
-    public Producto buscarPorId(String idProducto) {
-
-        for (Producto p : productos) {
-            if (p.getIdProducto().equals(idProducto)) {
-                return p;
+    /**
+     * Devuelve el stock actual indexado por ID de Producto.
+     */
+    /**
+     * Devuelve los productos del inventario con sus nombres y stock actual.
+     */
+    public List<Producto> stockActual() throws IOException {
+        List<Producto> lista = new ArrayList<>();
+        List<Map<String, String>> inventario = leerFilas(RUTA_INVENTARIO, INVENTARIO_COLUMNAS);
+        for (Map<String, String> fila : inventario) {
+            String id = fila.get("idProducto");
+            String nombre = fila.get("nombre");
+            int stock = parsearEntero(fila.get("stock"));
+            
+            if (id != null && !id.isBlank()) {
+                Producto p = new Producto(id, fila.get("marca"), parsearDouble(fila.get("precio")), 
+                                           fila.get("descripcion"), stock, nombre, fila.get("categoria"));
+                lista.add(p);
             }
         }
-
-        return null;
+        return lista;
     }
 
-    public List<Venta> ventasDia() {
-        Path rutaSalidas = Path.of(rutaArchivoCSV).resolveSibling("salidas.csv");
+    /**
+     * Devuelve todos los objetos Producto del inventario mapeados por su idProducto.
+     */
+    public Map<String, Producto> obtenerInventarioCompleto() throws IOException {
+        Map<String, Producto> mapa = new HashMap<>();
+        List<Map<String, String>> inventario = leerFilas(RUTA_INVENTARIO, INVENTARIO_COLUMNAS);
+        for (Map<String, String> fila : inventario) {
+            String id = fila.get("idProducto");
+            if (id != null && !id.isBlank()) {
+                double precio = parsearDouble(fila.get("precio"));
+                int stock = parsearEntero(fila.get("stock"));
+                Producto p = new Producto(
+                    id,
+                    fila.get("marca"),
+                    precio,
+                    fila.get("descripcion"),
+                    stock,
+                    fila.get("nombre"),
+                    fila.get("categoria")
+                );
+                mapa.put(id, p);
+            }
+        }
+        return mapa;
+    }
+
+    /**
+     * Retorna la lista de proveedores únicos desde proveedores.csv.
+     */
+    public List<Proveedor> proveedores() throws IOException {
+        List<Proveedor> lista = new ArrayList<>();
+        List<Map<String, String>> filas = leerFilas(RUTA_PROVEEDORES, PROVEEDORES_COLUMNAS);
+        for (Map<String, String> fila : filas) {
+            String codigo = fila.get("codigoProveedor");
+            String nombre = fila.get("nombreProveedor");
+            int contacto = parsearEntero(fila.get("contactoProveedor"));
+            if (codigo != null && !codigo.isBlank()) {
+                lista.add(new Proveedor(nombre, codigo, contacto));
+            }
+        }
+        return lista;
+    }
+
+    /**
+     * Retorna las ventas realizadas en una fecha específica.
+     */
+    public List<Venta> ventasDia(LocalDate fecha) throws IOException {
+        List<Venta> lista = new ArrayList<>();
+        List<Map<String, String>> salidas = leerFilas(RUTA_SALIDAS, new String[]{
+            "idVenta", "idProducto", "cliente(CI)", "nombreProducto", "cantidad", "precioUnitario", "fechaVenta"
+        });
+
         Map<String, List<Producto>> productosPorVenta = new LinkedHashMap<>();
-        Map<String, String> clientesPorVenta = new LinkedHashMap<>();
-        Map<String, LocalDate> fechasPorVenta = new LinkedHashMap<>();
+        Map<String, String> clientePorVenta = new LinkedHashMap<>();
 
-        for (Map<String, String> fila : leerFilas(rutaSalidas)) {
-            LocalDate fecha = LocalDate.parse(fila.get("fechaVenta"));
-            if (!LocalDate.now().equals(fecha)) {
-                continue;
+        for (Map<String, String> fila : salidas) {
+            String fechaFila = fila.get("fechaVenta");
+            if (fechaFila != null && fechaFila.equalsIgnoreCase(fecha.toString())) {
+                String idVenta = fila.get("idVenta");
+                String ci = fila.get("cliente(CI)");
+                double precio = parsearDouble(fila.get("precioUnitario"));
+                int cantidad = parsearEntero(fila.get("cantidad"));
+
+                Producto p = new Producto(fila.get("idProducto"), "", precio, "", cantidad, fila.get("nombreProducto"), "");
+                
+                productosPorVenta.computeIfAbsent(idVenta, k -> new ArrayList<>()).add(p);
+                clientePorVenta.putIfAbsent(idVenta, ci);
             }
-
-            String idVenta = fila.get("idVenta");
-            Producto productoInventario = buscarPorId(fila.get("idProducto"));
-            if (productoInventario == null) {
-                throw new IllegalStateException(
-                    "El producto de la venta no existe en el inventario: " + fila.get("idProducto"));
-            }
-
-            int cantidad = parsearEntero(fila.get("cantidad"), "cantidad");
-            Producto productoVendido = new Producto(
-                productoInventario.getIdProducto(),
-                productoInventario.getMarca(),
-                Double.parseDouble(fila.get("precioUnitario")),
-                productoInventario.getDescripcion(),
-                cantidad,
-                fila.get("nombreProducto"),
-                productoInventario.getCategoria()
-            );
-
-            productosPorVenta.computeIfAbsent(idVenta, clave -> new ArrayList<>()).add(productoVendido);
-            clientesPorVenta.putIfAbsent(idVenta, fila.get("cliente(CI)"));
-            fechasPorVenta.putIfAbsent(idVenta, fecha);
         }
 
-        List<Venta> ventas = new ArrayList<>();
-        for (Map.Entry<String, List<Producto>> entrada : productosPorVenta.entrySet()) {
-            ventas.add(new Venta(
-                entrada.getKey(),
-                fechasPorVenta.get(entrada.getKey()),
-                clientesPorVenta.get(entrada.getKey()),
-                entrada.getValue()
-            ));
+        for (String idVenta : productosPorVenta.keySet()) {
+            String ci = clientePorVenta.get(idVenta);
+            lista.add(new Venta(idVenta, fecha, ci, productosPorVenta.get(idVenta)));
         }
-        return ventas;
+
+        return lista;
     }
 
-    public double gananciasTotalesDia() {
-        double ganancias = 0.0;
-        Path rutaSalidas = Path.of(rutaArchivoCSV).resolveSibling("salidas.csv");
+    /**
+     * Obtiene el historial de compras acumulado por un Cliente (vía CI).
+     */
+    public Cliente historialCliente(String ci) throws IOException {
+        List<Map<String, String>> filas = leerFilas(RUTA_CLIENTES, CLIENTES_COLUMNAS);
+        Cliente cliente = null;
 
-        for (Map<String, String> fila : leerFilas(rutaSalidas)) {
-            if (LocalDate.now().equals(LocalDate.parse(fila.get("fechaVenta")))) {
-                int cantidad = parsearEntero(fila.get("cantidad"), "cantidad");
-                ganancias += cantidad * Double.parseDouble(fila.get("precioUnitario"));
-            }
-        }
-        return ganancias;
-    }
-
-    public List<Proveedor> proveedores() {
-        Path rutaEntradas = Path.of(rutaArchivoCSV).resolveSibling("entradas.csv");
-        Path rutaProveedores = Path.of(rutaArchivoCSV).resolveSibling("proveedores.csv");
-        Map<String, Integer> contactos = new LinkedHashMap<>();
-
-        for (Map<String, String> fila : leerFilas(rutaProveedores)) {
-            contactos.put(fila.get("codigoProveedor"),
-                parsearEnteroVacio(fila.get("contactoProveedor")));
-        }
-
-        Map<String, Proveedor> proveedores = new LinkedHashMap<>();
-        for (Map<String, String> fila : leerFilas(rutaEntradas)) {
-            String codigo = fila.get("idProveedor");
-            Proveedor proveedor = proveedores.computeIfAbsent(codigo, clave ->
-                new Proveedor(
-                    fila.get("nombreProveedor"),
-                    clave,
-                    contactos.getOrDefault(clave, 0)
-                )
-            );
-
-            Producto producto = buscarPorId(fila.get("idProducto"));
-            if (producto == null) {
-                throw new IllegalStateException(
-                    "El producto de la entrada no existe en el inventario: " + fila.get("idProducto"));
-            }
-            proveedor.entregarProducto(producto);
-        }
-        return new ArrayList<>(proveedores.values());
-    }
-
-    private List<Map<String, String>> leerFilas(Path ruta) {
-        if (!ruta.toFile().exists() || ruta.toFile().length() == 0) {
-            return new ArrayList<>();
-        }
-
-        try {
-            CsvSchema schema = CsvSchema.emptySchema().withHeader();
-            List<?> leidas = new CsvMapper()
-                .readerFor(Map.class)
-                .with(schema)
-                .readValues(ruta.toFile())
-                .readAll();
-
-            List<Map<String, String>> filas = new ArrayList<>();
-            for (Object filaObjeto : leidas) {
-                Map<?, ?> original = (Map<?, ?>) filaObjeto;
-                Map<String, String> fila = new LinkedHashMap<>();
-                for (Map.Entry<?, ?> entrada : original.entrySet()) {
-                    fila.put(String.valueOf(entrada.getKey()).trim(),
-                        entrada.getValue() == null ? "" : entrada.getValue().toString().trim());
+        for (Map<String, String> fila : filas) {
+            if (ci.equalsIgnoreCase(fila.get("ci"))) {
+                if (cliente == null) {
+                    cliente = new Cliente(fila.get("nombreCliente"), ci);
                 }
-                filas.add(fila);
+                int cantidad = parsearEntero(fila.get("cantidad"));
+                Producto p = new Producto(fila.get("idProducto"), "", 0.0, "", cantidad, fila.get("nombreProducto"), "");
+                cliente.agregarCompra(p);
             }
+        }
+        return cliente;
+    }
+
+    private List<Map<String, String>> leerFilas(String ruta, String[] columnas) throws IOException {
+        List<Map<String, String>> filas = new ArrayList<>();
+        File archivo = new File(ruta);
+        if (!archivo.exists() || archivo.length() == 0) {
             return filas;
-        } catch (IOException e) {
-            throw new IllegalStateException("Error al leer el archivo CSV: " + ruta, e);
         }
+
+        CsvSchema esquema = CsvSchema.emptySchema().withHeader();
+        try (MappingIterator<Map<String, String>> registros = new CsvMapper()
+                .readerFor(Map.class)
+                .with(esquema)
+                .readValues(archivo)) {
+            while (registros.hasNext()) {
+                Map<?, ?> original = registros.next();
+                Map<String, String> normalizada = new LinkedHashMap<>();
+                for (String columna : columnas) {
+                    Object valor = original.get(columna);
+                    normalizada.put(columna, valor == null ? "" : valor.toString().trim());
+                }
+                filas.add(normalizada);
+            }
+        }
+        return filas;
     }
 
-    private int parsearEntero(String valor, String campo) {
+    private int parsearEntero(String valor) {
         try {
-            return Integer.parseInt(valor);
+            return (valor == null || valor.isBlank()) ? 0 : Integer.parseInt(valor.trim());
         } catch (NumberFormatException e) {
-            throw new IllegalStateException("Valor inválido para " + campo + ": " + valor, e);
+            return 0;
         }
     }
 
-    private int parsearEnteroVacio(String valor) {
-        return valor == null || valor.isBlank() ? 0 : parsearEntero(valor, "contactoProveedor");
+    private double parsearDouble(String valor) {
+        try {
+            return (valor == null || valor.isBlank()) ? 0.0 : Double.parseDouble(valor.trim());
+        } catch (NumberFormatException e) {
+            return 0.0;
+        }
     }
-
 }
