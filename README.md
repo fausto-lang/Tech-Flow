@@ -1,4 +1,4 @@
-# Tech-Flow
+# NICOLE KIDMAN
 
 dentro de carpeta gestion debe estar la clase Gestion (logan)
 
