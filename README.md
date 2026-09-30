@@ -1,4 +1,4 @@
-# NICOLE KIDMAN
+# NICOLE KIDMAN 2.2
 
 dentro de carpeta gestion debe estar la clase Gestion (logan)
 
