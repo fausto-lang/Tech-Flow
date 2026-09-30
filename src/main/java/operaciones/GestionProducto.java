@@ -151,6 +151,7 @@ public class GestionProducto {
         return cliente;
     }
 
+    // Llevar a otra clase: MotorCSV
     private List<Map<String, String>> leerFilas(String ruta, String[] columnas) throws IOException {
         List<Map<String, String>> filas = new ArrayList<>();
         File archivo = new File(ruta);
@@ -176,6 +177,7 @@ public class GestionProducto {
         return filas;
     }
 
+    // Llevar a otra clase: MotorCSV
     private int parsearEntero(String valor) {
         try {
             return (valor == null || valor.isBlank()) ? 0 : Integer.parseInt(valor.trim());
@@ -184,6 +186,7 @@ public class GestionProducto {
         }
     }
 
+    // Llevar a otra clase: MotorCSV
     private double parsearDouble(String valor) {
         try {
             return (valor == null || valor.isBlank()) ? 0.0 : Double.parseDouble(valor.trim());

@@ -165,6 +165,7 @@ public class EntradaProducto {
         escribirFilas(rutaProveedores, proveedores, PROVEEDORES_COLUMNAS);
     }
 
+    // Llevar a otra clase: MotorCSV
     private List<Map<String, String>> leerFilas(Path ruta, String[] columnas) throws IOException {
         if (!Files.exists(ruta) || Files.size(ruta) == 0) {
             return new ArrayList<>();
@@ -185,6 +186,7 @@ public class EntradaProducto {
         return filas;
     }
 
+    // Llevar a otra clase: MotorCSV
     private void escribirFilas(Path ruta, List<Map<String, String>> filas, String[] columnas)
             throws IOException {
         Path padre = ruta.toAbsolutePath().getParent();
@@ -199,6 +201,7 @@ public class EntradaProducto {
         new CsvMapper().writer(schema).writeValues(ruta.toFile()).writeAll(filas);
     }
 
+    // Llevar a otra clase: MotorCSV
     private int parsearEntero(String valor, String nombreCampo) {
         try {
             return (valor == null || valor.isBlank()) ? 0 : Integer.parseInt(valor.trim());

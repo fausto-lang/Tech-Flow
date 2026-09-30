@@ -75,6 +75,7 @@ public class Venta {
         }
     }
 
+    // Llevar a otra clase: MotorCSV
     String obtenerUltimoIdVenta(File archivo) {
         CsvSchema esquema = CsvSchema.emptySchema().withHeader();
         CsvMapper mapper = new CsvMapper();
@@ -246,6 +247,7 @@ public class Venta {
         }
     }
 
+    // Llevar a otra clase: MotorCSV
     private List<Map<String, String>> leerFilas(String ruta, String[] columnas) throws IOException {
         List<Map<String, String>> filas = new ArrayList<>();
         File archivo = new File(ruta);
@@ -269,6 +271,7 @@ public class Venta {
         return filas;
     }
 
+    // Llevar a otra clase: MotorCSV
     private void escribirFilas(String ruta, List<Map<String, String>> filas, String[] columnas) throws IOException {
         File archivo = new File(ruta);
         File carpeta = archivo.getAbsoluteFile().getParentFile();
