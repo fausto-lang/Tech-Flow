@@ -14,9 +14,9 @@ public class Producto {
         this.idProducto = idProducto;
         this.marca = marca;
         this.precio = precio;
+        this.descripcion = descripcion;
         this.stock = stock;
         this.nombre = nombre;
-        this.descripcion = descripcion;
         this.categoria = categoria;
     }
 

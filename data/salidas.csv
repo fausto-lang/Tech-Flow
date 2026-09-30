@@ -1,1 +1,4 @@
 idVenta,idProducto,"cliente(CI)",nombreProducto,cantidad,precioUnitario,fechaVenta
+VEN-1,Prod-12,17080963,"Cámara Mirrorless Alpha",2,0.0,2026-09-29
+VEN-2,Prod-12,17080963,"Cámara Mirrorless Alpha",1,0.0,2026-09-29
+VEN-3,Prod-11,17080922,"Audífonos Gamer Kraken",3,89.99,2026-09-29

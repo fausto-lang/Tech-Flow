@@ -1,210 +1,679 @@
 package operaciones;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 public class EntradaProducto {
 
+    private static final String RUTA_ENTRADAS = "data/entradas.csv";
+    private static final String RUTA_INVENTARIO = "data/inventario.csv";
+    private static final String RUTA_PROVEEDORES = "data/proveedores.csv";
+
     private static final String[] ENTRADAS_COLUMNAS = {
-        "idProveedor", "nombreProveedor", "idProducto", "nombreProducto",
-        "marca", "categoria", "precio", "cantidad", "fechaEntrada"
+        "idProveedor",
+        "nombreProveedor",
+        "idProducto",
+        "nombreProducto",
+        "marca",
+        "categoria",
+        "precio",
+        "cantidad",
+        "fechaEntrada"
     };
+
     private static final String[] INVENTARIO_COLUMNAS = {
-        "idProducto", "nombre", "marca", "categoria", "descripcion", "precio", "stock"
+        "idProducto",
+        "nombre",
+        "marca",
+        "categoria",
+        "descripcion",
+        "precio",
+        "stock"
     };
+
     private static final String[] PROVEEDORES_COLUMNAS = {
-        "codigoProveedor", "nombreProveedor", "contactoProveedor", "fechaEntrega"
+        "codigoProveedor",
+        "nombreProveedor",
+        "contactoProveedor",
+        "fechaEntrega"
     };
 
-    private final Path rutaEntradas;
-    private final Path rutaInventario;
-    private final Path rutaProveedores;
-
-    public EntradaProducto() {
-        this("data/entradas.csv", "data/inventario.csv", "data/proveedores.csv");
-    }
-
-    public EntradaProducto(String rutaEntradas, String rutaProveedores) {
-        this(rutaEntradas, "data/inventario.csv", rutaProveedores);
-    }
-
-    public EntradaProducto(String rutaEntradas, String rutaInventario, String rutaProveedores) {
-        this.rutaEntradas = Path.of(rutaEntradas);
-        this.rutaInventario = Path.of(rutaInventario);
-        this.rutaProveedores = Path.of(rutaProveedores);
-    }
+    // ==========================================================
+    // BUSCAR PROVEEDOR
+    // ==========================================================
 
     public Proveedor buscarProveedor(String codigoProveedor) throws IOException {
-        if (codigoProveedor == null || codigoProveedor.isBlank()) return null;
 
-        List<Map<String, String>> proveedores = leerFilas(rutaProveedores, PROVEEDORES_COLUMNAS);
-        for (Map<String, String> fila : proveedores) {
-            if (codigoProveedor.trim().equalsIgnoreCase(fila.get("codigoProveedor").trim())) {
-                int contacto = parsearEntero(fila.get("contactoProveedor"), "contactoProveedor");
-                return new Proveedor(fila.get("nombreProveedor"), fila.get("codigoProveedor"), contacto);
-            }
+        if (codigoProveedor == null || codigoProveedor.isBlank()) {
+            return null;
         }
-        return null;
-    }
 
-    public Producto buscarProducto(String idProducto) throws IOException {
-        if (idProducto == null || idProducto.isBlank()) return null;
+        codigoProveedor = codigoProveedor.trim().toUpperCase();
 
-        List<Map<String, String>> inventario = leerFilas(rutaInventario, INVENTARIO_COLUMNAS);
-        for (Map<String, String> fila : inventario) {
-            if (idProducto.trim().equalsIgnoreCase(fila.get("idProducto").trim())) {
-                double precio = Double.parseDouble(fila.get("precio"));
-                int stock = parsearEntero(fila.get("stock"), "stock");
-                return new Producto(
-                    fila.get("idProducto"),
-                    fila.get("marca"),
-                    precio,
-                    fila.get("descripcion"),
-                    stock,
-                    fila.get("nombre"),
-                    fila.get("categoria")
+        List<Map<String, String>> proveedores =
+                leerFilas(RUTA_PROVEEDORES, PROVEEDORES_COLUMNAS);
+
+        for (Map<String, String> fila : proveedores) {
+
+            String codigo = fila.get("codigoProveedor");
+
+            if (codigo != null &&
+                codigo.trim().equalsIgnoreCase(codigoProveedor)) {
+
+                int contacto = 0;
+
+                try {
+                    contacto = Integer.parseInt(
+                            fila.get("contactoProveedor")
+                    );
+                } catch (Exception e) {
+                    contacto = 0;
+                }
+
+                return new Proveedor(
+                        fila.get("nombreProveedor"),
+                        codigo,
+                        contacto
                 );
             }
         }
+
         return null;
     }
 
-    public void registrarPedido(Proveedor proveedor, Producto producto, int cantidad,
-            LocalDate fechaEntrega) throws IOException {
-        if (proveedor == null || producto == null) {
-            throw new IllegalArgumentException("El proveedor y el producto son obligatorios");
+    // ==========================================================
+    // BUSCAR PRODUCTO POR ID
+    // ==========================================================
+
+    public Producto buscarProducto(String idProducto) throws IOException {
+
+        if (idProducto == null || idProducto.isBlank()) {
+            return null;
         }
+
+        idProducto = idProducto.trim().toUpperCase();
+
+        List<Map<String, String>> inventario =
+                leerFilas(RUTA_INVENTARIO, INVENTARIO_COLUMNAS);
+
+        for (Map<String, String> fila : inventario) {
+
+            String id = fila.get("idProducto");
+
+            if (id != null && id.equalsIgnoreCase(idProducto)) {
+
+                return convertirProducto(fila);
+            }
+        }
+
+        return null;
+    }
+
+    // ==========================================================
+    // BUSCAR PRODUCTO POR NOMBRE
+    // ==========================================================
+
+    public Producto buscarProductoPorNombre(String nombre) throws IOException {
+
+        if (nombre == null || nombre.isBlank()) {
+            return null;
+        }
+
+        nombre = nombre.trim();
+
+        List<Map<String, String>> inventario =
+                leerFilas(RUTA_INVENTARIO, INVENTARIO_COLUMNAS);
+
+        for (Map<String, String> fila : inventario) {
+
+            String nombreGuardado = fila.get("nombre");
+
+            if (nombreGuardado != null &&
+                nombreGuardado.trim().equalsIgnoreCase(nombre)) {
+
+                return convertirProducto(fila);
+            }
+        }
+
+        return null;
+    }
+
+    // ==========================================================
+    // GENERAR ID DE PRODUCTO
+    // ==========================================================
+
+    public String generarIdProducto() throws IOException {
+
+        List<Map<String, String>> inventario =
+                leerFilas(RUTA_INVENTARIO, INVENTARIO_COLUMNAS);
+
+        int mayor = 0;
+
+        for (Map<String, String> fila : inventario) {
+
+            String id = fila.get("idProducto");
+
+            if (id == null) {
+                continue;
+            }
+
+            id = id.trim().toUpperCase();
+
+            if (id.startsWith("PROD-")) {
+
+                try {
+                    int numero = Integer.parseInt(id.substring(5));
+
+                    if (numero > mayor) {
+                        mayor = numero;
+                    }
+
+                } catch (NumberFormatException e) {
+                    // Ignorar IDs que no tengan formato correcto
+                }
+            }
+        }
+
+        return String.format("PROD-%05d", mayor + 1);
+    }
+
+    // ==========================================================
+    // GENERAR ID DE PROVEEDOR
+    // ==========================================================
+
+    public String generarCodigoProveedor() throws IOException {
+
+        List<Map<String, String>> proveedores =
+                leerFilas(RUTA_PROVEEDORES, PROVEEDORES_COLUMNAS);
+
+        int mayor = 0;
+
+        for (Map<String, String> fila : proveedores) {
+
+            String codigo = fila.get("codigoProveedor");
+
+            if (codigo == null) {
+                continue;
+            }
+
+            codigo = codigo.trim().toUpperCase();
+
+            if (codigo.startsWith("PROV-")) {
+
+                try {
+                    int numero = Integer.parseInt(codigo.substring(5));
+
+                    if (numero > mayor) {
+                        mayor = numero;
+                    }
+
+                } catch (NumberFormatException e) {
+                    // Ignorar códigos incorrectos
+                }
+            }
+        }
+
+        return String.format("PROV-%05d", mayor + 1);
+    }
+
+    // ==========================================================
+    // REGISTRAR PEDIDO / ENTRADA
+    // ==========================================================
+
+    public void registrarPedido(
+            Proveedor proveedor,
+            Producto producto,
+            int cantidad,
+            double precio) throws IOException {
+
+        if (proveedor == null) {
+            throw new IllegalArgumentException("El proveedor no puede ser nulo.");
+        }
+
+        if (producto == null) {
+            throw new IllegalArgumentException("El producto no puede ser nulo.");
+        }
+
         if (cantidad <= 0) {
-            throw new IllegalArgumentException("La cantidad debe ser mayor que cero");
-        }
-        if (fechaEntrega == null) {
-            throw new IllegalArgumentException("La fecha de entrega es obligatoria");
+            throw new IllegalArgumentException("La cantidad debe ser mayor a 0.");
         }
 
-        List<Map<String, String>> entradas = leerFilas(rutaEntradas, ENTRADAS_COLUMNAS);
-        boolean productoEncontrado = false;
+        if (precio < 0) {
+            throw new IllegalArgumentException("El precio no puede ser negativo.");
+        }
 
-        for (Map<String, String> entrada : entradas) {
-            if (producto.getIdProducto().equals(entrada.get("idProducto"))) {
-                int cantidadActual = parsearEntero(entrada.get("cantidad"), "cantidad");
-                entrada.put("cantidad", String.valueOf(cantidadActual + cantidad));
-                entrada.put("fechaEntrada", fechaEntrega.toString());
-                productoEncontrado = true;
+        // La fecha se genera automáticamente
+        LocalDate fechaEntrada = LocalDate.now();
+
+        List<Map<String, String>> entradas =
+                leerFilas(RUTA_ENTRADAS, ENTRADAS_COLUMNAS);
+
+        boolean encontrado = false;
+
+        for (Map<String, String> fila : entradas) {
+
+            String id = fila.get("idProducto");
+
+            if (id != null &&
+                id.equalsIgnoreCase(producto.getIdProducto())) {
+
+                int cantidadActual = 0;
+
+                try {
+                    cantidadActual = Integer.parseInt(
+                            fila.get("cantidad")
+                    );
+                } catch (Exception e) {
+                    cantidadActual = 0;
+                }
+
+                fila.put(
+                        "cantidad",
+                        String.valueOf(cantidadActual + cantidad)
+                );
+
+                fila.put(
+                        "precio",
+                        String.valueOf(precio)
+                );
+
+                fila.put(
+                        "fechaEntrada",
+                        fechaEntrada.toString()
+                );
+
+                encontrado = true;
                 break;
             }
         }
 
-        if (!productoEncontrado) {
-            Map<String, String> nuevaEntrada = new LinkedHashMap<>();
-            nuevaEntrada.put("idProveedor", proveedor.getCodigoProveedor());
-            nuevaEntrada.put("nombreProveedor", proveedor.getNombreProveedor());
-            nuevaEntrada.put("idProducto", producto.getIdProducto());
-            nuevaEntrada.put("nombreProducto", producto.getNombre());
-            nuevaEntrada.put("marca", producto.getMarca());
-            nuevaEntrada.put("categoria", producto.getCategoria());
-            nuevaEntrada.put("precio", String.valueOf(producto.getPrecio()));
-            nuevaEntrada.put("cantidad", String.valueOf(cantidad));
-            nuevaEntrada.put("fechaEntrada", fechaEntrega.toString());
+        // Si no existe la entrada, se crea
+        if (!encontrado) {
+
+            Map<String, String> nuevaEntrada =
+                    new LinkedHashMap<>();
+
+            nuevaEntrada.put(
+                    "idProveedor",
+                    proveedor.getCodigoProveedor()
+            );
+
+            nuevaEntrada.put(
+                    "nombreProveedor",
+                    proveedor.getNombreProveedor()
+            );
+
+            nuevaEntrada.put(
+                    "idProducto",
+                    producto.getIdProducto()
+            );
+
+            nuevaEntrada.put(
+                    "nombreProducto",
+                    producto.getNombre()
+            );
+
+            nuevaEntrada.put(
+                    "marca",
+                    producto.getMarca()
+            );
+
+            nuevaEntrada.put(
+                    "categoria",
+                    producto.getCategoria()
+            );
+
+            nuevaEntrada.put(
+                    "precio",
+                    String.valueOf(precio)
+            );
+
+            nuevaEntrada.put(
+                    "cantidad",
+                    String.valueOf(cantidad)
+            );
+
+            nuevaEntrada.put(
+                    "fechaEntrada",
+                    fechaEntrada.toString()
+            );
+
             entradas.add(nuevaEntrada);
         }
 
-        escribirFilas(rutaEntradas, entradas, ENTRADAS_COLUMNAS);
+        escribirFilas(
+                RUTA_ENTRADAS,
+                entradas,
+                ENTRADAS_COLUMNAS
+        );
 
-        actualizarInventario(producto, cantidad);
-        registrarProveedor(proveedor, fechaEntrega);
+        // Actualizamos inventario
+        actualizarInventario(
+                producto,
+                cantidad,
+                precio
+        );
+
+        // Registramos proveedor
+        registrarProveedor(
+                proveedor,
+                fechaEntrada
+        );
     }
 
-    private void actualizarInventario(Producto producto, int cantidad) throws IOException {
-        List<Map<String, String>> inventario = leerFilas(rutaInventario, INVENTARIO_COLUMNAS);
+    // ==========================================================
+    // ACTUALIZAR INVENTARIO
+    // ==========================================================
+
+    private void actualizarInventario(
+            Producto producto,
+            int cantidad,
+            double precio) throws IOException {
+
+        List<Map<String, String>> inventario =
+                leerFilas(RUTA_INVENTARIO, INVENTARIO_COLUMNAS);
+
+        boolean encontrado = false;
+
         for (Map<String, String> fila : inventario) {
-            if (producto.getIdProducto().equals(fila.get("idProducto"))) {
-                int stockActual = parsearEntero(fila.get("stock"), "stock");
-                fila.put("stock", String.valueOf(stockActual + cantidad));
-                escribirFilas(rutaInventario, inventario, INVENTARIO_COLUMNAS);
-                return;
+
+            String id = fila.get("idProducto");
+
+            if (id != null &&
+                id.equalsIgnoreCase(producto.getIdProducto())) {
+
+                int stockActual = 0;
+
+                try {
+                    stockActual = Integer.parseInt(
+                            fila.get("stock")
+                    );
+                } catch (Exception e) {
+                    stockActual = 0;
+                }
+
+                fila.put(
+                        "stock",
+                        String.valueOf(stockActual + cantidad)
+                );
+
+                // Único precio del sistema
+                fila.put(
+                        "precio",
+                        String.valueOf(precio)
+                );
+
+                encontrado = true;
+                break;
             }
         }
 
-        Map<String, String> nuevaFila = new LinkedHashMap<>();
-        nuevaFila.put("idProducto", producto.getIdProducto());
-        nuevaFila.put("nombre", producto.getNombre());
-        nuevaFila.put("marca", producto.getMarca());
-        nuevaFila.put("categoria", producto.getCategoria());
-        nuevaFila.put("descripcion", producto.getDescripcion());
-        nuevaFila.put("precio", String.valueOf(producto.getPrecio()));
-        nuevaFila.put("stock", String.valueOf(cantidad));
-        inventario.add(nuevaFila);
-        escribirFilas(rutaInventario, inventario, INVENTARIO_COLUMNAS);
+        if (!encontrado) {
+
+            Map<String, String> nuevaFila =
+                    new LinkedHashMap<>();
+
+            nuevaFila.put(
+                    "idProducto",
+                    producto.getIdProducto()
+            );
+
+            nuevaFila.put(
+                    "nombre",
+                    producto.getNombre()
+            );
+
+            nuevaFila.put(
+                    "marca",
+                    producto.getMarca()
+            );
+
+            nuevaFila.put(
+                    "categoria",
+                    producto.getCategoria()
+            );
+
+            nuevaFila.put(
+                    "descripcion",
+                    producto.getDescripcion()
+            );
+
+            nuevaFila.put(
+                    "precio",
+                    String.valueOf(precio)
+            );
+
+            nuevaFila.put(
+                    "stock",
+                    String.valueOf(cantidad)
+            );
+
+            inventario.add(nuevaFila);
+        }
+
+        escribirFilas(
+                RUTA_INVENTARIO,
+                inventario,
+                INVENTARIO_COLUMNAS
+        );
     }
 
-    private void registrarProveedor(Proveedor proveedor, LocalDate fechaEntrega) throws IOException {
-        List<Map<String, String>> proveedores = leerFilas(rutaProveedores, PROVEEDORES_COLUMNAS);
+    // ==========================================================
+    // REGISTRAR PROVEEDOR
+    // ==========================================================
+
+    private void registrarProveedor(
+            Proveedor proveedor,
+            LocalDate fechaEntrega) throws IOException {
+
+        List<Map<String, String>> proveedores =
+                leerFilas(RUTA_PROVEEDORES, PROVEEDORES_COLUMNAS);
+
+        boolean encontrado = false;
+
         for (Map<String, String> fila : proveedores) {
-            if (proveedor.getCodigoProveedor().equals(fila.get("codigoProveedor"))) {
-                fila.put("fechaEntrega", fechaEntrega.toString());
-                escribirFilas(rutaProveedores, proveedores, PROVEEDORES_COLUMNAS);
-                return;
+
+            String codigo = fila.get("codigoProveedor");
+
+            if (codigo != null &&
+                codigo.equalsIgnoreCase(
+                        proveedor.getCodigoProveedor())) {
+
+                fila.put(
+                        "nombreProveedor",
+                        proveedor.getNombreProveedor()
+                );
+
+                fila.put(
+                        "contactoProveedor",
+                        String.valueOf(
+                                proveedor.getContactoProveedor()
+                        )
+                );
+
+                fila.put(
+                        "fechaEntrega",
+                        fechaEntrega.toString()
+                );
+
+                encontrado = true;
+                break;
             }
         }
 
-        Map<String, String> entrega = new LinkedHashMap<>();
-        entrega.put("codigoProveedor", proveedor.getCodigoProveedor());
-        entrega.put("nombreProveedor", proveedor.getNombreProveedor());
-        entrega.put("contactoProveedor", String.valueOf(proveedor.getContactoProveedor()));
-        entrega.put("fechaEntrega", fechaEntrega.toString());
-        proveedores.add(entrega);
-        escribirFilas(rutaProveedores, proveedores, PROVEEDORES_COLUMNAS);
+        if (!encontrado) {
+
+            Map<String, String> nuevaFila =
+                    new LinkedHashMap<>();
+
+            nuevaFila.put(
+                    "codigoProveedor",
+                    proveedor.getCodigoProveedor()
+            );
+
+            nuevaFila.put(
+                    "nombreProveedor",
+                    proveedor.getNombreProveedor()
+            );
+
+            nuevaFila.put(
+                    "contactoProveedor",
+                    String.valueOf(
+                            proveedor.getContactoProveedor()
+                    )
+            );
+
+            nuevaFila.put(
+                    "fechaEntrega",
+                    fechaEntrega.toString()
+            );
+
+            proveedores.add(nuevaFila);
+        }
+
+        escribirFilas(
+                RUTA_PROVEEDORES,
+                proveedores,
+                PROVEEDORES_COLUMNAS
+        );
     }
 
-    private List<Map<String, String>> leerFilas(Path ruta, String[] columnas) throws IOException {
-        if (!Files.exists(ruta) || Files.size(ruta) == 0) {
-            return new ArrayList<>();
+    // ==========================================================
+    // CONVERTIR FILA A PRODUCTO
+    // ==========================================================
+
+    private Producto convertirProducto(
+            Map<String, String> fila) {
+
+        double precio = 0;
+        int stock = 0;
+
+        try {
+            precio = Double.parseDouble(
+                    fila.get("precio")
+            );
+        } catch (Exception e) {
+            precio = 0;
         }
-        CsvSchema schema = CsvSchema.emptySchema().withHeader();
-        List<Map<String, String>> filas = new ArrayList<>();
-        List<?> leidas = new CsvMapper().readerFor(Map.class).with(schema)
-                .readValues(ruta.toFile()).readAll();
-        for (Object fila : leidas) {
-            Map<?, ?> original = (Map<?, ?>) fila;
-            Map<String, String> normalizada = new LinkedHashMap<>();
-            for (String columna : columnas) {
-                Object valor = original.get(columna);
-                normalizada.put(columna, valor == null ? "" : valor.toString());
+
+        try {
+            stock = Integer.parseInt(
+                    fila.get("stock")
+            );
+        } catch (Exception e) {
+            stock = 0;
+        }
+
+        return new Producto(
+                fila.get("idProducto"),
+                fila.get("marca"),
+                precio,
+                fila.get("descripcion"),
+                stock,
+                fila.get("nombre"),
+                fila.get("categoria")
+        );
+    }
+
+    // ==========================================================
+    // LEER CSV
+    // ==========================================================
+
+    private List<Map<String, String>> leerFilas(
+            String ruta,
+            String[] columnas) throws IOException {
+
+        List<Map<String, String>> filas =
+                new ArrayList<>();
+
+        File archivo = new File(ruta);
+
+        if (!archivo.exists() || archivo.length() == 0) {
+            return filas;
+        }
+
+        CsvSchema esquema =
+                CsvSchema.emptySchema().withHeader();
+
+        CsvMapper mapper = new CsvMapper();
+
+        try (MappingIterator<Map<String, String>> registros =
+                mapper.readerFor(Map.class)
+                      .with(esquema)
+                      .readValues(archivo)) {
+
+            while (registros.hasNext()) {
+
+                Map<?, ?> original = registros.next();
+
+                Map<String, String> normalizada =
+                        new LinkedHashMap<>();
+
+                for (String columna : columnas) {
+
+                    Object valor = original.get(columna);
+
+                    normalizada.put(
+                            columna,
+                            valor == null
+                                    ? ""
+                                    : valor.toString().trim()
+                    );
+                }
+
+                filas.add(normalizada);
             }
-            filas.add(normalizada);
         }
+
         return filas;
     }
 
-    private void escribirFilas(Path ruta, List<Map<String, String>> filas, String[] columnas)
-            throws IOException {
-        Path padre = ruta.toAbsolutePath().getParent();
-        if (padre != null) {
-            Files.createDirectories(padre);
-        }
-        CsvSchema.Builder esquema = CsvSchema.builder();
-        for (String columna : columnas) {
-            esquema.addColumn(columna);
-        }
-        CsvSchema schema = esquema.setUseHeader(true).build();
-        new CsvMapper().writer(schema).writeValues(ruta.toFile()).writeAll(filas);
-    }
+    // ==========================================================
+    // ESCRIBIR CSV
+    // ==========================================================
 
-    private int parsearEntero(String valor, String nombreCampo) {
-        try {
-            return (valor == null || valor.isBlank()) ? 0 : Integer.parseInt(valor.trim());
-        } catch (NumberFormatException excepcion) {
-            throw new IllegalArgumentException("Valor inválido para " + nombreCampo + ": " + valor,
-                    excepcion);
+    private void escribirFilas(
+            String ruta,
+            List<Map<String, String>> filas,
+            String[] columnas) throws IOException {
+
+        File archivo = new File(ruta);
+
+        File carpeta =
+                archivo.getAbsoluteFile().getParentFile();
+
+        if (carpeta != null) {
+            carpeta.mkdirs();
+        }
+
+        CsvSchema.Builder constructorEsquema =
+                CsvSchema.builder();
+
+        for (String columna : columnas) {
+            constructorEsquema.addColumn(columna);
+        }
+
+        CsvSchema esquema =
+                constructorEsquema
+                        .setUseHeader(true)
+                        .build();
+
+        try (SequenceWriter escritor =
+                new CsvMapper()
+                        .writer(esquema)
+                        .writeValues(archivo)) {
+
+            escritor.writeAll(filas);
         }
     }
 }
