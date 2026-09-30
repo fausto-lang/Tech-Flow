@@ -1,28 +1,46 @@
-# NICOLE KIDMAN 2.2
+# NICOLE KIDMAN 3.0
 
-dentro de carpeta gestion debe estar la clase Gestion (logan)
+csv producto 
+bufferedRwadeeer ;
+StringToknizar;
 
-dentro de carpeta opercaiones deben estar dos clase _
-      -Entrada.java (Fausto ,eunice)--> se encarga de la entrada de profducots
-      -Provedor.java (Fausti,Eeunicee)
-      -Salida.class (YO MERO) -----> venta de productos 
-## yas tienen llos csv para trabajr con ellos y un maven de dependencias si queires usar librerias externas 
+String descriapcion = shkjafdslksajfñlalsjkj "\n" akksdkfñsldkfñlsddkf "\n" .........................
+map<marca , lista[|| map>]>
 
-***************************************************************************************************************
-Etapa 2 refactorizar codigo 
-añadir manejio de excwspciones 
-añadir test 
-Blindar codigo al amximo 
+listbox(categoria) y listbox (productos) poder selelcionaunproducto descrpicosm
+--}-}-}-
+-
+-
 
-## Clientes (data/clientes.csv)
+--
+Lista VEenta();/
+confirmarVEnta();
+**************************************
+txt---> comprar;
+pila<filaEentrada>; Motocsv
+****************************************************
+por fila se valida MotorCSV parsear ;
+******************************************************
+generar veentas del dia otro csv ; --> excel; -----> opciuonal geenerar csv por cada dia 
+inicio y un fin *
+buscar por fecha O(n) 
+deberiar usar un arbol de segmentos ; pero esa es otra clase;
+***********************************************************
+Clase Empleado:
+ -Admintrador gen(gestion class)
+  - AdmALmacen (entarda class)
+  -VEndedoedor;(venta class)
+cargo : Enum;(adm,almacen,vendeor)
+csv empelado : cod(CI),nombree,cargo ,contraseña;
+*******************************************************************
+hacer test ideal fausto y eunice ; (1,2,3)== 6  luego (a,2,3)=8 ;
 
-La clase `Cliente` (nombre, CI y lista de compras) se registra automaticamente cuando se
-registra una venta (`Venta.registarVenta()`, opcion 2 del menu, que pide nombre y CI del cliente).
-El csv guarda **una fila por cada producto comprado**, sin acumular cantidades entre fechas:
-
-```
-ci,nombreCliente,idProducto,nombreProducto,cantidad,fechaCompra
-```
-
-`Cliente.cargarClientesCSV("data/clientes.csv")` agrupa esas filas por CI y el menu las
-muestra en la opcion 4. Los Precios y marcas no se guardan en este csv.
+test con caso ideka uno por funcion ; 
+************************************************************************
+duncion de prender (abrir tienda ) y cerrar ()
+*********************************************************************************
+añañdir a ventas y entarda csv los nombre sd elos que estan de turno 
+entrada tambien csv por dia ;
+lista[n]=normal como en tu main pór ahora (pero eso parsear bien )
+podemos buscar una librearia para fechas (investigacion de fausto)
+************************************************************************************
