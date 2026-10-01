@@ -33,7 +33,7 @@
 
 ## 4. Plan de Testing y Cronograma (Deadline: Viernes)
 * **Casos de Prueba (Happy Tests):**
-  * Diseño de pruebas unitarias ideales en conjunto con Fausto y Eunice (ej. verificar que operaciones tipo $(1, 2, 3) = 6$ o validaciones de errores como $(a, 2, 3) = 8$ funcionen correctamente).
+  * Diseño de pruebas unitarias ideales en conjunto con Fausto y Eunice (ej. verificar que operaciones tipo $(1, 2, 3) = 6$ ).
   * Un caso de prueba ideal por cada función principal del sistema.
 * **Hitos Inmediatos y Entregas:**
   * **Mañana (8:00 PM):** Demo de la tabla visual. Enviar capturas/fotos del funcionamiento de la tabla, junto con la implementación de Fausto en la clase `MotorCSV` o `MotorExcel`.
