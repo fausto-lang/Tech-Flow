@@ -1,55 +1,41 @@
-# NICOLE KIDMAN 3.0
+# NICOLE KIDMAN 3.0 - Plan de Desarrollo y Estructura
 
-csv producto 
-bufferedRwadeeer ;
-StringToknizar;
+## 1. Arquitectura y Motores de Datos (`MotorCSV` / `MotorExcel`)
+* **Transición Tecnológica:** Por decisión de Fausto, se elimina la lógica exclusiva de archivos planos para migrar al uso de **Excel** (o un motor mixto `MotorCSV` / `MotorExcel`).
+* **Conversión:** Implementar un transformador bidireccional (Excel $\leftrightarrow$ CSV) o lectura directa manejando macros o integraciones de Visual Basic (`VBA`) si fuese necesario.
+* **Parsing Robusto:**
+  * Uso de `BufferedReader` y `StringTokenizer` para la lectura y procesamiento eficiente de registros.
+  * Manejo adecuado de descripciones multilínea (ej. campos de texto extensos envueltos con saltos de línea `"\n"` entre comillas).
+* **Estructuras de Datos Core:**
+  * `map<marca, lista<map>>` para la categorización y anidamiento jerárquico de productos.
+  * `map<codigo, contraseña>` para autenticación rápida de personal.
 
-String descriapcion = shkjafdslksajfñlalsjkj "\n" akksdkfñsldkfñlsddkf "\n" .........................
-map<marca , lista[|| map>]>
+## 2. Módulo de Empleados, Seguridad y Turnos
+* **Clase `Empleado`:**
+  * **Atributos:** Código (CI), nombre, cargo, contraseña.
+  * **Cargos (Enum):** `Administrador` (gestión global), `AdmAlmacen` (control de entradas), `Vendedor` (registro de ventas).
+* **Control de Apertura y Cierre:**
+  * Funciones para prender (abrir tienda) y apagar (cerrar tienda).
+  * Registro automático en los reportes de ventas y entradas especificando qué empleados están de turno.
+* **Validación Avanzada:**
+  * Implementación de una función con **Bitmasks** para validar permisos y estados de forma eficiente.
 
-listbox(categoria) y listbox (productos) poder selelcionaunproducto descrpicosm
---}-}-}-
--
--
+## 3. Interfaz de Usuario y Flujo de Ventas
+* **Interfaz Visual:**
+  * Componentes `listbox` independientes para categorías y productos. Al seleccionar un producto en la lista, se despliega automáticamente su descripción detallada.
+* **Procesamiento de Ventas y Compras:**
+  * Estructuras de datos tipo `pila` para el procesamiento de compras.
+  * Transacciones de `ListaVenta()` y `confirmarVenta()`.
+* **Reportes Diarios:**
+  * Generación automática de ventas del día respaldadas en un archivo independiente (Excel/CSV diario).
+  * Búsqueda por fecha con complejidad temporal $O(n)$ (dejando los árboles de segmentos como un añadido teórico avanzado para otra clase).
+  * *Nota de investigación:* Fausto investigará librerías externas o métodos óptimos para el manejo de fechas.
 
---
-Lista VEenta();/
-confirmarVEnta();
-**************************************
-txt---> comprar;
-pila<filaEentrada>; Motocsv
-****************************************************
-por fila se valida MotorCSV parsear ;
-******************************************************
-generar veentas del dia otro csv ; --> excel; -----> opciuonal geenerar csv por cada dia 
-inicio y un fin *
-buscar por fecha O(n) 
-deberiar usar un arbol de segmentos ; pero esa es otra clase;
-***********************************************************
-Clase Empleado:
- -Admintrador gen(gestion class)
-  - AdmALmacen (entarda class)
-  -VEndedoedor;(venta class)
-cargo : Enum;(adm,almacen,vendeor)
-csv empelado : cod(CI),nombree,cargo ,contraseña;
-*******************************************************************
-hacer test ideal fausto y eunice ; (1,2,3)== 6  luego (a,2,3)=8 ;
-
-test con caso ideka uno por funcion ; 
-************************************************************************
-duncion de prender (abrir tienda ) y cerrar ()
-*********************************************************************************
-añañdir a ventas y entarda csv los nombre sd elos que estan de turno 
-entrada tambien csv por dia ;
-lista[n]=normal como en tu main pór ahora (pero eso parsear bien )
-podemos buscar una librearia para fechas (investigacion de fausto)
-************************************************************************************
-por descicion de fausto borrar logica de csv y usar excel implementar transformador de excel a csv y de csv a excel ;
-motorCSV en ves de haga logica de csv va parsear excel y va trabajar con un execl meter visual basic 
-pendiente ; 
-mañana demo de una tabla 8-.00pm mandar fotos lo de tu excel fasuto solo en la claes MOtorCASV o MOtor Excel 
-de paso eñl main 5tiene que estar limpio-
-map<codigo , contraseña>;
-# bit mask validador ();
-si usamos excel podraimos access 
-TODO ESO HASTA EL VIERNES CON EL MAIN  FUNCIONANDO CON LOS HAPPY TEST " 
+## 4. Plan de Testing y Cronograma (Deadline: Viernes)
+* **Casos de Prueba (Happy Tests):**
+  * Diseño de pruebas unitarias ideales en conjunto con Fausto y Eunice (ej. verificar que operaciones tipo $(1, 2, 3) = 6$ o validaciones de errores como $(a, 2, 3) = 8$ funcionen correctamente).
+  * Un caso de prueba ideal por cada función principal del sistema.
+* **Hitos Inmediatos y Entregas:**
+  * **Mañana (8:00 PM):** Demo de la tabla visual. Enviar capturas/fotos del funcionamiento de la tabla, junto con la implementación de Fausto en la clase `MotorCSV` o `MotorExcel`.
+  * **Limpieza de Código:** Asegurarse de que el `main` esté completamente limpio y ordenado, invocando únicamente a los módulos correspondientes.
+  * **Meta Final:** Dejar todo listo para el viernes con el `main` funcionando perfectamente con los "happy tests".
