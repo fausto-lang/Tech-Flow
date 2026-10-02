@@ -3,17 +3,19 @@ package operaciones;
 public class Producto {
     private final String idProducto;
     private final String marca;
-    private double precio;
+    private double precioEntrada;
+    private double precioVenta;
     private int stock;
     private final String nombre;
     private final String descripcion;
     private final String categoria;
 
-    public Producto(String idProducto, String marca, double precio, String descripcion, int stock,
+    public Producto(String idProducto, String marca, double precioEntrada, double precioVenta, String descripcion, int stock,
             String nombre, String categoria) {
         this.idProducto = idProducto;
         this.marca = marca;
-        this.precio = precio;
+        this.precioEntrada = precioEntrada;
+        this.precioVenta = precioVenta;
         this.stock = stock;
         this.nombre = nombre;
         this.descripcion = descripcion;
@@ -28,8 +30,12 @@ public class Producto {
         return marca;
     }
 
-    public double getPrecio() {
-        return precio;
+    public double getPrecioEntrada() {
+        return precioEntrada;
+    }
+
+    public double getPrecioVenta() {
+        return precioVenta;
     }
 
     public int getStock() {
@@ -48,8 +54,12 @@ public class Producto {
         return categoria;
     }
 
-    public void setPrecio(double nuevoPrecio) {
-        this.precio = nuevoPrecio;
+    public void setPrecioEntrada(double nuevoPrecioEntrada) {
+        this.precioEntrada = nuevoPrecioEntrada;
+    }
+
+    public void setPrecioVenta(double nuevoPrecioVenta) {
+        this.precioVenta = nuevoPrecioVenta;
     }
 
     public void setStock(int nuevoStock) {

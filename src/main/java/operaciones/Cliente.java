@@ -1,12 +1,13 @@
 package operaciones;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Cliente {
     private String nombre;
-    private String ci;
-    private List<Producto> compras;
+    private final String ci;
+    private final List<Producto> compras;
 
     public Cliente(String nombre, String ci) {
         this.nombre = nombre;
@@ -23,7 +24,11 @@ public class Cliente {
     }
 
     public List<Producto> getCompras() {
-        return compras;
+    return Collections.unmodifiableList(compras);
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
     public void agregarCompra(Producto producto) {

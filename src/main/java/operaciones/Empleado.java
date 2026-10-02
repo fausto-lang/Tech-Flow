@@ -6,14 +6,14 @@ public class Empleado {
     private final String nombre;
     private final String cargo;
     private final String salt;
-    private final String contrasenaHash;
+    private String contrasena;
 
-    public Empleado(String ci, String nombre, String cargo, String salt, String contrasenaHash) {
+    public Empleado(String ci, String nombre, String cargo, String salt, String contrasena) {
         this.ci = ci;
         this.nombre = nombre;
         this.cargo = cargo;
         this.salt = salt;
-        this.contrasenaHash = contrasenaHash;
+        this.contrasena = contrasena;
     }
 
     public String getCi() {
@@ -32,7 +32,7 @@ public class Empleado {
         return salt;
     }
 
-    public String getContrasenaHash() {
-        return contrasenaHash;
+    public String getContrasena() {
+        return contrasena;
     }
 }

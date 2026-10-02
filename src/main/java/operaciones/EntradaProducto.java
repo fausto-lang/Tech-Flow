@@ -64,15 +64,16 @@ public class EntradaProducto {
             if (idProducto.trim().equalsIgnoreCase(fila.get("idProducto").trim())) {
                 double precio = Double.parseDouble(fila.get("precio"));
                 int stock = parsearEntero(fila.get("stock"), "stock");
-                return new Producto(
-                    fila.get("idProducto"),
-                    fila.get("marca"),
-                    precio,
-                    fila.get("descripcion"),
-                    stock,
-                    fila.get("nombre"),
-                    fila.get("categoria")
-                );
+                //return new Producto(
+                //    fila.get("idProducto"),
+                //    fila.get("marca"),
+                //    precio,
+                //    fila.get("precio"), precio
+                //    fila.get("descripcion"),
+                //    stock,
+                //    fila.get("nombre"),
+                //    fila.get("categoria")
+                //);
             }
         }
         return null;
@@ -111,7 +112,7 @@ public class EntradaProducto {
             nuevaEntrada.put("nombreProducto", producto.getNombre());
             nuevaEntrada.put("marca", producto.getMarca());
             nuevaEntrada.put("categoria", producto.getCategoria());
-            nuevaEntrada.put("precio", String.valueOf(producto.getPrecio()));
+           // nuevaEntrada.put("precio", String.valueOf(producto.getPrecio()));
             nuevaEntrada.put("cantidad", String.valueOf(cantidad));
             nuevaEntrada.put("fechaEntrada", fechaEntrega.toString());
             entradas.add(nuevaEntrada);
@@ -140,7 +141,7 @@ public class EntradaProducto {
         nuevaFila.put("marca", producto.getMarca());
         nuevaFila.put("categoria", producto.getCategoria());
         nuevaFila.put("descripcion", producto.getDescripcion());
-        nuevaFila.put("precio", String.valueOf(producto.getPrecio()));
+        //nuevaFila.put("precio", String.valueOf(producto.getPrecio()));
         nuevaFila.put("stock", String.valueOf(cantidad));
         inventario.add(nuevaFila);
         escribirFilas(rutaInventario, inventario, INVENTARIO_COLUMNAS);

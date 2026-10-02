@@ -45,9 +45,9 @@ public class GestionProducto {
             int stock = parsearEntero(fila.get("stock"));
             
             if (id != null && !id.isBlank()) {
-                Producto p = new Producto(id, fila.get("marca"), parsearDouble(fila.get("precio")), 
-                                           fila.get("descripcion"), stock, nombre, fila.get("categoria"));
-                lista.add(p);
+                //Producto p = new Producto(id, fila.get("marca"), parsearDouble(fila.get("precio")), 
+                //                           fila.get("descripcion"), stock, nombre, fila.get("categoria"));
+                //lista.add(p);
             }
         }
         return lista;
@@ -64,16 +64,16 @@ public class GestionProducto {
             if (id != null && !id.isBlank()) {
                 double precio = parsearDouble(fila.get("precio"));
                 int stock = parsearEntero(fila.get("stock"));
-                Producto p = new Producto(
-                    id,
-                    fila.get("marca"),
-                    precio,
-                    fila.get("descripcion"),
-                    stock,
-                    fila.get("nombre"),
-                    fila.get("categoria")
-                );
-                mapa.put(id, p);
+                //Producto p = new Producto(
+                  //  id,
+                //fila.get("marca"),
+                //    precio,
+            //    fila.get("descripcion"),
+              //      stock,
+                    //fila.get("nombre"),
+                //    fila.get("categoria")
+               // );
+              //  mapa.put(id, p);
             }
         }
         return mapa;
@@ -116,9 +116,9 @@ public class GestionProducto {
                 double precio = parsearDouble(fila.get("precioUnitario"));
                 int cantidad = parsearEntero(fila.get("cantidad"));
 
-                Producto p = new Producto(fila.get("idProducto"), "", precio, "", cantidad, fila.get("nombreProducto"), "");
+             //   Producto p = new Producto(fila.get("idProducto"), "", precio, "", cantidad, fila.get("nombreProducto"), "");
                 
-                productosPorVenta.computeIfAbsent(idVenta, k -> new ArrayList<>()).add(p);
+               // productosPorVenta.computeIfAbsent(idVenta, k -> new ArrayList<>()).add(p);
                 clientePorVenta.putIfAbsent(idVenta, ci);
             }
         }
@@ -144,8 +144,8 @@ public class GestionProducto {
                     cliente = new Cliente(fila.get("nombreCliente"), ci);
                 }
                 int cantidad = parsearEntero(fila.get("cantidad"));
-                Producto p = new Producto(fila.get("idProducto"), "", 0.0, "", cantidad, fila.get("nombreProducto"), "");
-                cliente.agregarCompra(p);
+                // Producto p = new Producto(fila.get("idProducto"), "", 0.0, "", cantidad, fila.get("nombreProducto"), "");
+                // cliente.agregarCompra(p);
             }
         }
         return cliente;

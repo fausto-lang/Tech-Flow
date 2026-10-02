@@ -116,7 +116,7 @@ public class Venta {
         if (productosVendidos == null) return 0.0;
         double total = 0.0;
         for (Producto producto : productosVendidos) {
-            total += producto.getPrecio() * producto.getStock();
+            total += producto.getPrecioVenta() * producto.getStock();
         }
         return total;
     }
@@ -174,7 +174,7 @@ public class Venta {
         System.out.println("Cliente CI:  " + clienteCi);
         System.out.println("-----------------------------");
         for (Producto producto : productosVendidos) {
-            double subtotal = producto.getPrecio() * producto.getStock();
+            double subtotal = producto.getPrecioEntrada() * producto.getStock();
             System.out.printf("%s x%d ............ %.2f%n",
                     producto.getNombre(), producto.getStock(), subtotal);
         }
@@ -196,7 +196,7 @@ public class Venta {
             fila.put("cliente(CI)", clienteCi);
             fila.put("nombreProducto", producto.getNombre());
             fila.put("cantidad", String.valueOf(producto.getStock()));
-            fila.put("precioUnitario", String.valueOf(producto.getPrecio()));
+            fila.put("precioUnitario", String.valueOf(producto.getPrecioVenta()));
             fila.put("fechaVenta", fechaVenta.toString());
             salidas.add(fila);
         }
