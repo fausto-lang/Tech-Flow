@@ -41,7 +41,7 @@ public class GestionProducto {
             
             if (id != null && !id.isBlank()) {
                 //Producto p = new Producto(id, fila.get("marca"), parsearDouble(fila.get("precio")), 
-                //                           fila.get("descripcion"), stock, nombre, fila.get("categoria"));
+                //                           fila.get("descri   pcion"), stock, nombre, fila.get("categoria"));
                 //lista.add(p);
             }
         }
@@ -132,5 +132,23 @@ public class GestionProducto {
             }
         }
         return cliente;
+    }
+    /**
+     * Filtra una lista de productos buscando aquellos que contengan la característica deseada.
+     */
+    public List<Producto> buscarPorCaracteristica(List<Producto> inventario, String termino) {
+        List<Producto> resultados = new ArrayList<>();
+        if (termino == null || termino.isBlank()) return resultados;
+
+        String busqueda = termino.toLowerCase().trim();
+        for (Producto producto : inventario) {
+            for (String feat : producto.obtenerCaracteristicasVenta()) {
+                if (feat.toLowerCase().contains(busqueda)) {
+                    resultados.add(producto);
+                    break;
+                }
+            }
+        }
+        return resultados;
     }
 }
