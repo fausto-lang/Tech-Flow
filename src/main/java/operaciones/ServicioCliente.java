@@ -46,7 +46,7 @@ public class ServicioCliente {
         return clientes.stream()
             .filter(c -> c.getCi().equals(ci.trim()))
             .findFirst()
-            .orElse(null); // Retorna null si no lo encuentra
+            .orElse(null);
     }
 
     public void registrarClienteSiNoExiste(List<Cliente> clientes, Cliente nuevo) throws IOException {

@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 public class AnalizadorProducto {
 
-    private static final int longitudMaximaFraseCorta = 30;
+    private static final int longitudMaximaFraseCorta = 50;
 
     private static final Pattern patronEspecificaciones = Pattern.compile(
         "\\b(\\d+\\s*(GB|TB|pulgadas|hz|mAh|MP|W)|i[3579]|Ryzen\\s*\\d+|OLED|AMOLED|4K|FHD|Bluetooth|Inalámbrico|Garantía)\\b",

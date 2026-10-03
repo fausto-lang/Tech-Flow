@@ -38,11 +38,24 @@ public class ServicioProveedor {
             .collect(Collectors.toList());
     }
 
-    public void registrarProveedorSiNoExiste(List<Proveedor> proveedores, Proveedor nuevo) {
+   public void registrarProveedorSiNoExiste(List<Proveedor> proveedores, Proveedor nuevo) throws IOException {
         boolean existe = proveedores.stream().anyMatch(p -> p.getCodigoProveedor().equals(nuevo.getCodigoProveedor()));
+        
         if (!existe) {
             proveedores.add(nuevo);
-            // MotorCSV.escribirFilas(...)
+            
+            List<Map<String, String>> filasProveedores = new java.util.ArrayList<>();
+            
+            for (Proveedor p : proveedores) {
+                Map<String, String> fila = new java.util.LinkedHashMap<>();
+                fila.put("codigoProveedor", p.getCodigoProveedor());
+                fila.put("nombreProveedor", p.getNombreProveedor());
+                fila.put("contactoProveedor", String.valueOf(p.getContactoProveedor())); 
+                fila.put("fechaEntrega", java.time.LocalDate.now().toString());                 
+                filasProveedores.add(fila);
+            }
+            
+            motorCSV.escribirFilas(ConfiguracionCSV.RUTA_PROVEEDORES, filasProveedores, ConfiguracionCSV.PROVEEDORES_COLUMNAS);
         }
     }
 }

@@ -21,4 +21,8 @@ public class ConfiguracionCSV {
     public static final String[] COLUMNAS_VENTA = {
         "idFactura", "ciCliente", "idProducto", "precioEntrada", "precioVenta", "cantidad", "totalCobrado"
     };
+
+    public static final String[] ENTRADAS_COLUMNAS = {
+        "idProveedor", "nombreProveedor", "idProducto", "nombreProducto", "cantidad", "costoTotal"
+    };
 }

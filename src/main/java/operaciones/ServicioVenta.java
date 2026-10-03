@@ -15,11 +15,11 @@ public class ServicioVenta {
         this.finanzas = new CalculadoraFinanzas();
     }
 
-    // 1. Generar Factura real y descontar stock
     public String procesarVenta(OrdenVenta orden, Cliente cliente, boolean conFactura) throws IOException {
-        if (!caja.isCajaAbierta()) throw new IllegalStateException("Abra la caja primero.");
+        if (!caja.isCajaAbierta()) {
+            throw new IllegalStateException("Abra la caja primero.");
+        }
 
-        // Verificar stock antes de vender
         for (Map.Entry<Producto, Integer> item : orden.getItems().entrySet()) {
             if (item.getKey().getStock() < item.getValue()) {
                 throw new IllegalArgumentException("Stock insuficiente para: " + item.getKey().getNombre());
@@ -28,18 +28,41 @@ public class ServicioVenta {
 
         double totalBase = orden.calcularTotal();
         double totalFinal = finanzas.calcularCobroFinal(totalBase, conFactura);
+        
+        String idFactura = java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        
+        String rutaVentasDia = caja.obtenerRutaVentasDia();
 
-        // Descontar inventario
-        for (Map.Entry<Producto, Integer> item : orden.getItems().entrySet()) {
-            Producto p = item.getKey();
-            p.setStock(p.getStock() - item.getValue());
-            
-            // Guardar en data/ventas/año/mes/dia/ventas.csv (usando el GestorCajaDiaria)
-            String rutaVentasDia = caja.obtenerRutaVentasDia();
-            // Lógica de MotorCSV para anexar fila: idFactura, CI, idProducto, precioEntrada (histórico), precioVenta, cantidad
+        List<Map<String, String>> filasDiarias = new java.util.ArrayList<>();
+        java.io.File archivoVentas = new java.io.File(rutaVentasDia);
+        if (archivoVentas.exists()) {
+            filasDiarias = motorCSV.leerFilas(rutaVentasDia, ConfiguracionCSV.COLUMNAS_VENTA);
         }
 
-        return "Venta procesada con éxito. Total cobrado: Bs. " + totalFinal;
+        for (Map.Entry<Producto, Integer> item : orden.getItems().entrySet()) {
+            Producto p = item.getKey();
+            int cantidadVendida = item.getValue();
+
+            p.setStock(p.getStock() - cantidadVendida);
+            
+            Map<String, String> filaVenta = new java.util.LinkedHashMap<>();
+            filaVenta.put("idFactura", idFactura);
+            filaVenta.put("ciCliente", cliente != null ? cliente.getCi() : "Sin Registro");
+            filaVenta.put("idProducto", p.getIdProducto());
+            filaVenta.put("precioEntrada", String.valueOf(p.getPrecioEntrada())); 
+            filaVenta.put("precioVenta", String.valueOf(p.getPrecioVenta()));
+            filaVenta.put("cantidad", String.valueOf(cantidadVendida));
+            
+            double subtotalItemBase = p.getPrecioVenta() * cantidadVendida;
+            double subtotalItemFinal = finanzas.calcularCobroFinal(subtotalItemBase, conFactura);
+            filaVenta.put("totalCobrado", String.valueOf(subtotalItemFinal));
+
+            filasDiarias.add(filaVenta);
+        }
+
+        motorCSV.escribirFilas(rutaVentasDia, filasDiarias, ConfiguracionCSV.COLUMNAS_VENTA);
+
+        return "Venta procesada con éxito. Factura N°: " + idFactura + " | Total cobrado: Bs. " + String.format("%.2f", totalFinal);
     }
 
     public double calcularGananciasDia(java.time.LocalDate fecha) throws IOException {
@@ -58,7 +81,6 @@ public class ServicioVenta {
         List<Map<String, String>> ventasDelDia = motorCSV.leerFilas(rutaVentasDia, ConfiguracionCSV.COLUMNAS_VENTA);
         double gananciaNeta = 0.0;
 
-        // 4. Calcular la ganancia
         for (Map<String, String> fila : ventasDelDia) {
             try {
                 double precioVenta = motorCSV.parsearDouble(fila.get("precioVenta"));
