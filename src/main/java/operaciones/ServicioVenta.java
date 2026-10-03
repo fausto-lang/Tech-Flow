@@ -83,9 +83,12 @@ public class ServicioVenta {
 
         for (Map<String, String> fila : ventasDelDia) {
             try {
-                double precioVenta = motorCSV.parsearDouble(fila.get("precioVenta"));
-                double precioEntrada = motorCSV.parsearDouble(fila.get("precioEntrada"));
-                int cantidad = motorCSV.parsearEntero(fila.get("cantidad"));
+                double precioVenta = motorCSV.parsearDouble(fila.get("precioVenta"),
+                    fila.get("idProducto"));
+                double precioEntrada = motorCSV.parsearDouble(fila.get("precioEntrada"),
+                    fila.get("idProducto"));
+                int cantidad = motorCSV.parsearEntero(fila.get("cantidad"),
+                    fila.get("idProducto"));
                 
                 gananciaNeta += (precioVenta - precioEntrada) * cantidad;
                 

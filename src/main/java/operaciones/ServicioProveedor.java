@@ -23,8 +23,7 @@ public class ServicioProveedor {
         for (Map<String, String> fila : filas) {
             String codigo = fila.get("codigoProveedor");
             String nombre = fila.get("nombreProveedor");
-            int contacto = motorCSV.parsearEntero(fila.get("contactoProveedor"));
-            
+            int contacto = Integer.parseInt(fila.getOrDefault("contactoProveedor", "0"));            
             if (codigo != null && !codigo.isBlank()) {
                 lista.add(new Proveedor(nombre, codigo, contacto));
             }

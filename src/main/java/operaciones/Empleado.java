@@ -1,10 +1,10 @@
 package operaciones;
 
 public class Empleado {
-    private String id;
-    private String nombre;
-    private String password;
-    private Rol rol;
+    private final String id;
+    private final String nombre;
+    private final String password;
+    private final Rol rol;
 
     public Empleado(String id, String nombre, String password, Rol rol) {
         this.id = id;

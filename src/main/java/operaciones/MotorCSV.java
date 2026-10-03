@@ -61,26 +61,25 @@ public class MotorCSV {
 
         csvMapper.writer(esquema).writeValues(archivo).writeAll(filas);
     }
-
-    public int parsearEntero(String valor) {
+public int parsearEntero(String valor, String idProducto) {
         if (valor == null || valor.isBlank()) {
-            return 0;
+            throw new IllegalStateException("Error crítico: El stock del producto con ID [" + idProducto + "] está vacío.");
         }
         try {
             return Integer.parseInt(valor.trim());
         } catch (NumberFormatException e) {
-            return 0;
+            throw new IllegalArgumentException("Error de formato: El stock '" + valor + "' del producto ID [" + idProducto + "] no es un número entero válido.");
         }
     }
 
-    public double parsearDouble(String valor) {
+    public double parsearDouble(String valor, String idProducto) {
         if (valor == null || valor.isBlank()) {
-            return 0.0;
+            throw new IllegalStateException("Error crítico: El precio del producto con ID [" + idProducto + "] está vacío.");
         }
         try {
             return Double.parseDouble(valor.trim());
         } catch (NumberFormatException e) {
-            return 0.0;
+            throw new IllegalArgumentException("Error de formato: El precio '" + valor + "' del producto ID [" + idProducto + "] no es un número válido.");
         }
     }
 }
