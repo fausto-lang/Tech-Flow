@@ -1,4 +1,5 @@
 # NICOLE KIDMAN 3.0 - Plan de Desarrollo y Estructura
+#Fausto vende humo dónde eat mi main
 
 ## 1. Arquitectura y Motores de Datos (`MotorCSV` / `MotorExcel`)
 * **Transición Tecnológica:** Por decisión de Fausto, se elimina la lógica exclusiva de archivos planos para migrar al uso de **Excel** (o un motor mixto `MotorCSV` / `MotorExcel`).
