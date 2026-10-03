@@ -1,3 +1,5 @@
+//Esta es la funcionalidad base (el motor) que permite que los datos no se borren al cerrar el programa.
+
 package operaciones;
 
 import java.io.File;

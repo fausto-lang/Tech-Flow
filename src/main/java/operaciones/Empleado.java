@@ -1,38 +1,30 @@
 package operaciones;
 
 public class Empleado {
+    private String id;
+    private String nombre;
+    private String password;
+    private Rol rol;
 
-    private final String ci;
-    private final String nombre;
-    private final String cargo;
-    private final String salt;
-    private String contrasena;
-
-    public Empleado(String ci, String nombre, String cargo, String salt, String contrasena) {
-        this.ci = ci;
+    public Empleado(String id, String nombre, String password, Rol rol) {
+        this.id = id;
         this.nombre = nombre;
-        this.cargo = cargo;
-        this.salt = salt;
-        this.contrasena = contrasena;
+        this.password = password;
+        this.rol = rol;
     }
 
-    public String getCi() {
-        return ci;
+    public String getId() {
+        return id;
     }
 
     public String getNombre() {
         return nombre;
     }
 
-    public String getCargo() {
-        return cargo;
-    }
-
-    public String getSalt() {
-        return salt;
-    }
-
     public String getContrasena() {
-        return contrasena;
+        return password;
     }
+
+    public boolean verificarPassword(String pwd) { return this.password.equals(pwd); }
+    public Rol getRol() { return rol; }
 }
