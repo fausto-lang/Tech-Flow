@@ -47,7 +47,7 @@ public class ServicioVenta {
             
             Map<String, String> filaVenta = new java.util.LinkedHashMap<>();
             filaVenta.put("idFactura", idFactura);
-            filaVenta.put("ciCliente", cliente != null ? cliente.getCi() : "Sin Registro");
+            filaVenta.put("ci", cliente != null ? cliente.getCi() : "Sin Registro");
             filaVenta.put("idProducto", p.getIdProducto());
             filaVenta.put("precioEntrada", String.valueOf(p.getPrecioEntrada())); 
             filaVenta.put("precioVenta", String.valueOf(p.getPrecioVenta()));

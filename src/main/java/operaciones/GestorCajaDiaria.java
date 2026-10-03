@@ -30,6 +30,10 @@ public class GestorCajaDiaria {
         return generarRutaJerarquica("entradas");
     }
 
+    public String obtenerRutaSalidasDia() {
+        return generarRutaJerarquica("salidas");
+    }
+
     private String generarRutaJerarquica(String modulo) {
         if (!cajaAbierta) throw new IllegalStateException("La caja está cerrada.");
         
@@ -44,5 +48,6 @@ public class GestorCajaDiaria {
     private void crearEstructuraDirectoriosSiNoExiste() {
         new File(obtenerRutaVentasDia()).getParentFile().mkdirs();
         new File(obtenerRutaEntradasDia()).getParentFile().mkdirs();
+        new File(obtenerRutaSalidasDia()).getParentFile().mkdirs();
     }
 }

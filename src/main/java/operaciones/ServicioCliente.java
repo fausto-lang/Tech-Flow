@@ -20,7 +20,7 @@ public class ServicioCliente {
         List<Map<String, String>> filas = motorCSV.leerFilas(ConfiguracionCSV.RUTA_CLIENTES, ConfiguracionCSV.CLIENTES_COLUMNAS);
         
         for (Map<String, String> fila : filas) {
-            String ci = fila.get("ciCliente");
+            String ci = fila.get("ci");
             String nombre = fila.get("nombreCliente");
             
             if (ci != null && !ci.isBlank()) {
@@ -64,7 +64,7 @@ public class ServicioCliente {
         
         for (Cliente c : clientes) {
             Map<String, String> fila = new LinkedHashMap<>();
-            fila.put("ciCliente", c.getCi());
+            fila.put("ci", c.getCi());
             fila.put("nombreCliente", c.getNombre());            
             filas.add(fila);
         }

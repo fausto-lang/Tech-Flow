@@ -47,7 +47,8 @@ public class ServicioInventario {
             fila.put("marca", p.getMarca());
             fila.put("categoria", p.getCategoria());
             fila.put("descripcion", p.getDescripcion());
-            fila.put("precio", String.valueOf(p.getPrecioVenta())); 
+            fila.put("precioEntrada", String.valueOf(p.getPrecioEntrada()));
+            fila.put("precioSalida", String.valueOf(p.getPrecioVenta()));
             fila.put("stock", String.valueOf(p.getStock()));
             
             filas.add(fila);

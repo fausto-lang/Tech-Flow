@@ -1,4 +1,4 @@
-idProducto,nombre,marca,categoria,descripcion,precio,stock
+idProducto,nombre,marca,categoria,descripcion,precioEntrada,precioSalida,stock
 Prod-01,"Auriculares Inalámbricos Pro",Sony,Audio,"Auriculares de diadema con cancelación de ruido activa y Bluetooth 5.2",299.99,7
 Prod-02,"Smartphone Apex X1",Samsung,Celulares,"Pantalla AMOLED de 6.5 pulgadas, 128GB de almacenamiento y cámara triple",799.00,1
 Prod-03,"Laptop UltraBook",Lenovo,Computación,"Procesador de alto rendimiento, 16GB RAM y diseño ultradelgado",1299.00,3
