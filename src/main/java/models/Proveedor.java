@@ -48,6 +48,11 @@ public class Proveedor {
         this.codigo = codigoProveedor;
     }
 
+    /**
+     * Registra la entrega de un nuevo producto por parte del proveedor.
+     *
+     * @param producto Producto entregado.
+     */
     public void entregarProducto(Producto producto) {
         if (producto != null) {
             this.productos.add(producto);

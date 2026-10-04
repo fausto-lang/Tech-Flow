@@ -13,5 +13,11 @@ public class Cliente {
 
     public String getCi() { return ci; }
     public String getNombre() { return nombre; }
+
+    /**
+     * Indica si el cliente es frecuente.
+     *
+     * @return {@code true} si es un cliente frecuente.
+     */
     public boolean isEsFrecuente() { return true; }
 }
