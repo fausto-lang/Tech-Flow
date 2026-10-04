@@ -9,6 +9,14 @@ import models.Proveedor;
 
 public class Gestor extends Empleado {
 
+    public Gestor() {
+        super();
+    }
+
+    public Gestor(String ci, String nombre, String contrasena) {
+        super(ci, nombre, contrasena, Rol.ADMINISTRADOR);
+    }
+
     public boolean abrirCaja() {
         return true;
     }
@@ -18,10 +26,20 @@ public class Gestor extends Empleado {
     }
 
     public void verVentasEIngresosDiarios() {
-        // Muestra reporte hardcodeado por consola
     }
 
     public void verInventario() {}
+
+    public boolean ingresarEntradaProducto(Producto entrada) {
+        return true;
+    }
+
+    public boolean ingresarEntradasDesdeCSV(String rutaArchivo) {
+        return true;
+    }
+
+    public void verAnalisisEntradasDiarias() {
+    }
 
     public boolean anadirEmpleado(Empleado empleado) {
         return true;
@@ -53,7 +71,6 @@ public class Gestor extends Empleado {
         return Collections.emptyList();
     }
 
-    // Funciones futuras / Árbol de segmentos
     public void consultarVentasPorRangoFechas(LocalDate inicio, LocalDate fin) {}
 
     public boolean exportarReporteExcelOCSV(String ruta) {

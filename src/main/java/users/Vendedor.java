@@ -15,7 +15,6 @@ public class Vendedor extends Empleado {
         super(ci, nombre, contrasena, Rol.CAJERO);
     }
 
-
     public boolean venderProducto(String codigoProducto, String ciCliente, int cantidad){
         return true;
     }

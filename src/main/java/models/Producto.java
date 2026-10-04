@@ -1,5 +1,4 @@
-package operaciones;
-
+package models;
 public class Producto {
 
     private final String idProducto;
@@ -11,8 +10,8 @@ public class Producto {
     private final String descripcion;
     private final String categoria;
 
-    public Producto(String idProducto, String marca, double precioEntrada, double precioVenta, 
-                    String descripcion, int stock, String nombre, String categoria) {
+    public Producto(String idProducto, String nombre, double precioEntrada, double precioVenta, 
+                    String descripcion, int stock, String marca, String categoria) {
         this.idProducto = idProducto;
         this.marca = marca;
         this.precioEntrada = precioEntrada;

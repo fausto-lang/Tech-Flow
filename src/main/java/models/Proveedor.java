@@ -1,35 +1,35 @@
-package operaciones;
+package models;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Proveedor {
-    private String nombreProveedor;
-    private String codigoProveedor;
-    private int contactoProveedor;
+    private String nombre;
+    private String codigo;
+    private int contacto;
     private List<Producto> productos;
 
-    public Proveedor(String nombreProveedor, String codigoProveedor, int contactoProveedor, List<Producto> productos) {
-        this.nombreProveedor = nombreProveedor;
-        this.codigoProveedor = codigoProveedor;
-        this.contactoProveedor = contactoProveedor;
+    public Proveedor(String nombre, String codigo, int contacto, List<Producto> productos) {
+        this.nombre = nombre;
+        this.codigo = codigo;
+        this.contacto = contacto;
         this.productos = productos != null ? productos : new ArrayList<>();
     }
 
-    public Proveedor(String nombreProveedor, String codigoProveedor, int contactoProveedor) {
-        this(nombreProveedor, codigoProveedor, contactoProveedor, new ArrayList<>());
+    public Proveedor(String nombre, String codigo, int contacto) {
+        this(nombre, codigo, contacto, new ArrayList<>());
     }
 
     public String getNombreProveedor() {
-        return nombreProveedor;
+        return nombre;
     }
 
     public String getCodigoProveedor() {
-        return codigoProveedor;
+        return codigo;
     }
 
     public int getContactoProveedor() {
-        return contactoProveedor;
+        return contacto;
     }
 
     public List<Producto> getProductos() {
@@ -37,15 +37,15 @@ public class Proveedor {
     }
 
     public void setContactoProveedor(int contactoProveedor) {
-        this.contactoProveedor = contactoProveedor;
+        this.contacto = contactoProveedor;
     }
 
     public void setNombreProveedor(String nombreProveedor) {
-        this.nombreProveedor = nombreProveedor;
+        this.nombre = nombreProveedor;
     }
 
     public void setCodigoProveedor(String codigoProveedor) {
-        this.codigoProveedor = codigoProveedor;
+        this.codigo = codigoProveedor;
     }
 
     public void entregarProducto(Producto producto) {
