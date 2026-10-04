@@ -1,3 +1,6 @@
+##NICOLE KIDMAN 4.0 ##
+Fausto Vende Humo .
+
 clases 
 ** Entrada ---x
 ** Venta ---- x
