@@ -1,67 +1,172 @@
-##NICOLE KIDMAN 4.0 ##
-Fausto Vende Humo .
+# Nicole Kidman 4.0
+fausto vende humo
 
-clases 
-** Entrada ---x
-** Venta ---- x
-** Gestion ----x
-** Inventario --- map<codigo, objeto(carcterizticas)>(por ver)
-** Producto
-** MotorCsv(funciones repsectiva)
-** Empleado()--> * Vendedor () ** verfifvcar garantia(id cliente +  fecah actual -->boolean)
-                * Gestor()
-                * Almacen()
-** Producto()
-** Proveedor()
-** Cliente()
-** ConfiguracionCsv
-** Veroficador()---->  map<ci,contraseña> user if (user.get(ci)== ciantarseñal que enmtra )
-** Eroroes personaliados 
-exception e -------VentasinInventarioExceeeprtiom
-                    
-***************************************************
--Csv historicos
--Entrada ()
--Ventas ( atributos + nombre o ci cliente+ empleadoEncargaso codigo +garantia dias)
--Inventario
--Empleados
--Proveedores;
-**********************************************************************************
- csvDiario ventas --> de ahi nace analisis de ventas del dia gandancia etc
- csvDiario entradas--->lo mimo de anterior;
- *********************************************************************************
-    MENUS //
- login *******
- seleccionar el rol 
- -adm ( contraseña  user ) acceso a todos los csv 
-   --abrir /cerrar cajas***
-   --ver ventas y ingresos diarios *** 
-   --ver inventario  ***
-   -- añadir/eliminar empleados
-   -- añadir/ eliminar provedores
-   --añadir productos o eliminar productos 
- -almacen entrada y inventario y provedoor csv 
-  -- private Ingrea producto nuevo fila 
-  -- private ingresa producto exxisteente
-  -- private ACTUALIXA INVEntario en positivo
-  -- ingresa entrad ( csv o txt ) filas * columnas***
- - vendedor 
-  -- private vende un  producto 
-  --proivate genmerar orden de venta ()
-  -- ingreso de orden( csv o txt ) ***
-  ---prvate confirmar venta
-  -- buscar en inventario private 
-  -- generarfactura();---->genrar el text 
-  -- publico buscar por  xxxxxx razon  map<key= razon , values>() 
-  -- private poner costo p.csoto+ o.costo*0.20 + iva;
-  --------------------------------------------------------------------------------
-************************************************
-futuras funciones ()
- --//arbol de segmentos 
-   ---- de x fecha hasta y == consultas( administrador) y aquiu podemos genrar un excel o csv 
- --// popularidad  y despopular de producto  analsiis de frecuencia en ventas map 
- --dar liquidacion productos (fecah de entada - actaul con una razon )
- ---dar descuento a cliente frecuente 
- ---dar descuneto a pediodos grandes razon x 
- -- generar pedido en administador a provvedor 
- --  listar productos que se acaban que se acaba y su razon : administaror class trabajar  el inventario csv 
+## Clases
+
+- **Entrada**
+- **Venta**
+- **Gestion**
+- **Inventario**
+  - `Map<codigo, objeto(caracteristicas)>` *(por ver)*
+- **Producto**
+- **MotorCsv**
+  - Funciones respectivas
+- **Empleado**
+  - **Vendedor**
+    - Verificar garantía:
+      - `idCliente + fechaActual -> boolean`
+  - **Gestor**
+  - **Almacen**
+- **Proveedor**
+- **Cliente**
+- **ConfiguracionCsv**
+- **Verificador**
+  - `Map<CI, contraseña>`
+  - Verificar usuario:
+    - `user.get(CI) == contraseñaIngresada`
+- **Errores personalizados**
+  - `Exception`
+  - `VentaSinInventarioException`
+
+---
+
+# CSV históricos
+
+- **Entradas**
+- **Ventas**
+  - Atributos:
+    - Nombre o CI del cliente
+    - Empleado encargado
+    - Código
+    - Garantía en días
+- **Inventario**
+- **Empleados**
+- **Proveedores**
+
+---
+
+# CSV diarios
+
+## `csvDiarioVentas`
+
+De aquí nace el análisis de ventas del día:
+
+- Ganancia
+- Ventas realizadas
+- Productos vendidos
+- Etc.
+
+## `csvDiarioEntradas`
+
+Análisis similar al de ventas:
+
+- Productos ingresados
+- Cantidades
+- Costos
+- Proveedores
+- Etc.
+
+---
+
+# Menús
+
+## Login
+
+- Ingreso mediante usuario y contraseña.
+- Seleccionar el rol.
+
+---
+
+## Administrador
+
+Acceso a todos los CSV.
+
+### Funciones
+
+- Abrir / cerrar cajas
+- Ver ventas e ingresos diarios
+- Ver inventario
+- Añadir / eliminar empleados
+- Añadir / eliminar proveedores
+- Añadir / eliminar productos
+
+---
+
+## Almacén
+
+Acceso a:
+
+- Entradas
+- Inventario
+- Proveedores
+
+### Funciones privadas
+
+- Ingresar producto nuevo
+  - Agregar nueva fila
+- Ingresar producto existente
+- Actualizar inventario en positivo
+- Ingresar entrada desde CSV o TXT
+  - Filas × columnas
+
+---
+
+## Vendedor
+
+### Funciones privadas
+
+- Vender un producto
+- Generar orden de venta
+- Ingresar orden desde CSV o TXT
+- Confirmar venta
+- Buscar en inventario
+- Generar factura
+  - Generar el texto correspondiente
+- Calcular costo:
+  - `P.costo + O.costo * 0.20 + IVA`
+
+### Función pública
+
+- Buscar por razón
+  - `Map<key = razon, values = ...>`
+
+---
+
+# Funciones futuras
+
+## Árbol de segmentos
+
+- Consultas desde una fecha `X` hasta una fecha `Y`
+- Acceso para el administrador
+- Generar un Excel o CSV con los resultados
+
+## Popularidad de productos
+
+- Analizar frecuencia de ventas
+- Utilizar un `Map`
+- Determinar productos:
+  - Populares
+  - Despopulares
+
+## Liquidación de productos
+
+- Liquidar productos según:
+  - Fecha de entrada
+  - Fecha actual
+  - Una razón determinada
+
+## Descuentos
+
+- Descuento para clientes frecuentes
+- Descuento para pedidos grandes
+- Aplicar según una razón o condición determinada
+
+## Pedidos a proveedores
+
+- Generar pedido al proveedor desde el administrador
+
+## Productos próximos a agotarse
+
+- Listar productos que se están acabando
+- Mostrar la razón / causa
+- El administrador trabaja con la información del inventario CSV
