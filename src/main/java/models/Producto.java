@@ -1,4 +1,7 @@
 package models;
+
+import java.util.Objects;
+
 public class Producto {
 
     private final String idProducto;
@@ -37,5 +40,36 @@ public class Producto {
     public void setPrecioVenta(double precioVenta) { this.precioVenta = precioVenta; }
     public void setStock(int stock) { this.stock = stock; }
 
-    
+    /**
+     * Compara dos productos por valor (todos sus campos), no por identidad.
+     * Útil para aserciones en los tests y como clave/valor en colecciones.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Producto)) return false;
+        Producto otro = (Producto) o;
+        return Double.compare(otro.precioEntrada, precioEntrada) == 0
+                && Double.compare(otro.precioVenta, precioVenta) == 0
+                && stock == otro.stock
+                && Objects.equals(idProducto, otro.idProducto)
+                && Objects.equals(nombre, otro.nombre)
+                && Objects.equals(marca, otro.marca)
+                && Objects.equals(descripcion, otro.descripcion)
+                && Objects.equals(categoria, otro.categoria);
+    }
+
+    /** Hash coherente con {@link #equals(Object)}. */
+    @Override
+    public int hashCode() {
+        return Objects.hash(idProducto, nombre, marca, precioEntrada, precioVenta, descripcion, stock, categoria);
+    }
+
+    /** Representación legible para depuración y reportes. */
+    @Override
+    public String toString() {
+        return "Producto{idProducto='" + idProducto + "', nombre='" + nombre + "', marca='" + marca
+                + "', categoria='" + categoria + "', precioEntrada=" + precioEntrada
+                + ", precioVenta=" + precioVenta + ", stock=" + stock + "}";
+    }
 }

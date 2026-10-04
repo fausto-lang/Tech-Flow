@@ -1,21 +1,32 @@
 package services;
 
-import java.util.Collections;
+import config.ConfiguracionCSV;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Servicio encargado de la manipulación y persistencia de archivos en formato CSV.
+ * Implementación mínima funcional: lectura/escritura con soporte para campos
+ * entrecomillados y delimitador configurable.
  */
 public class MotorCSV {
 
     /**
-     * Lee un archivo CSV usando el delimitador por defecto.
+     * Lee un archivo CSV usando el delimitador por defecto (coma).
      *
      * @param rutaArchivo Ruta del archivo CSV a leer.
      * @return Lista de arreglos de cadenas con los datos leídos.
      */
     public List<String[]> leerCSV(String rutaArchivo) {
-        return Collections.emptyList();
+        return leerCSV(rutaArchivo, ConfiguracionCSV.DELIMITADOR_POR_DEFECTO);
     }
 
     /**
@@ -26,18 +37,27 @@ public class MotorCSV {
      * @return Lista con el contenido leído por filas.
      */
     public List<String[]> leerCSV(String rutaArchivo, String delimitador) {
-        return Collections.emptyList();
+        Path ruta = Paths.get(rutaArchivo);
+        if (!Files.exists(ruta)) {
+            return new ArrayList<>();
+        }
+        try {
+            String contenido = Files.readString(ruta, Charset.forName(ConfiguracionCSV.CODIFICACION));
+            return parsearContenido(contenido, delimitador);
+        } catch (IOException e) {
+            return new ArrayList<>();
+        }
     }
 
     /**
-     * Escribe un conjunto de datos en un archivo CSV.
+     * Escribe un conjunto de datos en un archivo CSV (sobrescribiendo).
      *
      * @param rutaArchivo Ruta de destino.
      * @param datos       Lista de arreglos con los datos a escribir.
      * @return {@code true} si la escritura fue exitosa.
      */
     public boolean escribirCSV(String rutaArchivo, List<String[]> datos) {
-        return true;
+        return escribirCSV(rutaArchivo, datos, false);
     }
 
     /**
@@ -49,7 +69,24 @@ public class MotorCSV {
      * @return {@code true} si se completó la operación.
      */
     public boolean escribirCSV(String rutaArchivo, List<String[]> datos, boolean append) {
-        return true;
+        try {
+            Path ruta = Paths.get(rutaArchivo);
+            if (ruta.getParent() != null) {
+                Files.createDirectories(ruta.getParent());
+            }
+            StandardOpenOption[] opciones = append
+                    ? new StandardOpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.APPEND}
+                    : new StandardOpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE};
+            try (BufferedWriter bw = Files.newBufferedWriter(ruta, Charset.forName(ConfiguracionCSV.CODIFICACION), opciones)) {
+                for (String[] fila : datos) {
+                    bw.write(formatearFila(fila, ConfiguracionCSV.DELIMITADOR_POR_DEFECTO));
+                    bw.newLine();
+                }
+            }
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     /**
@@ -60,7 +97,9 @@ public class MotorCSV {
      * @return {@code true} si se agregó la fila.
      */
     public boolean agregarFila(String rutaArchivo, String[] fila) {
-        return true;
+        List<String[]> unaFila = new ArrayList<>();
+        unaFila.add(fila);
+        return escribirCSV(rutaArchivo, unaFila, true);
     }
 
     /**
@@ -72,7 +111,12 @@ public class MotorCSV {
      * @return {@code true} si la actualización tuvo éxito.
      */
     public boolean actualizarFila(String rutaArchivo, int indiceFila, String[] nuevaFila) {
-        return true;
+        List<String[]> filas = leerCSV(rutaArchivo);
+        if (indiceFila < 0 || indiceFila >= filas.size()) {
+            return false;
+        }
+        filas.set(indiceFila, nuevaFila);
+        return escribirCSV(rutaArchivo, filas, false);
     }
 
     /**
@@ -83,7 +127,12 @@ public class MotorCSV {
      * @return {@code true} si se eliminó con éxito.
      */
     public boolean eliminarFila(String rutaArchivo, int indiceFila) {
-        return true;
+        List<String[]> filas = leerCSV(rutaArchivo);
+        if (indiceFila < 0 || indiceFila >= filas.size()) {
+            return false;
+        }
+        filas.remove(indiceFila);
+        return escribirCSV(rutaArchivo, filas, false);
     }
 
     /**
@@ -95,7 +144,20 @@ public class MotorCSV {
      * @return {@code true} si la fila fue eliminada.
      */
     public boolean eliminarFilaPorClave(String rutaArchivo, int columnaClave, String valorClave) {
-        return true;
+        List<String[]> filas = leerCSV(rutaArchivo);
+        boolean eliminada = false;
+        for (int i = filas.size() - 1; i >= 0; i--) {
+            String[] fila = filas.get(i);
+            if (columnaClave >= 0 && columnaClave < fila.length
+                    && fila[columnaClave].equals(valorClave)) {
+                filas.remove(i);
+                eliminada = true;
+            }
+        }
+        if (!eliminada) {
+            return false;
+        }
+        return escribirCSV(rutaArchivo, filas, false);
     }
 
     /**
@@ -105,7 +167,7 @@ public class MotorCSV {
      * @return {@code true} si el archivo existe.
      */
     public boolean existeArchivo(String rutaArchivo) {
-        return true;
+        return Files.exists(Paths.get(rutaArchivo));
     }
 
     /**
@@ -116,6 +178,83 @@ public class MotorCSV {
      * @return {@code true} si la inicialización fue exitosa.
      */
     public boolean inicializarCSV(String rutaArchivo, String[] encabezados) {
-        return true;
+        List<String[]> encabezado = new ArrayList<>();
+        encabezado.add(encabezados);
+        return escribirCSV(rutaArchivo, encabezado, false);
+    }
+
+    // ------------------------------------------------------------------
+    // Helpers internos de parseo/formateo
+    // ------------------------------------------------------------------
+
+    /**
+     * Parsea el contenido completo respetando los campos entrecomillados.
+     * Es stateful sobre todo el archivo, por lo que soporta saltos de línea
+     * dentro de un campo entrecomillado (a diferencia de un parser por líneas).
+     */
+    private List<String[]> parsearContenido(String contenido, String delimitador) {
+        List<String[]> filas = new ArrayList<>();
+        List<String> campos = new ArrayList<>();
+        StringBuilder actual = new StringBuilder();
+        boolean enComillas = false;
+        for (int i = 0; i < contenido.length(); i++) {
+            char c = contenido.charAt(i);
+            if (enComillas) {
+                if (c == '"') {
+                    if (i + 1 < contenido.length() && contenido.charAt(i + 1) == '"') {
+                        actual.append('"');
+                        i++;
+                    } else {
+                        enComillas = false;
+                    }
+                } else {
+                    actual.append(c);
+                }
+            } else if (c == '"') {
+                enComillas = true;
+            } else if (contenido.startsWith(delimitador, i)) {
+                campos.add(actual.toString());
+                actual.setLength(0);
+                i += delimitador.length() - 1;
+            } else if (c == '\n' || c == '\r') {
+                campos.add(actual.toString());
+                actual.setLength(0);
+                if (!(campos.size() == 1 && campos.get(0).isEmpty())) {
+                    filas.add(campos.toArray(new String[0]));
+                }
+                campos = new ArrayList<>();
+                if (c == '\r' && i + 1 < contenido.length() && contenido.charAt(i + 1) == '\n') {
+                    i++;
+                }
+            } else {
+                actual.append(c);
+            }
+        }
+        // Última fila sin salto de línea final
+        if (actual.length() > 0 || !campos.isEmpty()) {
+            campos.add(actual.toString());
+            if (!(campos.size() == 1 && campos.get(0).isEmpty())) {
+                filas.add(campos.toArray(new String[0]));
+            }
+        }
+        return filas;
+    }
+
+    /** Convierte una fila en línea CSV, entrecomillando los campos que lo requieran. */
+    private String formatearFila(String[] fila, String delimitador) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < fila.length; i++) {
+            if (i > 0) {
+                sb.append(delimitador);
+            }
+            String valor = fila[i] == null ? "" : fila[i];
+            if (valor.contains(delimitador) || valor.contains("\"")
+                    || valor.contains("\n") || valor.contains("\r")) {
+                sb.append('"').append(valor.replace("\"", "\"\"")).append('"');
+            } else {
+                sb.append(valor);
+            }
+        }
+        return sb.toString();
     }
 }

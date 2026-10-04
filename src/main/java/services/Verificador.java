@@ -14,7 +14,8 @@ public class Verificador {
      * @return {@code true} si las credenciales son válidas.
      */
     public boolean verificarUsuario(String ci, String contrasenaIngresada) {
-        return true; 
+        String contrasenaAlmacenada = credencialesUsuarios.get(ci);
+        return contrasenaAlmacenada != null && contrasenaAlmacenada.equals(contrasenaIngresada);
     }
 
     /**
@@ -23,5 +24,9 @@ public class Verificador {
      * @param ci         Cédula de identidad.
      * @param contrasena Contraseña asignada.
      */
-    public void registrarUsuario(String ci, String contrasena) {}
+    public void registrarUsuario(String ci, String contrasena) {
+        if (ci != null && contrasena != null) {
+            credencialesUsuarios.put(ci, contrasena);
+        }
+    }
 }

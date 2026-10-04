@@ -1,4 +1,4 @@
-ci,nombre,cargo,salt,contrasenaHash
-DEMO-ADM-001,Admin Demo,ADMINISTRADOR,rhZgcxOxvf/eqjoaH6sPjg==,dRG1d0upVGeNzXqTYS9eKRddGS1Jlb0C20miyqAF1Qs=
-DEMO-VEN-001,Ventas Demo,VENDEDOR,u7XALkNvUAGk2+IcdbIo1w==,QVvuiAu+/o7ju9r8Q5a9/vKtO1x0KagqidOj8//y0N8=
-DEMO-ALM-001,Almacen Demo,ADM_ALMACEN,AY76NVXv/F3RVFInGdQ2ZA==,QViX9mPQ5MJrxCuEgu+jH564sK/Iut7izxU9CDi2ucQ=
+ci,nombre,rol,contrasena
+DEMO-ADM-001,Admin Demo,ADMINISTRADOR,admin123
+DEMO-VEN-001,Ventas Demo,CAJERO,ventas123
+DEMO-ALM-001,Almacen Demo,ALMACENERO,almacen123

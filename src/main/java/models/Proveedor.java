@@ -2,6 +2,7 @@ package models;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Proveedor {
     private String nombre;
@@ -57,5 +58,33 @@ public class Proveedor {
         if (producto != null) {
             this.productos.add(producto);
         }
+    }
+
+    /**
+     * Compara dos proveedores por valor (nombre, código, contacto y catálogo).
+     * Necesario para aserciones de igualdad en los tests.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Proveedor)) return false;
+        Proveedor otro = (Proveedor) o;
+        return contacto == otro.contacto
+                && Objects.equals(nombre, otro.nombre)
+                && Objects.equals(codigo, otro.codigo)
+                && Objects.equals(productos, otro.productos);
+    }
+
+    /** Hash coherente con {@link #equals(Object)}. */
+    @Override
+    public int hashCode() {
+        return Objects.hash(nombre, codigo, contacto, productos);
+    }
+
+    /** Representación legible para depuración. */
+    @Override
+    public String toString() {
+        return "Proveedor{codigo='" + codigo + "', nombre='" + nombre + "', contacto=" + contacto
+                + ", productos=" + productos.size() + "}";
     }
 }

@@ -1,0 +1,3 @@
+idVenta,idProducto,ciCliente,nombreProducto,cantidad,precioUnitario,fechaVenta,ciEmpleado
+V-001,Prod-01,CLI-001,"Auriculares Inalámbricos Pro",2,389.99,2026-10-01,DEMO-VEN-001
+V-002,Prod-09,CLI-002,"Smartwatch Watch GT 3",1,259.99,2026-10-02,DEMO-VEN-001

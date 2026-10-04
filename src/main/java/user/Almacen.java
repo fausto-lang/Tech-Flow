@@ -8,6 +8,17 @@ import models.Producto;
 public class Almacen extends Empleado {
 
     /**
+     * Constructor para instanciar un Almacen con el rol ALMACENERO.
+     *
+     * @param ci         Cédula de identidad.
+     * @param nombre     Nombre completo.
+     * @param contrasena Contraseña de acceso.
+     */
+    public Almacen(String ci, String nombre, String contrasena) {
+        super(ci, nombre, contrasena, Rol.ALMACENERO);
+    }
+
+    /**
      * Registra un nuevo producto en el catálogo del inventario.
      *
      * @param producto Objeto {@link Producto} a ingresar.

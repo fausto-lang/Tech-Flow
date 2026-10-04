@@ -1,0 +1,3 @@
+idProveedor,nombreProveedor,idProducto,nombreProducto,marca,categoria,precio,cantidad,fechaEntrada,ciEmpleado
+PROV-01,"JAVIER ESPINOZA",Prod-01,"Auriculares Inalámbricos Pro",Sony,Audio,299.99,10,2026-09-28,DEMO-ALM-001
+PROV-02,"TECNOLOGÍA AVANZADA",Prod-09,"Smartwatch Watch GT 3",Huawei,Wearables,199.99,15,2026-09-28,DEMO-ALM-001

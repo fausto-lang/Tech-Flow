@@ -1,5 +1,7 @@
 package user;
 
+import java.util.Objects;
+
 /**
  * Clase base que define un empleado del sistema.
  */
@@ -38,4 +40,31 @@ public class Empleado {
 
     /** @return Rol asignado al empleado. */
     public Rol getRol() { return rol; }
+
+    /**
+     * Compara dos empleados por valor (ci, nombre, contraseña y rol).
+     * Necesario para poder usar aserciones de igualdad en los tests.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Empleado)) return false;
+        Empleado otro = (Empleado) o;
+        return Objects.equals(ci, otro.ci)
+                && Objects.equals(nombre, otro.nombre)
+                && Objects.equals(contrasena, otro.contrasena)
+                && rol == otro.rol;
+    }
+
+    /** Hash coherente con {@link #equals(Object)}. */
+    @Override
+    public int hashCode() {
+        return Objects.hash(ci, nombre, contrasena, rol);
+    }
+
+    /** Representación legible para depuración. */
+    @Override
+    public String toString() {
+        return "Empleado{ci='" + ci + "', nombre='" + nombre + "', rol=" + rol + "}";
+    }
 }

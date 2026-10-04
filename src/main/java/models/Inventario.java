@@ -1,11 +1,12 @@
 package models;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Inventario {
-    private Map<String, Producto> productos;
+    private Map<String, Producto> productos = new HashMap<>();
 
     /**
      * Busca un producto en el inventario a través de su código identificador.
