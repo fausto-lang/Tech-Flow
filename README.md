@@ -1,42 +1,64 @@
-# NICOLE KIDMAN 3.0 - Plan de Desarrollo y Estructura
-#Fausto vende humo dónde eat mi main
-
-## 1. Arquitectura y Motores de Datos (`MotorCSV` / `MotorExcel`)
-* **Transición Tecnológica:** Por decisión de Fausto, se elimina la lógica exclusiva de archivos planos para migrar al uso de **Excel** (o un motor mixto `MotorCSV` / `MotorExcel`).
-* **Conversión:** Implementar un transformador bidireccional (Excel $\leftrightarrow$ CSV) o lectura directa manejando macros o integraciones de Visual Basic (`VBA`) si fuese necesario.
-* **Parsing Robusto:**
-  * Uso de `BufferedReader` y `StringTokenizer` para la lectura y procesamiento eficiente de registros.
-  * Manejo adecuado de descripciones multilínea (ej. campos de texto extensos envueltos con saltos de línea `"\n"` entre comillas).
-* **Estructuras de Datos Core:**
-  * `map<marca, lista<map>>` para la categorización y anidamiento jerárquico de productos.
-  * `map<codigo, contraseña>` para autenticación rápida de personal.
-
-## 2. Módulo de Empleados, Seguridad y Turnos
-* **Clase `Empleado`:**
-  * **Atributos:** Código (CI), nombre, cargo, contraseña.
-  * **Cargos (Enum):** `Administrador` (gestión global), `AdmAlmacen` (control de entradas), `Vendedor` (registro de ventas).
-* **Control de Apertura y Cierre:**
-  * Funciones para prender (abrir tienda) y apagar (cerrar tienda).
-  * Registro automático en los reportes de ventas y entradas especificando qué empleados están de turno.
-* **Validación Avanzada:**
-  * Implementación de una función con **Bitmasks** para validar permisos y estados de forma eficiente.
-
-## 3. Interfaz de Usuario y Flujo de Ventas
-* **Interfaz Visual:**
-  * Componentes `listbox` independientes para categorías y productos. Al seleccionar un producto en la lista, se despliega automáticamente su descripción detallada.
-* **Procesamiento de Ventas y Compras:**
-  * Estructuras de datos tipo `pila` para el procesamiento de compras.
-  * Transacciones de `ListaVenta()` y `confirmarVenta()`.
-* **Reportes Diarios:**
-  * Generación automática de ventas del día respaldadas en un archivo independiente (Excel/CSV diario).
-  * Búsqueda por fecha con complejidad temporal $O(n)$ (dejando los árboles de segmentos como un añadido teórico avanzado para otra clase).
-  * *Nota de investigación:* Fausto investigará librerías externas o métodos óptimos para el manejo de fechas.
-
-## 4. Plan de Testing y Cronograma (Deadline: Viernes)
-* **Casos de Prueba (Happy Tests):**
-  * Diseño de pruebas unitarias ideales en conjunto con Fausto y Eunice (ej. verificar que operaciones tipo $(1, 2, 3) = 6$ ).
-  * Un caso de prueba ideal por cada función principal del sistema.
-* **Hitos Inmediatos y Entregas:**
-  * **Mañana (8:00 PM):** Demo de la tabla visual. Enviar capturas/fotos del funcionamiento de la tabla, junto con la implementación de Fausto en la clase `MotorCSV` o `MotorExcel`.
-  * **Limpieza de Código:** Asegurarse de que el `main` esté completamente limpio y ordenado, invocando únicamente a los módulos correspondientes.
-  * **Meta Final:** Dejar todo listo para el viernes con el `main` funcionando perfectamente con los "happy tests".
+clases 
+** Entrada ---x
+** Venta ---- x
+** Gestion ----x
+** Inventario --- map<codigo, objeto(carcterizticas)>(por ver)
+** Producto
+** MotorCsv(funciones repsectiva)
+** Empleado()--> * Vendedor () ** verfifvcar garantia(id cliente +  fecah actual -->boolean)
+                * Gestor()
+                * Almacen()
+** Producto()
+** Proveedor()
+** Cliente()
+** ConfiguracionCsv
+** Veroficador()---->  map<ci,contraseña> user if (user.get(ci)== ciantarseñal que enmtra )
+** Eroroes personaliados 
+exception e -------VentasinInventarioExceeeprtiom
+                    
+***************************************************
+-Csv historicos
+-Entrada ()
+-Ventas ( atributos + nombre o ci cliente+ empleadoEncargaso codigo +garantia dias)
+-Inventario
+-Empleados
+-Proveedores;
+**********************************************************************************
+ csvDiario ventas --> de ahi nace analisis de ventas del dia gandancia etc
+ csvDiario entradas--->lo mimo de anterior;
+ *********************************************************************************
+    MENUS //
+ login *******
+ seleccionar el rol 
+ -adm ( contraseña  user ) acceso a todos los csv 
+   --abrir /cerrar cajas***
+   --ver ventas y ingresos diarios *** 
+   --ver inventario  ***
+   -- añadir/eliminar empleados
+   -- añadir/ eliminar provedores
+   --añadir productos o eliminar productos 
+ -almacen entrada y inventario y provedoor csv 
+  -- private Ingrea producto nuevo fila 
+  -- private ingresa producto exxisteente
+  -- private ACTUALIXA INVEntario en positivo
+  -- ingresa entrad ( csv o txt ) filas * columnas***
+ - vendedor 
+  -- private vende un  producto 
+  --proivate genmerar orden de venta ()
+  -- ingreso de orden( csv o txt ) ***
+  ---prvate confirmar venta
+  -- buscar en inventario private 
+  -- generarfactura();---->genrar el text 
+  -- publico buscar por  xxxxxx razon  map<key= razon , values>() 
+  -- private poner costo p.csoto+ o.costo*0.20 + iva;
+  --------------------------------------------------------------------------------
+************************************************
+futuras funciones ()
+ --//arbol de segmentos 
+   ---- de x fecha hasta y == consultas( administrador) y aquiu podemos genrar un excel o csv 
+ --// popularidad  y despopular de producto  analsiis de frecuencia en ventas map 
+ --dar liquidacion productos (fecah de entada - actaul con una razon )
+ ---dar descuento a cliente frecuente 
+ ---dar descuneto a pediodos grandes razon x 
+ -- generar pedido en administador a provvedor 
+ --  listar productos que se acaban que se acaba y su razon : administaror class trabajar  el inventario csv 
