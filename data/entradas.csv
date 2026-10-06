@@ -1,1 +1,1 @@
-idProveedor,nombreProveedor,idProducto,nombreProducto,marca,categoria,precio,cantidad,fechaEntrada,ciEmpleado
+idEntrada,idProveedor,idProducto,nombreProducto,cantidad,precioUnitario,fechaEntrada,ciEmpleado

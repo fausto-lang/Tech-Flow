@@ -1,12 +1,26 @@
 package services;
 
+import java.nio.file.Path;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
-import static org.junit.jupiter.api.Assertions.*;
+import user.Empleado;
+import user.Gestor;
+import user.Rol;
 
 @DisplayName("Verificador")
 class VerificadorTest {
+
+    @TempDir
+    Path directorio;
 
     @Test
     @DisplayName("Credenciales correctas son válidas")
@@ -98,6 +112,27 @@ class VerificadorTest {
         Verificador v = new Verificador();
         v.registrarUsuario("CI-1", "Pw");
         assertFalse(v.verificarUsuario("CI-1", "pw"));
+    }
+
+    @Test
+    @DisplayName("El primer uso crea el administrador adm/user")
+    void administradorInicial() {
+        Verificador verificador = new Verificador(directorio);
+        Empleado empleado = verificador.iniciarSesion("adm", "user", Rol.ADMINISTRADOR);
+        assertInstanceOf(Gestor.class, empleado);
+    }
+
+    @Test
+    @DisplayName("El rol seleccionado debe coincidir con el rol registrado")
+    void validaRolSeleccionado() {
+        MotorCSV csv = new MotorCSV(directorio);
+        csv.escribirCSV(csv.rutaDatos("empleado.csv").toString(), List.of(
+                new String[]{"ci", "nombre", "rol", "contrasena"},
+                new String[]{"CI-1", "Cajero", "CAJERO", "pw"}));
+        Verificador verificador = new Verificador(directorio);
+        assertEquals(Rol.CAJERO, verificador.iniciarSesion("Cajero", "pw", Rol.CAJERO).getRol());
+        assertNull(verificador.iniciarSesion("Cajero", "pw", Rol.ADMINISTRADOR));
+        assertNull(verificador.iniciarSesion("Cajero", "incorrecta", Rol.CAJERO));
     }
 
     @Test

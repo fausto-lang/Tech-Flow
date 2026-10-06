@@ -1,63 +1,66 @@
 package models;
 
-import org.junit.jupiter.api.Disabled;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Inventario")
 class InventarioTest {
 
-    @Test
-    @DisplayName("buscarEnInventario no devuelve null (contrato base)")
-    void buscarEnInventarioNoEsNull() {
-        assertNotNull(new Inventario().buscarEnInventario("P1"));
+    private Producto producto(String id, int stock) {
+        return new Producto(id, "Producto " + id, 10, 15, "desc", stock, "Marca", "Cat");
     }
 
     @Test
-    @DisplayName("actualizarStock devuelve true (contrato base)")
-    void actualizarStockDevuelveTrue() {
-        assertTrue(new Inventario().actualizarStock("P1", 5));
+    @DisplayName("Registra productos únicos y busca por id")
+    void registraYBuscaProductos() {
+        Inventario inventario = new Inventario();
+        Producto producto = producto("P1", 10);
+        assertTrue(inventario.registrarProducto(producto));
+        assertSame(producto, inventario.buscarEnInventario("P1"));
+        assertFalse(inventario.registrarProducto(producto("P1", 5)));
+        assertFalse(inventario.registrarProducto(null));
+        assertNull(inventario.buscarEnInventario("NO-EXISTE"));
+        assertNull(inventario.buscarEnInventario(null));
     }
 
     @Test
-    @DisplayName("listarProductosProximosAAgotarse no devuelve null")
-    void listarProductosProximosAAgotarseNoEsNull() {
-        assertNotNull(new Inventario().listarProductosProximosAAgotarse());
+    @DisplayName("Actualiza existencias recibidas")
+    void actualizarStock() {
+        Inventario inventario = new Inventario();
+        inventario.registrarProducto(producto("P1", 5));
+        assertTrue(inventario.actualizarStock("P1", 3));
+        assertEquals(8, inventario.buscarEnInventario("P1").getStock());
+        assertFalse(inventario.actualizarStock("P1", 0));
+        assertFalse(inventario.actualizarStock("NO-EXISTE", 2));
     }
 
     @Test
-    @DisplayName("obtenerPopularidadProductos no devuelve null")
-    void obtenerPopularidadProductosNoEsNull() {
-        assertNotNull(new Inventario().obtenerPopularidadProductos());
+    @DisplayName("Venta descuenta existencias y actualiza popularidad")
+    void registraVentas() {
+        Inventario inventario = new Inventario();
+        inventario.registrarProducto(producto("P1", 5));
+        assertTrue(inventario.registrarVenta("P1", 2));
+        assertFalse(inventario.registrarVenta("P1", 4));
+        assertFalse(inventario.registrarVenta("P1", 0));
+        assertEquals(3, inventario.buscarEnInventario("P1").getStock());
+        assertEquals(2, inventario.obtenerPopularidadProductos().get("P1"));
     }
 
     @Test
-    @DisplayName("buscarEnInventario debería devolver null para un código inexistente")
-    @Disabled("Pendiente de lógica: debe consultarse realmente el mapa de productos")
-    void buscarEnInventarioInexistente() {
-        assertNull(new Inventario().buscarEnInventario("NO-EXISTE"));
-    }
-
-    @Test
-    @DisplayName("actualizarStock debería sumar la cantidad al producto existente")
-    @Disabled("Pendiente de lógica: actualizarStock debe modificar el stock en el mapa")
-    void actualizarStockModificaElMapa() {
-        Inventario inv = new Inventario();
-        inv.actualizarStock("P1", 5);
-        assertEquals(5, inv.buscarEnInventario("P1").getStock());
-    }
-
-    @Test
-    @DisplayName("actualizarStock con cantidad negativa no lanza (contrato base)")
-    void actualizarStockNegativoNoLanza() {
-        assertDoesNotThrow(() -> new Inventario().actualizarStock("P1", -5));
-    }
-
-    @Test
-    @DisplayName("actualizarStock con cantidad cero no lanza (contrato base)")
-    void actualizarStockCeroNoLanza() {
-        assertDoesNotThrow(() -> new Inventario().actualizarStock("P1", 0));
+    @DisplayName("Lista productos con cinco unidades o menos")
+    void listarStockBajo() {
+        Inventario inventario = new Inventario();
+        inventario.registrarProducto(producto("P1", 5));
+        inventario.registrarProducto(producto("P2", 6));
+        assertEquals(1, inventario.listarProductosProximosAAgotarse().size());
+        assertNotNull(assertThrows(UnsupportedOperationException.class,
+            () -> inventario.listarProductosProximosAAgotarse().clear()));
     }
 }

@@ -1,4 +1,6 @@
 ci,nombre,rol,contrasena
+ADM-001,adm,ADMINISTRADOR,user
 DEMO-ADM-001,Admin Demo,ADMINISTRADOR,admin123
 DEMO-VEN-001,Ventas Demo,CAJERO,ventas123
 DEMO-ALM-001,Almacen Demo,ALMACENERO,almacen123
+17080963,Fausto,CAJERO,ja12345

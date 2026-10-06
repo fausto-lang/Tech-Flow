@@ -1,7 +1,5 @@
 package services;
 
-import config.ConfiguracionCSV;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -10,7 +8,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import config.ConfiguracionCSV;
 
 /**
  * Servicio encargado de la manipulación y persistencia de archivos en formato CSV.
@@ -18,6 +19,21 @@ import java.util.List;
  * entrecomillados y delimitador configurable.
  */
 public class MotorCSV {
+
+    private final Path directorioDatos;
+
+    public MotorCSV() {
+        this(Paths.get(System.getProperty("techflow.data.dir", "data")));
+    }
+
+    public MotorCSV(Path directorioDatos) {
+        this.directorioDatos = directorioDatos.toAbsolutePath().normalize();
+    }
+
+    public Path rutaDatos(String nombreArchivo) {
+        Path ruta = Paths.get(nombreArchivo);
+        return ruta.isAbsolute() ? ruta : directorioDatos.resolve(ruta).normalize();
+    }
 
     /**
      * Lee un archivo CSV usando el delimitador por defecto (coma).
@@ -183,6 +199,46 @@ public class MotorCSV {
         return escribirCSV(rutaArchivo, encabezado, false);
     }
 
+    /** Importa filas de un CSV/TXT, omitiendo su encabezado, al archivo destino. */
+    public boolean importarDatos(String rutaOrigen, String rutaDestino) {
+        if (rutaOrigen == null || rutaOrigen.isBlank()) {
+            return false;
+        }
+        List<String[]> origen = leerCSV(rutaOrigen);
+        if (origen.size() < 2) {
+            return false;
+        }
+        List<String[]> destino = leerCSV(rutaDestino);
+        if (destino.isEmpty()) {
+            destino.add(origen.get(0));
+        }
+        for (int i = 1; i < origen.size(); i++) {
+            destino.add(origen.get(i));
+        }
+        return escribirCSV(rutaDestino, destino, false);
+    }
+
+    /** Exporta inventario y ventas a un resumen CSV sencillo. */
+    public boolean exportarReporte(String rutaDestino) {
+        if (rutaDestino == null || rutaDestino.isBlank()) {
+            return false;
+        }
+        List<String[]> reporte = new ArrayList<>();
+        reporte.add(new String[]{"tipo", "identificador", "detalle", "fecha"});
+        agregarAlReporte(reporte, rutaDatos("inventario.csv"), "INVENTARIO");
+        agregarAlReporte(reporte, rutaDatos("ventas.csv"), "VENTA");
+        return escribirCSV(rutaDestino, reporte, false);
+    }
+
+    private void agregarAlReporte(List<String[]> reporte, Path ruta, String tipo) {
+        List<String[]> filas = leerCSV(ruta.toString());
+        for (int i = 1; i < filas.size(); i++) {
+            String[] fila = filas.get(i);
+            String identificador = fila.length == 0 ? "" : fila[0];
+            reporte.add(new String[]{tipo, identificador, String.join(" | ", Arrays.asList(fila)), ""});
+        }
+    }
+
     // ------------------------------------------------------------------
     // Helpers internos de parseo/formateo
     // ------------------------------------------------------------------
@@ -220,7 +276,7 @@ public class MotorCSV {
                 campos.add(actual.toString());
                 actual.setLength(0);
                 if (!(campos.size() == 1 && campos.get(0).isEmpty())) {
-                    filas.add(campos.toArray(new String[0]));
+                    filas.add(campos.toArray(String[]::new));
                 }
                 campos = new ArrayList<>();
                 if (c == '\r' && i + 1 < contenido.length() && contenido.charAt(i + 1) == '\n') {
@@ -234,7 +290,7 @@ public class MotorCSV {
         if (actual.length() > 0 || !campos.isEmpty()) {
             campos.add(actual.toString());
             if (!(campos.size() == 1 && campos.get(0).isEmpty())) {
-                filas.add(campos.toArray(new String[0]));
+                filas.add(campos.toArray(String[]::new));
             }
         }
         return filas;
