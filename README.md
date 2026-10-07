@@ -1,5 +1,4 @@
-# Tech-Flow
-
+# NICOLE KIDMAN 5.0
 Aplicacion de consola para administrar inventario, recepciones de proveedores y ventas de una tienda. Requiere JDK 21 y Maven.
 
 ## Ejecutar
