@@ -1,0 +1,2 @@
+idGarantia,idVenta,idOrden,idCliente,ciCliente,nombreCliente,telefonoCliente,idProducto,nombreProducto,fechaInicio,fechaFin,estado,ciEmpleado
+GAR-001,VEN-001,ORD-001,CLI-001,CI-001,Ana Cliente,70000000,P1,Producto,2026-10-06,2027-10-06,VIGENTE,CI-VEN

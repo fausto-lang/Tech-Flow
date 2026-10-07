@@ -240,6 +240,70 @@ class VendedorTest {
     }
 
     @Test
+    @DisplayName("Anular una venta confirmada restaura el stock y no permite anularla dos veces")
+    void anulaVentaConfirmadaUnaSolaVez() {
+        Vendedor vendedor = vendedor();
+        assertTrue(vendedor.venderProducto("P1", "Cliente", 2));
+        assertEquals(8, vendedor.buscarEnInventario("P1").getStock());
+
+        List<String[]> ventas = new MotorCSV(directorio).leerCSV(
+                new MotorCSV(directorio).rutaDatos("ventas.csv").toString());
+        String idVenta = ventas.get(1)[0];
+
+        assertTrue(vendedor.eliminarVenta(idVenta));
+        assertEquals(10, vendedor.buscarEnInventario("P1").getStock());
+        assertFalse(vendedor.eliminarVenta(idVenta));
+        assertEquals(10, vendedor.buscarEnInventario("P1").getStock());
+        assertEquals("ANULADA", new MotorCSV(directorio)
+                .leerCSV(new MotorCSV(directorio).rutaDatos("ventas.csv").toString()).get(1)[2]);
+    }
+
+    @Test
+    @DisplayName("Una importacion con una fila invalida no persiste las filas anteriores")
+    void importacionInvalidaNoPersisteParcialmente() {
+        Vendedor vendedor = vendedor();
+        MotorCSV csv = new MotorCSV(directorio);
+        String ruta = directorio.resolve("ordenes-invalidas.csv").toString();
+        csv.escribirCSV(ruta, List.of(
+                new String[]{"idOrden", "nombreCliente", "idProducto", "cantidad"},
+                new String[]{"EXT-1", "Cliente", "P1", "1"},
+                new String[]{"EXT-2", "Cliente", "NO-EXISTE", "1"}));
+
+        assertFalse(vendedor.ingresarOrdenDesdeArchivo(ruta));
+        assertEquals(0, csv.leerCSV(csv.rutaDatos("ventas.csv").toString()).size());
+        assertEquals(10, vendedor.buscarEnInventario("P1").getStock());
+    }
+
+    @Test
+    @DisplayName("La importacion de ordenes usa nombres de columnas aunque cambie el orden")
+    void importacionAceptaColumnasReordenadas() {
+        Vendedor vendedor = vendedor();
+        MotorCSV csv = new MotorCSV(directorio);
+        String ruta = directorio.resolve("ordenes-reordenadas.csv").toString();
+        csv.escribirCSV(ruta, List.of(
+                new String[]{"cantidad", "idProducto", "nombreCliente", "idOrden"},
+                new String[]{"2", "P1", "Cliente", "EXT-REORDENADA"}));
+
+        assertTrue(vendedor.ingresarOrdenDesdeArchivo(ruta));
+        List<String[]> ventas = csv.leerCSV(csv.rutaDatos("ventas.csv").toString());
+        assertTrue(ventas.get(1)[1].startsWith("ORD-"));
+        assertEquals("PROFORMA", ventas.get(1)[2]);
+        assertEquals("2", ventas.get(1)[7]);
+    }
+
+    @Test
+    @DisplayName("Una confirmacion rechazada por stock no modifica ventas ni inventario")
+    void confirmacionSinStockNoPersisteCambios() {
+        Vendedor vendedor = vendedor();
+        String orden = vendedor.generarOrdenDeVenta("Cliente", Map.of("P1", 11));
+
+        assertNull(orden);
+        MotorCSV csv = new MotorCSV(directorio);
+        assertTrue(csv.leerCSV(csv.rutaDatos("ventas.csv").toString()).isEmpty());
+        assertEquals(10, vendedor.buscarEnInventario("P1").getStock());
+    }
+
+    @Test
     @DisplayName("Genera identificador de orden")
     void generarOrdenDeVentaNoEsVacia() {
         assertFalse(vendedor().generarOrdenDeVenta(producto()).isBlank());

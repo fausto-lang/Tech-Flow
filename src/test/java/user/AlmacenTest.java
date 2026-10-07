@@ -98,4 +98,65 @@ class AlmacenTest {
         assertFalse(almacen.ingresarEntradaDesdeArchivo(ruta));
         assertFalse(almacen.ingresarEntradaDesdeArchivo(""));
     }
+
+    @Test
+    @DisplayName("Una fila invalida no deja cambios parciales en inventario ni entradas")
+    void importacionInvalidaNoDejaCambiosParciales() {
+        Almacen almacen = almacen();
+        MotorCSV csv = new MotorCSV(directorio);
+        String ruta = directorio.resolve("carga-parcialmente-invalida.csv").toString();
+        csv.escribirCSV(ruta, List.of(
+                new String[]{"idProveedor", "idProducto", "nombreProducto", "marca", "categoria", "precio", "cantidad"},
+                new String[]{"PROV-01", "P1", "Producto", "Marca", "Cat", "11", "2"},
+                new String[]{"PROV-01", "P1", "Producto", "Marca", "Cat", "11", "no-numero"}));
+
+        assertFalse(almacen.ingresarEntradaDesdeArchivo(ruta));
+        assertEquals("5", csv.leerCSV(csv.rutaDatos("inventario.csv").toString()).get(1)[7]);
+        assertTrue(csv.leerCSV(csv.rutaDatos("entradas.csv").toString()).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Una entrada con cantidad negativa no modifica los archivos")
+    void cantidadNegativaNoModificaArchivos() {
+        Almacen almacen = almacen();
+        MotorCSV csv = new MotorCSV(directorio);
+        String ruta = directorio.resolve("cantidad-negativa.csv").toString();
+        csv.escribirCSV(ruta, List.of(
+                new String[]{"idProveedor", "idProducto", "nombreProducto", "marca", "categoria", "precio", "cantidad"},
+                new String[]{"PROV-01", "P1", "Producto", "Marca", "Cat", "11", "-1"}));
+
+        assertFalse(almacen.ingresarEntradaDesdeArchivo(ruta));
+        assertEquals("5", csv.leerCSV(csv.rutaDatos("inventario.csv").toString()).get(1)[7]);
+        assertTrue(csv.leerCSV(csv.rutaDatos("entradas.csv").toString()).isEmpty());
+    }
+
+    @Test
+    @DisplayName("La importacion usa nombres de columnas aunque cambie el orden")
+    void importacionAceptaColumnasReordenadas() {
+        Almacen almacen = almacen();
+        MotorCSV csv = new MotorCSV(directorio);
+        String ruta = directorio.resolve("columnas-reordenadas.csv").toString();
+        csv.escribirCSV(ruta, List.of(
+                new String[]{"cantidad", "categoria", "idProducto", "idProveedor", "precio", "marca", "nombreProducto"},
+                new String[]{"2", "Cat", "P1", "PROV-01", "12", "Marca", "Producto"}));
+
+        assertTrue(almacen.ingresarEntradaDesdeArchivo(ruta));
+        assertEquals("7", csv.leerCSV(csv.rutaDatos("inventario.csv").toString()).get(1)[7]);
+        assertEquals("2", csv.leerCSV(csv.rutaDatos("entradas.csv").toString()).get(1)[4]);
+    }
+
+    @Test
+    @DisplayName("Una fila con columnas insuficientes no modifica los archivos")
+    void filaIncompletaNoModificaArchivos() {
+        Almacen almacen = almacen();
+        MotorCSV csv = new MotorCSV(directorio);
+        String ruta = directorio.resolve("fila-incompleta.csv").toString();
+        csv.escribirCSV(ruta, List.of(
+                new String[]{"idProveedor", "idProducto", "cantidad"},
+                new String[]{"PROV-01", "P1"}));
+
+        assertFalse(almacen.ingresarEntradaDesdeArchivo(ruta));
+        assertEquals("5", csv.leerCSV(csv.rutaDatos("inventario.csv").toString()).get(1)[7]);
+        assertTrue(csv.leerCSV(csv.rutaDatos("entradas.csv").toString()).isEmpty());
+    }
 }

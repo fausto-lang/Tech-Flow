@@ -144,4 +144,48 @@ class GestorTest {
         assertTrue(gestor.exportarReporteExcelOCSV(salida));
         assertEquals("tipo", csv().leerCSV(salida).get(0)[0]);
     }
+
+    @Test
+    @DisplayName("No elimina al unico administrador registrado")
+    void noEliminaAlUltimoAdministrador() {
+        csv().escribirCSV(csv().rutaDatos("empleado.csv").toString(), List.of(
+                new String[]{"ci", "nombre", "rol", "contrasena"},
+                new String[]{"CI-ADM", "Admin", "ADMINISTRADOR", "pw"}));
+
+        assertFalse(gestor().eliminarEmpleado("CI-ADM"));
+        assertEquals(2, csv().leerCSV(csv().rutaDatos("empleado.csv").toString()).size());
+    }
+
+    @Test
+    @DisplayName("Permite eliminar un administrador si queda otro administrador")
+    void eliminaAdministradorSiQuedaOtro() {
+        csv().escribirCSV(csv().rutaDatos("empleado.csv").toString(), List.of(
+                new String[]{"ci", "nombre", "rol", "contrasena"},
+                new String[]{"CI-ADM", "Admin", "ADMINISTRADOR", "pw"},
+                new String[]{"CI-ADM-2", "Admin Dos", "ADMINISTRADOR", "pw2"}));
+
+        assertTrue(gestor().eliminarEmpleado("CI-ADM"));
+        assertEquals("CI-ADM-2", csv().leerCSV(csv().rutaDatos("empleado.csv").toString()).get(1)[0]);
+    }
+
+    @Test
+    @DisplayName("No persiste productos con precios no finitos")
+    void rechazaPrecioNoFinito() {
+        Gestor gestor = gestor();
+        Producto producto = new Producto("P-NAN", "Producto", Double.NaN, 15.0,
+                "desc", 1, "Marca", "Cat");
+
+        assertFalse(gestor.anadirProducto(producto));
+        assertTrue(csv().leerCSV(csv().rutaDatos("inventario.csv").toString()).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Un pedido invalido no crea un archivo de pedidos")
+    void pedidoInvalidoNoPersiste() {
+        Gestor gestor = gestor();
+
+        gestor.generarPedidoProveedor("PROV-INEXISTENTE", List.of(producto("P1", 3)));
+
+        assertFalse(csv().existeArchivo(csv().rutaDatos("pedidos.csv").toString()));
+    }
 }

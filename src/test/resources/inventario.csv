@@ -1,0 +1,2 @@
+idProducto,nombre,marca,categoria,descripcion,precioEntrada,precioVenta,stock
+P1,Producto,Marca,Categoria,Descripcion con coma,10.0,15.0,5

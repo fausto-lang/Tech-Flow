@@ -251,4 +251,48 @@ class MotorCSVTest {
         Files.writeString(ruta, " \n");
         assertEquals(" ", motor.leerCSV(ruta.toString()).get(0)[0]);
     }
+
+    @Test
+    @DisplayName("No importa un origen inexistente, vacio o con solo cabecera")
+    void importarDatosRechazaOrigenSinDatos() {
+        String destino = tempDir.resolve("destino.csv").toString();
+        assertFalse(motor.importarDatos(null, destino));
+        assertFalse(motor.importarDatos("", destino));
+        assertFalse(motor.importarDatos(tempDir.resolve("no-existe.csv").toString(), destino));
+
+        String soloCabecera = tempDir.resolve("solo-cabecera.csv").toString();
+        motor.inicializarCSV(soloCabecera, new String[]{"id", "nombre"});
+        assertFalse(motor.importarDatos(soloCabecera, destino));
+    }
+
+    @Test
+    @DisplayName("Importar datos conserva la cabecera existente del destino")
+    void importarDatosConservaCabeceraDestino() {
+        String origen = tempDir.resolve("origen.csv").toString();
+        String destino = tempDir.resolve("destino.csv").toString();
+        motor.escribirCSV(origen, filas(new String[]{"id", "nombre"}, new String[]{"1", "Origen"}));
+        motor.escribirCSV(destino, filas(new String[]{"codigo", "detalle"}, new String[]{"D-1", "Existente"}));
+
+        assertTrue(motor.importarDatos(origen, destino));
+        assertArrayEquals(new String[]{"codigo", "detalle"}, motor.leerCSV(destino).get(0));
+        assertEquals("1", motor.leerCSV(destino).get(2)[0]);
+    }
+
+    @Test
+    @DisplayName("Una ruta relativa no puede escapar del directorio de datos")
+    void rutaRelativaNoEscapaDelDirectorio() {
+        MotorCSV motorLocal = new MotorCSV(tempDir);
+
+        Path ruta = motorLocal.rutaDatos("../fuera.csv");
+
+        assertTrue(ruta.startsWith(tempDir.toAbsolutePath().normalize()));
+    }
+
+    @Test
+    @DisplayName("Las operaciones con rutas nulas no lanzan excepciones")
+    void rutasNulasNoLanzanExcepciones() {
+        assertDoesNotThrow(() -> motor.leerCSV(null));
+        assertDoesNotThrow(() -> motor.escribirCSV(null, filas(new String[]{"dato"})));
+        assertDoesNotThrow(() -> motor.existeArchivo(null));
+    }
 }

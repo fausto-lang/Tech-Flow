@@ -9,12 +9,15 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+
+import services.MotorCSV;
 
 @DisplayName("Integracion de Main")
 class MainTest {
@@ -580,6 +583,48 @@ class MainTest {
     }
 
     @Test
+    @DisplayName("un cliente compuesto solo por espacios explica que no puede estar vacio")
+    void mensajeClienteSoloEspaciosEsClaro() {
+        ejecutar("2\nVentas Demo\nventas123\n1\n   \n0\n0\n0\n");
+        assertSalidaContiene("El nombre del cliente no puede estar vacio.");
+    }
+
+    @Test
+    @DisplayName("un empleado sin nombre indica que debe completarse el campo")
+    void mensajeEmpleadoSinNombreEsClaro() {
+        ejecutar("1\nadm\nuser\n5\nCI-SIN-NOMBRE\n   \nclave123\n2\n0\n0\n");
+        assertSalidaContiene("El nombre del empleado es obligatorio.");
+    }
+
+    @Test
+    @DisplayName("un proveedor sin nombre indica que debe completarse el campo")
+    void mensajeProveedorSinNombreEsClaro() {
+        ejecutar("1\nadm\nuser\n7\nPROV-SIN-NOMBRE\n   \n70000000\n0\n0\n");
+        assertSalidaContiene("El nombre del proveedor es obligatorio.");
+    }
+
+    @Test
+    @DisplayName("un producto sin nombre indica que debe completarse el campo")
+    void mensajeProductoSinNombreEsClaro() {
+        ejecutar("3\nAlmacen Demo\nalmacen123\n1\nP-SIN-NOMBRE\n   \nMarca\nCategoria\nDescripcion\n10\n15\n1\n0\n0\n");
+        assertSalidaContiene("El nombre del producto es obligatorio.");
+    }
+
+    @Test
+    @DisplayName("un contacto vacio indica que debe completarse el campo")
+    void mensajeContactoVacioEsClaro() {
+        ejecutar("1\nadm\nuser\n7\nPROV-SIN-CONTACTO\nProveedor Valido\n\n0\n0\n");
+        assertSalidaContiene("El contacto del proveedor es obligatorio.");
+    }
+
+    @Test
+    @DisplayName("un administrador no puede eliminarse si es el ultimo administrador")
+    void ultimoAdministradorNoPuedeEliminarse() {
+        ejecutar("1\nadm\nuser\n6\nADM-001\n0\n0\n");
+        assertSalidaContiene("No se puede eliminar al ultimo administrador.");
+    }
+
+    @Test
     @DisplayName("el error de importacion no expone una traza tecnica")
     void mensajeImportacionNoExponeTraza() {
         ejecutar("2\nVentas Demo\nventas123\n2\n/ruta/inexistente.csv\n0\n0\n");
@@ -789,10 +834,9 @@ class MainTest {
     @Test
     @DisplayName("cerrar caja persiste el estado y bloquea la confirmacion de ventas")
     void cajaCerradaPersisteYBloqueaVenta() throws Exception {
-        ejecutar("1\nadm\nuser\n2\n0\n0\n");
+        ejecutar("1\nadm\nuser\n2\n0\n2\nVentas Demo\nventas123\n1\nCliente\n1\nProd-01\n1\n2\nCI-CERRADA\n12345678\n0\n0\n0\n");
         String caja = Files.readString(directorioDatos.resolve("caja.csv"), StandardCharsets.UTF_8);
         assertTrue(caja.contains("CERRADA"));
-        ejecutar("2\nVentas Demo\nventas123\n1\nCliente\n1\nProd-01\n1\n2\nCI-CERRADA\n12345678\n0\n0\n0\n");
         assertSalidaContiene("La caja esta cerrada.");
     }
 
@@ -828,10 +872,11 @@ class MainTest {
     }
 
     private int stockDe(String idProducto) throws Exception {
-        for (String linea : Files.readAllLines(directorioDatos.resolve("inventario.csv"), StandardCharsets.UTF_8)) {
-            if (linea.startsWith(idProducto + ",")) {
-                String[] columnas = linea.split(",", -1);
-                return Integer.parseInt(columnas[7]);
+        MotorCSV motorCSV = new MotorCSV(directorioDatos);
+        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("inventario.csv").toString());
+        for (String[] fila : filas) {
+            if (fila.length > 7 && fila[0].equals(idProducto)) {
+                return Integer.parseInt(fila[7]);
             }
         }
         throw new AssertionError("Producto no encontrado: " + idProducto);
