@@ -1,1 +1,3 @@
 idEntrada,idProveedor,idProducto,nombreProducto,cantidad,precioUnitario,fechaEntrada,ciEmpleado
+ENT-50633D82,,Prod-13,Impresora Multifuncional EcoTank,5,299.99,2026-10-06,DEMO-ALM-001
+ENT-D303EEAD,,prod-76,Laptop,3515,1.0,2026-10-06,DEMO-ALM-001

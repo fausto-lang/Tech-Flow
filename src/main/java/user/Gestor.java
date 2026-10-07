@@ -24,8 +24,6 @@ public class Gestor extends Empleado {
     private static final String[] CABECERA_PROVEEDORES = {"idProveedor", "nombreProveedor", "contactoProveedor"};
     private static final String[] CABECERA_INVENTARIO = {"idProducto", "nombre", "marca", "categoria",
             "descripcion", "precioEntrada", "precioVenta", "stock"};
-        private static final String[] CABECERA_ENTRADAS = {"idEntrada", "idProveedor", "idProducto",
-            "nombreProducto", "cantidad", "precioUnitario", "fechaEntrada", "ciEmpleado"};
     private static final int STOCK_CRITICO = 5;
 
     private final MotorCSV motorCSV;
@@ -90,14 +88,7 @@ public class Gestor extends Empleado {
         Almacen almacen = new Almacen(getCi(), getNombre(), getContrasena(), directorioDatos());
         Producto existente = leerProducto(entrada.getIdProducto());
         if (existente == null) {
-            if (!almacen.ingresarProductoNuevo(entrada)) {
-                return false;
-            }
-            List<String[]> entradas = leerConCabecera(ARCHIVO_ENTRADAS, CABECERA_ENTRADAS);
-            entradas.add(new String[]{"ENT-" + java.util.UUID.randomUUID(), "", entrada.getIdProducto(),
-                    entrada.getNombre(), String.valueOf(entrada.getStock()),
-                    String.valueOf(entrada.getPrecioEntrada()), LocalDate.now().toString(), getCi()});
-            return motorCSV.escribirCSV(ruta(ARCHIVO_ENTRADAS), entradas, false);
+            return almacen.ingresarProductoNuevo(entrada);
         }
         return almacen.ingresarProductoExistente(entrada.getIdProducto(), entrada.getStock());
     }

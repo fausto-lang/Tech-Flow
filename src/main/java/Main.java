@@ -17,7 +17,7 @@ public class Main {
         try (Scanner scanner = new Scanner(System.in)) {
             Verificador verificador = new Verificador();
             System.out.println("=== SISTEMA DE INVENTARIO Y VENTAS ===");
-            while (scanner.hasNextLine()) {
+            while (true) {
                 Rol rol = seleccionarRol(scanner);
                 if (rol == null) {
                     return;
@@ -40,13 +40,7 @@ public class Main {
 
     private static Empleado autenticar(Scanner scanner, Verificador verificador, Rol rol) {
         for (int intento = 1; intento <= 5; intento++) {
-            if (!scanner.hasNextLine()) {
-                return null;
-            }
             String nombre = leerTexto(scanner, "Nombre de usuario: ");
-            if (!scanner.hasNextLine()) {
-                return null;
-            }
             String contrasena = leerTexto(scanner, "Contrasena: ");
             Empleado operador = verificador.iniciarSesion(nombre, contrasena, rol);
             if (operador != null) {
@@ -64,9 +58,6 @@ public class Main {
 
     private static Rol seleccionarRol(Scanner scanner) {
         while (true) {
-            if (!scanner.hasNextLine()) {
-                return null;
-            }
             System.out.println("Tipo de operador: 1) Administrador  2) Cajero  3) Almacen  0) Salir del sistema");
             String seleccion = leerTexto(scanner, "> ").trim().toLowerCase();
             switch (seleccion) {

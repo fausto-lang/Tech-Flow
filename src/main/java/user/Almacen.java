@@ -44,7 +44,11 @@ public class Almacen extends Empleado {
             return false;
         }
         inventario.add(filaProducto(producto));
-        return motorCSV.escribirCSV(ruta(ARCHIVO_INVENTARIO), inventario, false);
+        if (!motorCSV.escribirCSV(ruta(ARCHIVO_INVENTARIO), inventario, false)) {
+            return false;
+        }
+        return producto.getStock() == 0 || registrarEntrada("", producto.getIdProducto(), producto.getNombre(),
+                producto.getStock(), String.valueOf(producto.getPrecioEntrada()));
     }
 
     /** Incrementa el stock de un producto ya registrado y deja constancia de la entrada. */

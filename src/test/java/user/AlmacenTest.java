@@ -51,6 +51,11 @@ class AlmacenTest {
         assertTrue(almacen.ingresarProductoNuevo(producto("P2")));
         assertFalse(almacen.ingresarProductoNuevo(producto("P2")));
         assertFalse(almacen.ingresarProductoNuevo(null));
+        MotorCSV csv = new MotorCSV(directorio);
+        List<String[]> entradas = csv.leerCSV(csv.rutaDatos("entradas.csv").toString());
+        assertEquals(2, entradas.size());
+        assertEquals("P2", entradas.get(1)[2]);
+        assertEquals("5", entradas.get(1)[4]);
     }
 
     @Test
