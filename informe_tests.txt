@@ -1,0 +1,154 @@
+INFORME DE TESTS
+Fecha: 2026-10-06
+
+1. RESUMEN GENERAL
+
+- Tests aprobados: 229
+- Tests fallidos: 55
+- La logica de produccion no fue modificada al crear estos tests.
+- Los fallos muestran comportamientos que deben corregirse en produccion.
+
+2. user.VendedorTest
+
+Objetivo: validar ventas, proformas, clientes, garantias, stock e importacion
+de ordenes.
+
+Tests fallidos:
+
+- anulaVentaConfirmadaUnaSolaVez
+  La primera anulacion restaura el stock correctamente, pero la misma venta
+  puede anularse nuevamente. La segunda anulacion deberia rechazarse y no
+  modificar otra vez el inventario.
+
+- importacionInvalidaNoPersisteParcialmente
+  Cuando una importacion contiene una orden valida y despues una orden invalida,
+  la orden valida queda guardada. La importacion deberia ser atomica: si una
+  fila falla, ninguna fila del lote debe persistirse.
+
+3. user.GestorTest
+
+Objetivo: validar administradores, empleados, proveedores, inventario, caja,
+pedidos y reportes.
+
+Tests fallidos:
+
+- noEliminaAlUltimoAdministrador
+  El sistema permite eliminar al unico administrador. Debe impedirlo para que
+  el sistema no quede sin ningun usuario administrador.
+
+- rechazaPrecioNoFinito
+  Se acepta un producto cuyo precio es NaN. Deben rechazarse NaN, infinito,
+  precios negativos y precios de venta menores que el costo.
+
+Casos relacionados que actualmente pasan:
+
+- Se permite eliminar un administrador cuando queda otro administrador.
+- Los pedidos con proveedor inexistente no crean el archivo de pedidos.
+
+4. services.MotorCSVTest
+
+Objetivo: validar lectura, escritura, importacion, rutas y seguridad del motor
+de archivos CSV.
+
+Tests fallidos:
+
+- rutaRelativaNoEscapaDelDirectorio
+  Una ruta como ../fuera.csv puede salir del directorio de datos. El motor debe
+  bloquear o normalizar estas rutas para evitar escritura fuera del directorio
+  autorizado.
+
+- rutasNulasNoLanzanExcepciones
+  Una ruta null produce NullPointerException. Las operaciones publicas deberian
+  devolver false o una lista vacia, pero no romper la aplicacion.
+
+Casos cubiertos correctamente:
+
+- Archivos inexistentes, vacios y con solo cabecera.
+- Campos con comas, comillas, saltos de linea y valores vacios.
+- Importacion conservando la cabecera del archivo destino.
+- Codificacion UTF-8 y finales de linea CRLF.
+
+5. services.CsvArchivosTest
+
+Objetivo: comprobar que todos los CSV del proyecto existan, tengan cabecera
+correcta, filas con el mismo numero de columnas y puedan escribirse nuevamente.
+
+Test fallido:
+
+- todosLosCsvRespetanSuContrato
+  ventas.csv contiene filas de 8 columnas, pero el esquema actual de ventas
+  espera 15 columnas. El archivo historico y el esquema de ventas no son
+  consistentes.
+
+6. MainTest
+
+Objetivo: validar la aplicacion completa desde la consola, incluyendo menus,
+autenticacion, entradas invalidas, mensajes y cierre de sesion.
+
+Fallos de validacion y mensajes:
+
+- altaEmpleadoRechazadaNoPersiste
+- empleadoCiInvalido
+- empleadoContrasenaCorta
+- nombreEmpleadoConNumerosEsRechazado
+- mensajeEmpleadoSinNombreEsClaro
+- proveedorNombreConNumeros
+- proveedorCodigoConEspacios
+- mensajeProveedorSinNombreEsClaro
+- mensajeContactoVacioEsClaro
+- contactoDemasiadoCorto
+- contactoNegativo
+- productoNombreNumerico
+- productoCodigoCorto
+- productoStockCero
+- precioNoNumericoNaN
+- precioInfinito
+- precioVentaMenorQueCosto
+- mensajeProductoSinNombreEsClaro
+
+Estos casos muestran que varias entradas invalidas se aceptan o solo producen
+el mensaje generico "No se pudo completar la operacion".
+
+Fallos de clientes y ventas:
+
+- clienteNombreNumerico
+- clienteCiSoloEspacios
+- telefonoConLetras
+- telefonoDemasiadoLargo
+- ventaConCajaCerrada
+- ventaRechazadaNoModificaStock
+- cambiarCantidadNegativa
+- cantidadNoPositivaEnAlmacen
+- mensajeClienteSoloEspaciosEsClaro
+- mensajeClienteObligatorioEsClaro
+
+Estos casos verifican que el cliente, telefono, cantidad, caja y stock tengan
+mensajes claros y que una venta rechazada no altere los datos.
+
+Fallos de autenticacion y entrada incompleta:
+
+- contrasenaIncorrecta
+- contrasenaDistingueMayusculas
+- contraseñaConEspacioNoSeRecorta
+- rolNoCoincide
+- usuarioInexistente
+- errorAutenticacionNoFiltraContrasena
+- noExponeContrasena
+- eofAntesDeAutenticar
+- eofDespuesDelUsuario
+- eofDentroDeMenuNoRompeLaAplicacion
+- finDeEntradaEnRol
+- decimalInvalidoEnProducto
+- mensajeDecimalInvalidoEsClaro
+- mensajeCredencialesIncluyeIntentos
+- mensajeCarritoNoExponeTraza
+
+Los casos EOF muestran que algunos menus lanzan NoSuchElementException cuando
+la entrada termina antes de tiempo. Los mensajes de autenticacion tambien
+necesitan ser consistentes y no exponer datos sensibles.
+
+Fallo de regla de seguridad:
+
+- ultimoAdministradorNoPuedeEliminarse
+  La interfaz tampoco informa que el ultimo administrador no puede eliminarse.
+
