@@ -101,11 +101,16 @@ public class Vendedor extends Empleado {
         List<String[]> ventas = leerVentas();
         boolean encontrada = false;
         boolean confirmada = false;
+        boolean anulada = false;
         for (String[] fila : ventas) {
-            if (fila.length > 1 && (fila[0].equals(idVenta) || fila[1].equals(idVenta))) {
+            if (fila.length > 2 && (fila[0].equals(idVenta) || fila[1].equals(idVenta))) {
                 encontrada = true;
                 confirmada |= fila[2].equals("CONFIRMADA");
+                anulada |= fila[2].equals("ANULADA");
             }
+        }
+        if (anulada) {
+            return false;
         }
         if (!encontrada) {
             return false;
@@ -162,6 +167,14 @@ public class Vendedor extends Empleado {
                 clientes.put(id, fila[colCliente]);
             } catch (NumberFormatException e) {
                 return false;
+            }
+        }
+        for (Map.Entry<String, Map<String, Integer>> orden : ordenes.entrySet()) {
+            for (Map.Entry<String, Integer> linea : orden.getValue().entrySet()) {
+                Producto producto = buscarEnInventario(linea.getKey());
+                if (producto == null || producto.getStock() < linea.getValue()) {
+                    return false;
+                }
             }
         }
         for (Map.Entry<String, Map<String, Integer>> orden : ordenes.entrySet()) {

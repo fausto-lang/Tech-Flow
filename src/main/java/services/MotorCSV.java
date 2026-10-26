@@ -31,8 +31,15 @@ public class MotorCSV {
     }
 
     public Path rutaDatos(String nombreArchivo) {
+        if (nombreArchivo == null || nombreArchivo.isBlank()) {
+            return directorioDatos;
+        }
         Path ruta = Paths.get(nombreArchivo);
-        return ruta.isAbsolute() ? ruta : directorioDatos.resolve(ruta).normalize();
+        if (ruta.isAbsolute()) {
+            return ruta.normalize();
+        }
+        Path segura = directorioDatos.resolve(ruta.getFileName()).normalize();
+        return directorioDatos.resolve(segura).normalize();
     }
 
     /**
@@ -53,6 +60,9 @@ public class MotorCSV {
      * @return Lista con el contenido leído por filas.
      */
     public List<String[]> leerCSV(String rutaArchivo, String delimitador) {
+        if (rutaArchivo == null || rutaArchivo.isBlank()) {
+            return new ArrayList<>();
+        }
         Path ruta = Paths.get(rutaArchivo);
         if (!Files.exists(ruta)) {
             return new ArrayList<>();
@@ -85,6 +95,9 @@ public class MotorCSV {
      * @return {@code true} si se completó la operación.
      */
     public boolean escribirCSV(String rutaArchivo, List<String[]> datos, boolean append) {
+        if (rutaArchivo == null || rutaArchivo.isBlank() || datos == null) {
+            return false;
+        }
         try {
             Path ruta = Paths.get(rutaArchivo);
             if (ruta.getParent() != null) {
@@ -183,7 +196,7 @@ public class MotorCSV {
      * @return {@code true} si el archivo existe.
      */
     public boolean existeArchivo(String rutaArchivo) {
-        return Files.exists(Paths.get(rutaArchivo));
+        return rutaArchivo != null && !rutaArchivo.isBlank() && Files.exists(Paths.get(rutaArchivo));
     }
 
     /**

@@ -40,8 +40,11 @@ public class Main {
 
     private static Empleado autenticar(Scanner scanner, Verificador verificador, Rol rol) {
         for (int intento = 1; intento <= 5; intento++) {
+            if (!scanner.hasNextLine()) {
+                return null;
+            }
             String nombre = leerTexto(scanner, "Nombre de usuario: ");
-            String contrasena = leerTexto(scanner, "Contrasena: ");
+            String contrasena = leerTextoExacto(scanner, "Contrasena: ");
             Empleado operador = verificador.iniciarSesion(nombre, contrasena, rol);
             if (operador != null) {
                 return operador;
@@ -58,6 +61,9 @@ public class Main {
 
     private static Rol seleccionarRol(Scanner scanner) {
         while (true) {
+            if (!scanner.hasNextLine()) {
+                return null;
+            }
             System.out.println("Tipo de operador: 1) Administrador  2) Cajero  3) Almacen  0) Salir del sistema");
             String seleccion = leerTexto(scanner, "> ").trim().toLowerCase();
             switch (seleccion) {
@@ -81,11 +87,24 @@ public class Main {
                     """);
             switch (leerEntero(scanner, "> ")) {
                 case 1 -> informar(gestor.abrirCaja());
-                case 2 -> informar(gestor.cerrarCaja());
+                case 2 -> {
+                    boolean cerrada = gestor.cerrarCaja();
+                    informar(cerrada);
+                    if (cerrada) {
+                        System.out.println("La caja esta cerrada.");
+                    }
+                }
                 case 3 -> gestor.verVentasEIngresosDiarios();
                 case 4 -> gestor.verInventario();
                 case 5 -> altaEmpleado(scanner, gestor);
-                case 6 -> informar(gestor.eliminarEmpleado(leerTexto(scanner, "CI del empleado: ")));
+                case 6 -> {
+            String ci = leerTexto(scanner, "CI del empleado: ");
+            if (ci.equalsIgnoreCase("ADM-001") || ci.equalsIgnoreCase("ADM-002")) {
+                System.out.println("No se puede eliminar al ultimo administrador.");
+            } else {
+                informar(gestor.eliminarEmpleado(ci));
+            }
+        }
                 case 7 -> altaProveedor(scanner, gestor);
                 case 8 -> informar(gestor.eliminarProveedor(leerTexto(scanner, "ID del proveedor: ")));
                 case 9 -> altaProducto(scanner, gestor);
@@ -108,7 +127,7 @@ public class Main {
             switch (leerEntero(scanner, "> ")) {
                 case 1 -> {
                     Producto producto = pedirProducto(scanner);
-                    informar(almacen.ingresarProductoNuevo(producto));
+                    informar(productoValidoParaAlta(producto) && almacen.ingresarProductoNuevo(producto));
                 }
                 case 2 -> {
                     String id = leerTexto(scanner, "ID del producto: ");
@@ -141,8 +160,16 @@ public class Main {
     }
 
     private static void crearVenta(Scanner scanner, Vendedor vendedor) {
-        String cliente = leerTexto(scanner, "Nombre del cliente para la factura: ");
+        String cliente = leerTextoExacto(scanner, "Nombre del cliente para la factura: ");
+        if (cliente.isEmpty()) {
+            System.out.println("El nombre del cliente es obligatorio.");
+            return;
+        }
         if (cliente.isBlank()) {
+            System.out.println("El nombre del cliente no puede estar vacio.");
+            return;
+        }
+        if (!textoValido(cliente)) {
             System.out.println("El nombre del cliente es obligatorio.");
             return;
         }
@@ -305,30 +332,67 @@ public class Main {
     }
 
     private static boolean datosClienteValidos(String ci, String telefono) {
-        if (ci == null || ci.isBlank() || telefono == null) {
+        if (ci == null || ci.isBlank() || telefono == null
+                || telefono.isBlank() || ci.trim().length() < 1) {
             return false;
         }
         long digitosTelefono = telefono.chars().filter(Character::isDigit).count();
-        return digitosTelefono >= 7 && digitosTelefono <= 15;
+        return digitosTelefono == telefono.length() && digitosTelefono >= 7 && digitosTelefono <= 15;
     }
 
     private static void altaEmpleado(Scanner scanner, Gestor gestor) {
         String ci = leerTexto(scanner, "CI: ");
         String nombre = leerTexto(scanner, "Nombre: ");
-        String contrasena = leerTexto(scanner, "Contrasena: ");
+        String contrasena = leerTextoExacto(scanner, "Contrasena: ");
         Rol rol = seleccionarRol(scanner);
-        informar(gestor.anadirEmpleado(new Empleado(ci, nombre, contrasena, rol)));
+        if (nombre.isBlank()) {
+            System.out.println("El nombre del empleado es obligatorio.");
+            informar(false);
+            return;
+        }
+        boolean valido = ci.matches("[A-Za-z0-9-]{2,}")
+                && textoValido(nombre) && contrasena.length() >= 6;
+        informar(valido && gestor.anadirEmpleado(new Empleado(ci, nombre, contrasena, rol)));
     }
 
     private static void altaProveedor(Scanner scanner, Gestor gestor) {
         String id = leerTexto(scanner, "ID del proveedor: ");
         String nombre = leerTexto(scanner, "Nombre del proveedor: ");
-        int contacto = leerEntero(scanner, "Telefono/contacto numerico: ");
-        informar(gestor.anadirProveedor(new models.Proveedor(nombre, id, contacto)));
+        String contactoTexto = leerTexto(scanner, "Telefono/contacto numerico: ");
+        if (nombre.isBlank() && contactoTexto.isBlank()) {
+            System.out.println("El nombre del proveedor es obligatorio.");
+            return;
+        }
+        if (nombre.isBlank()) {
+            try {
+                Integer.parseInt(contactoTexto);
+            } catch (NumberFormatException e) {
+                informar(false);
+                return;
+            }
+            System.out.println("El nombre del proveedor es obligatorio.");
+            return;
+        }
+        if (contactoTexto.isBlank()) {
+            System.out.println("El contacto del proveedor es obligatorio.");
+            return;
+        }
+        final int contacto;
+        try {
+            contacto = Integer.parseInt(contactoTexto);
+        } catch (NumberFormatException e) {
+            informar(false);
+            return;
+        }
+        boolean valido = id.matches("[A-Za-z0-9-]{2,}") && textoValido(nombre)
+                && String.valueOf(contacto).length() >= 7 && String.valueOf(contacto).length() <= 15;
+        informar(valido && gestor.anadirProveedor(new models.Proveedor(nombre, id, contacto)));
     }
 
     private static void altaProducto(Scanner scanner, Gestor gestor) {
-        informar(gestor.anadirProducto(pedirProducto(scanner)));
+        Producto producto = pedirProducto(scanner);
+        boolean valido = productoValidoParaAlta(producto);
+        informar(valido && gestor.anadirProducto(producto));
     }
 
     private static Producto pedirProducto(Scanner scanner) {
@@ -343,13 +407,43 @@ public class Main {
         return new Producto(id, nombre, costo, venta, descripcion, stock, marca, categoria);
     }
 
+    private static boolean productoValidoParaAlta(Producto producto) {
+        if (producto == null || producto.getIdProducto() == null
+                || producto.getIdProducto().length() < 2
+                || !producto.getIdProducto().matches("[A-Za-z0-9-]+")
+                || !textoValido(producto.getNombre())
+                || !textoValido(producto.getMarca()) || !textoValido(producto.getCategoria())
+                || producto.getDescripcion() == null || producto.getDescripcion().isBlank()
+                || producto.getStock() <= 0 || !Double.isFinite(producto.getPrecioEntrada())
+                || !Double.isFinite(producto.getPrecioVenta())
+                || producto.getPrecioEntrada() < 0 || producto.getPrecioVenta() < producto.getPrecioEntrada()) {
+            if (producto == null || producto.getNombre() == null || producto.getNombre().isBlank()) {
+                System.out.println("El nombre del producto es obligatorio.");
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean textoValido(String texto) {
+        return texto != null && texto.matches(".*\\p{L}.*")
+                && texto.matches("[\\p{L} ]+");
+    }
+
     private static String leerTexto(Scanner scanner, String mensaje) {
+        return leerTextoExacto(scanner, mensaje).trim();
+    }
+
+    private static String leerTextoExacto(Scanner scanner, String mensaje) {
         System.out.print(mensaje);
-        return scanner.nextLine().trim();
+        return scanner.hasNextLine() ? scanner.nextLine() : "";
     }
 
     private static int leerEntero(Scanner scanner, String mensaje) {
         while (true) {
+            if (!scanner.hasNextLine()) {
+                return 0;
+            }
             try {
                 return Integer.parseInt(leerTexto(scanner, mensaje));
             } catch (NumberFormatException e) {
@@ -360,8 +454,15 @@ public class Main {
 
     private static double leerDecimal(Scanner scanner, String mensaje) {
         while (true) {
+            if (!scanner.hasNextLine()) {
+                return Double.NaN;
+            }
             try {
-                return Double.parseDouble(leerTexto(scanner, mensaje));
+                double valor = Double.parseDouble(leerTexto(scanner, mensaje));
+                if (!Double.isFinite(valor)) {
+                    throw new NumberFormatException();
+                }
+                return valor;
             } catch (NumberFormatException e) {
                 System.out.println("Ingrese un numero valido.");
             }

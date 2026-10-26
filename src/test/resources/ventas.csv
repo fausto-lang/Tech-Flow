@@ -1,3 +1,3 @@
-idVenta,idProducto,ciCliente,nombreProducto,cantidad,precioUnitario,fechaVenta,ciEmpleado
-V-001,Prod-01,CLI-001,"Auriculares Inalámbricos Pro",2,389.99,2026-10-01,DEMO-VEN-001
-V-002,Prod-09,CLI-002,"Smartwatch Watch GT 3",1,259.99,2026-10-02,DEMO-VEN-001
+idVenta,idOrden,estado,ciCliente,nombreCliente,idProducto,nombreProducto,cantidad,precioUnitario,total,fechaVenta,ciEmpleado,idCliente,telefonoCliente,idGarantia
+V-001,ORD-001,CONFIRMADA,CLI-001,Cliente Uno,Prod-01,"Auriculares Inalámbricos Pro",2,389.99,779.98,2026-10-01T00:00:00,DEMO-VEN-001,CLI-001,,GAR-001
+V-002,ORD-002,CONFIRMADA,CLI-002,Cliente Dos,Prod-09,"Smartwatch Watch GT 3",1,259.99,259.99,2026-10-02T00:00:00,DEMO-VEN-001,CLI-002,,GAR-002

@@ -130,6 +130,21 @@ public class Gestor extends Empleado {
     }
 
     public boolean eliminarEmpleado(String ci) {
+        if (vacio(ci)) {
+            return false;
+        }
+        List<String[]> empleados = leerConCabecera(ARCHIVO_EMPLEADOS, CABECERA_EMPLEADOS);
+        String[] objetivo = empleados.stream().skip(1)
+                .filter(fila -> fila.length > 2 && fila[0].equalsIgnoreCase(ci))
+                .findFirst().orElse(null);
+        if (objetivo == null) {
+            return false;
+        }
+        if (objetivo[2].equalsIgnoreCase(Rol.ADMINISTRADOR.name())
+                && empleados.stream().skip(1).filter(fila -> fila.length > 2
+                        && fila[2].equalsIgnoreCase(Rol.ADMINISTRADOR.name())).count() <= 1) {
+            return false;
+        }
         return eliminarPorClave(ARCHIVO_EMPLEADOS, ci);
     }
 
@@ -152,7 +167,9 @@ public class Gestor extends Empleado {
 
     public boolean anadirProducto(Producto producto) {
         if (producto == null || vacio(producto.getIdProducto()) || vacio(producto.getNombre())
-                || producto.getStock() < 0 || producto.getPrecioEntrada() < 0 || producto.getPrecioVenta() < 0) {
+                || producto.getStock() < 0 || !Double.isFinite(producto.getPrecioEntrada())
+                || !Double.isFinite(producto.getPrecioVenta())
+                || producto.getPrecioEntrada() < 0 || producto.getPrecioVenta() < 0) {
             return false;
         }
         List<String[]> filas = leerConCabecera(ARCHIVO_INVENTARIO, CABECERA_INVENTARIO);
