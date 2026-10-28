@@ -1,0 +1,110 @@
+.fondo-login {
+    -fx-background-color:
+        linear-gradient(to bottom right, #080d1b, #111a32, #17132d);
+    -fx-font-family: "Segoe UI";
+}
+
+.encabezado {
+    -fx-padding: 0 0 8 0;
+}
+
+.icono-logo {
+    -fx-font-size: 35px;
+    -fx-text-fill: #a78bfa;
+}
+
+.titulo {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f8fafc;
+}
+
+.subtitulo {
+    -fx-font-size: 12px;
+    -fx-text-fill: #a5b4cf;
+}
+
+.tarjeta-login {
+    -fx-background-color: rgba(20, 29, 52, 0.96);
+    -fx-background-radius: 18px;
+    -fx-border-color: #303b5b;
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-padding: 28px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 24, 0.2, 0, 8);
+}
+
+.titulo-formulario {
+    -fx-font-size: 23px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f8fafc;
+}
+
+.texto-secundario {
+    -fx-font-size: 12px;
+    -fx-text-fill: #9caac5;
+}
+
+.etiqueta {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e2e8f0;
+}
+
+.campo {
+    -fx-background-color: #0d1529;
+    -fx-background-radius: 8px;
+    -fx-border-color: #35415f;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-text-fill: #f8fafc;
+    -fx-prompt-text-fill: #71809e;
+    -fx-padding: 11px;
+    -fx-font-size: 13px;
+}
+
+.campo:focused {
+    -fx-border-color: #8b5cf6;
+    -fx-effect: dropshadow(gaussian, rgba(139, 92, 246, 0.22), 10, 0.2, 0, 0);
+}
+
+.boton-rol {
+    -fx-background-color: #202a45;
+    -fx-background-radius: 8px;
+    -fx-border-color: #3b4665;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #dbe4f5;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 6px;
+    -fx-cursor: hand;
+}
+
+.boton-rol:hover {
+    -fx-background-color: #30375c;
+    -fx-border-color: #8b5cf6;
+}
+
+.boton-principal {
+    -fx-background-color: linear-gradient(to right, #7c3aed, #6366f1);
+    -fx-background-radius: 9px;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 13px;
+    -fx-cursor: hand;
+}
+
+.boton-principal:hover {
+    -fx-background-color: linear-gradient(to right, #8b5cf6, #818cf8);
+}
+
+.mensaje {
+    -fx-font-size: 12px;
+    -fx-text-fill: #fca5a5;
+}
+
+.pie-tarjeta {
+    -fx-font-size: 10px;
+    -fx-text-fill: #7887a5;
+}

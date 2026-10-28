@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.overbyte.controllers.LoginController"
+      alignment="CENTER"
+      spacing="20"
+      stylesheets="@../styles/estilos.css"
+      styleClass="fondo-login">
+
+    <padding>
+        <Insets top="30" right="30" bottom="30" left="30"/>
+    </padding>
+
+    <VBox alignment="CENTER" spacing="8" styleClass="encabezado">
+        <Label text="◆" styleClass="icono-logo"/>
+        <Label text="TECH-FLOW" styleClass="titulo"/>
+        <Label text="Sistema de gestión de inventario y ventas"
+               styleClass="subtitulo"/>
+    </VBox>
+
+    <VBox alignment="CENTER_LEFT"
+          spacing="16"
+          maxWidth="430"
+          styleClass="tarjeta-login">
+
+        <Label text="Bienvenido de nuevo" styleClass="titulo-formulario"/>
+        <Label text="Ingresa tus datos para continuar"
+               styleClass="texto-secundario"/>
+
+        <VBox spacing="7">
+            <Label text="Nombre de usuario" styleClass="etiqueta"/>
+            <TextField fx:id="campoNombre"
+                       promptText="Escribe tu nombre de usuario"
+                       styleClass="campo"/>
+        </VBox>
+
+        <VBox spacing="7">
+            <Label text="Selecciona tu rol" styleClass="etiqueta"/>
+
+            <HBox spacing="8" alignment="CENTER">
+                <Button text="Administrador"
+                        onAction="#seleccionarAdministrador"
+                        styleClass="boton-rol"
+                        HBox.hgrow="ALWAYS"
+                        maxWidth="Infinity"/>
+
+                <Button text="Cajero"
+                        onAction="#seleccionarCajero"
+                        styleClass="boton-rol"
+                        HBox.hgrow="ALWAYS"
+                        maxWidth="Infinity"/>
+
+                <Button text="Almacén"
+                        onAction="#seleccionarAlmacen"
+                        styleClass="boton-rol"
+                        HBox.hgrow="ALWAYS"
+                        maxWidth="Infinity"/>
+            </HBox>
+
+            <Label fx:id="etiquetaRol"
+                   text="Selecciona un rol para continuar"
+                   styleClass="texto-secundario"/>
+        </VBox>
+
+        <VBox spacing="7">
+            <Label text="Contraseña" styleClass="etiqueta"/>
+            <PasswordField fx:id="campoContrasena"
+                           promptText="Escribe tu contraseña"
+                           styleClass="campo"/>
+        </VBox>
+
+        <Label fx:id="mensaje"
+               text=""
+               wrapText="true"
+               styleClass="mensaje"/>
+
+        <Button text="INICIAR SESIÓN"
+                onAction="#iniciarSesion"
+                maxWidth="Infinity"
+                styleClass="boton-principal"/>
+
+        <Label text="Acceso seguro · Tech-Flow"
+               styleClass="pie-tarjeta"/>
+    </VBox>
+
+</VBox>
