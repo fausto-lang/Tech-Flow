@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
@@ -22,25 +23,30 @@
             <Label styleClass="logo-text" text="Over-Byte"/>
         </VBox>
 
-        <VBox styleClass="nav-menu">
-            <Button styleClass="nav-button nav-active"
-                    text="Ventas &amp; Cajas"
+        <VBox styleClass="nav-menu" spacing="8">
+            <Button styleClass="nav-button"
+                    text="Caja"
+                    onAction="#mostrarCaja"
                     maxWidth="Infinity"/>
 
             <Button styleClass="nav-button"
-                    text="Inventario &amp; Stock"
+                    text="Inventario"
+                    onAction="#mostrarInventario"
                     maxWidth="Infinity"/>
 
             <Button styleClass="nav-button"
-                    text="Colaboradores &amp; Empleados"
+                    text="Ventas"
+                    onAction="#mostrarVentas"
                     maxWidth="Infinity"/>
 
             <Button styleClass="nav-button"
-                    text="Proveedores"
+                    text="Empleados"
+                    onAction="#mostrarEmpleados"
                     maxWidth="Infinity"/>
 
             <Button styleClass="nav-button"
-                    text="Reportes Financieros"
+                    text="Productos"
+                    onAction="#mostrarProductos"
                     maxWidth="Infinity"/>
         </VBox>
 
@@ -59,336 +65,20 @@
     <!-- CONTENIDO PRINCIPAL -->
     <VBox styleClass="main-content" HBox.hgrow="ALWAYS">
 
-        <!-- ENCABEZADO -->
         <HBox alignment="CENTER_LEFT" styleClass="header">
-
-            <VBox spacing="8">
-                <Label styleClass="header-title"
-                       text="Control de Cajas y Flujo de Ventas"/>
-
-                <HBox alignment="CENTER_LEFT" spacing="10"
-                      styleClass="status-bar">
-
-                    <Label styleClass="badge badge-green"
-                           text="● TURNO MAÑANA EN CURSO"/>
-
-                    <Label styleClass="status-text"
-                           text="☁ Sistema de gestión de ventas"/>
-                </HBox>
-            </VBox>
-
+            <Label fx:id="lblTituloSeccion"
+                   styleClass="header-title"
+                   text="Caja"/>
             <Region HBox.hgrow="ALWAYS"/>
-
-            <HBox spacing="15">
-                <Button styleClass="btn btn-outline"
-                        text="⊖ Cerrar Caja"/>
-
-                <Button styleClass="btn btn-primary"
-                        text="⊕ Abrir Caja"/>
-            </HBox>
         </HBox>
 
-        <!-- TOTAL DE VENTAS -->
-        <HBox alignment="CENTER_LEFT"
-              styleClass="card total-card">
-
-            <VBox spacing="10">
-                <Label styleClass="subtitle"
-                       text="TOTAL VENTAS DEL DÍA"/>
-
-                <Label styleClass="total-amount"
-                       text="4,850.50 BS"/>
-            </VBox>
-
-            <Region HBox.hgrow="ALWAYS"/>
-
-            <Button styleClass="icon-button"
-                    text="💵"/>
-        </HBox>
-
-        <!-- ESTADO DE TERMINALES -->
-        <VBox styleClass="terminals-section" spacing="20">
-
-            <HBox alignment="CENTER_LEFT">
-                <Label styleClass="section-title"
-                       text="🖥 Estado de Terminales y Asignación de Turno"/>
-
-                <Region HBox.hgrow="ALWAYS"/>
-
-                <Label styleClass="subtitle-small"
-                       text="ESTADO DE LAS CAJAS"/>
-            </HBox>
-
-            <HBox spacing="20">
-
-                <!-- CAJA 01 -->
-                <VBox styleClass="card terminal-card"
-                      HBox.hgrow="ALWAYS"
-                      spacing="18">
-
-                    <HBox alignment="CENTER_LEFT">
-                        <VBox spacing="6">
-                            <Label styleClass="terminal-title"
-                                   text="Caja 01 - Principal"/>
-
-                            <Label styleClass="terminal-subtitle"
-                                   text="ID: POS-001 • Terminal Mostrador A"/>
-                        </VBox>
-
-                        <Region HBox.hgrow="ALWAYS"/>
-
-                        <Label styleClass="badge badge-green-dark"
-                               text="● Activa"/>
-                    </HBox>
-
-                    <HBox alignment="CENTER_LEFT"
-                          spacing="12"
-                          styleClass="user-info">
-
-                        <Label styleClass="avatar avatar-purple"
-                               text="SR"/>
-
-                        <VBox spacing="5">
-                            <Label styleClass="user-name"
-                                   text="Sofía Rodríguez"/>
-
-                            <Label styleClass="user-role"
-                                   text="Cajera Líder • Desde 08:00 AM"/>
-                        </VBox>
-                    </HBox>
-
-                    <VBox styleClass="amount-box" spacing="8">
-                        <Label styleClass="amount-label"
-                               text="RECAUDADO"/>
-
-                        <Label styleClass="amount-value"
-                               text="1,240.00 BS"/>
-                    </VBox>
-
-                    <Button styleClass="btn btn-secondary"
-                            text="Ver Informe"
-                            maxWidth="Infinity"/>
-                </VBox>
-
-                <!-- CAJA 02 -->
-                <VBox styleClass="card terminal-card"
-                      HBox.hgrow="ALWAYS"
-                      spacing="18">
-
-                    <HBox alignment="CENTER_LEFT">
-                        <VBox spacing="6">
-                            <Label styleClass="terminal-title"
-                                   text="Caja 02 - Mostrador"/>
-
-                            <Label styleClass="terminal-subtitle"
-                                   text="ID: POS-002 • Terminal Pasillo B"/>
-                        </VBox>
-
-                        <Region HBox.hgrow="ALWAYS"/>
-
-                        <Label styleClass="badge badge-green-dark"
-                               text="● Activa"/>
-                    </HBox>
-
-                    <HBox alignment="CENTER_LEFT"
-                          spacing="12"
-                          styleClass="user-info">
-
-                        <Label styleClass="avatar avatar-green"
-                               text="MG"/>
-
-                        <VBox spacing="5">
-                            <Label styleClass="user-name"
-                                   text="Mateo Gutiérrez"/>
-
-                            <Label styleClass="user-role"
-                                   text="Cajero • Desde 08:30 AM"/>
-                        </VBox>
-                    </HBox>
-
-                    <VBox styleClass="amount-box" spacing="8">
-                        <Label styleClass="amount-label"
-                               text="RECAUDADO"/>
-
-                        <Label styleClass="amount-value"
-                               text="890.00 BS"/>
-                    </VBox>
-
-                    <Button styleClass="btn btn-secondary"
-                            text="Ver Arqueo"
-                            maxWidth="Infinity"/>
-                </VBox>
-            </HBox>
-        </VBox>
-
-        <!-- HISTORIAL DE VENTAS -->
-        <VBox styleClass="card table-card" spacing="18">
-
-            <HBox alignment="CENTER_LEFT"
-                  styleClass="table-header-top"
-                  spacing="12">
-
-                <Button styleClass="icon-button-small bg-purple"
-                        text="📊"/>
-
-                <VBox spacing="5">
-                    <Label styleClass="terminal-title"
-                           text="Historial de Ventas"/>
-
-                    <Label styleClass="terminal-subtitle"
-                           text="Transacciones registradas durante el turno"/>
-                </VBox>
-
-                <Region HBox.hgrow="ALWAYS"/>
-
-                <HBox styleClass="toggle-group" spacing="5">
-                    <Button styleClass="toggle-btn toggle-active"
-                            text="Todas"/>
-
-                    <Button styleClass="toggle-btn"
-                            text="Efectivo"/>
-                </HBox>
-            </HBox>
-
-            <!-- ENCABEZADOS -->
-            <HBox styleClass="table-columns" spacing="10">
-                <Label prefWidth="120"
-                       styleClass="col-header"
-                       text="FOLIO TICKET"/>
-
-                <Label prefWidth="80"
-                       styleClass="col-header"
-                       text="HORA"/>
-
-                <Label prefWidth="140"
-                       styleClass="col-header"
-                       text="CAJA / TERMINAL"/>
-
-                <Label prefWidth="130"
-                       styleClass="col-header"
-                       text="CAJERO"/>
-
-                <Label prefWidth="130"
-                       styleClass="col-header"
-                       text="MÉTODO DE PAGO"/>
-
-                <Label prefWidth="120"
-                       alignment="CENTER_RIGHT"
-                       styleClass="col-header"
-                       text="TOTAL"/>
-
-                <Label prefWidth="100"
-                       alignment="CENTER"
-                       styleClass="col-header"
-                       text="ACCIONES"/>
-            </HBox>
-
-            <!-- FILA DEMOSTRATIVA 1 -->
-            <HBox styleClass="table-row"
-                  alignment="CENTER_LEFT"
-                  spacing="10">
-
-                <Label prefWidth="120"
-                       styleClass="cell-text"
-                       text="#VTA-00142"/>
-
-                <Label prefWidth="80"
-                       styleClass="cell-text"
-                       text="10:42"/>
-
-                <Label prefWidth="140"
-                       styleClass="cell-text"
-                       text="Caja 01"/>
-
-                <Label prefWidth="130"
-                       styleClass="cell-text"
-                       text="Sofía Rodríguez"/>
-
-                <Label prefWidth="130"
-                       styleClass="cell-text"
-                       text="Efectivo"/>
-
-                <Label prefWidth="120"
-                       alignment="CENTER_RIGHT"
-                       styleClass="cell-amount"
-                       text="350.00 BS"/>
-
-                <HBox prefWidth="100" alignment="CENTER">
-                    <Button styleClass="btn btn-secondary"
-                            text="Ver"/>
-                </HBox>
-            </HBox>
-
-            <!-- FILA DEMOSTRATIVA 2 -->
-            <HBox styleClass="table-row"
-                  alignment="CENTER_LEFT"
-                  spacing="10">
-
-                <Label prefWidth="120"
-                       styleClass="cell-text"
-                       text="#VTA-00141"/>
-
-                <Label prefWidth="80"
-                       styleClass="cell-text"
-                       text="10:35"/>
-
-                <Label prefWidth="140"
-                       styleClass="cell-text"
-                       text="Caja 02"/>
-
-                <Label prefWidth="130"
-                       styleClass="cell-text"
-                       text="Mateo Gutiérrez"/>
-
-                <Label prefWidth="130"
-                       styleClass="cell-text"
-                       text="Tarjeta"/>
-
-                <Label prefWidth="120"
-                       alignment="CENTER_RIGHT"
-                       styleClass="cell-amount"
-                       text="520.00 BS"/>
-
-                <HBox prefWidth="100" alignment="CENTER">
-                    <Button styleClass="btn btn-secondary"
-                            text="Ver"/>
-                </HBox>
-            </HBox>
-
-            <!-- PAGINACIÓN -->
-            <HBox alignment="CENTER_LEFT"
-                  styleClass="pagination-bar"
-                  spacing="10">
-
-                <Label styleClass="row-text-sub"
-                       text="Transacciones del turno"/>
-
-                <Region HBox.hgrow="ALWAYS"/>
-
-                <HBox spacing="5" alignment="CENTER">
-                    <Button styleClass="page-btn"
-                            text="Anterior"/>
-
-                    <Button styleClass="page-btn page-active"
-                            text="1"/>
-
-                    <Button styleClass="page-btn"
-                            text="2"/>
-
-                    <Button styleClass="page-btn"
-                            text="3"/>
-
-                    <Label styleClass="page-dots"
-                           text="..."/>
-
-                    <Button styleClass="page-btn"
-                            text="Siguiente"/>
-                </HBox>
-            </HBox>
-        </VBox>
+        <VBox fx:id="contenidoCentro"
+              HBox.hgrow="ALWAYS"
+              VBox.vgrow="ALWAYS"/>
 
         <padding>
             <Insets top="25" right="25" bottom="25" left="25"/>
         </padding>
     </VBox>
+
 </HBox>

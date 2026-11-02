@@ -116,6 +116,9 @@ public class LoginController {
 
                 Parent vistaAdmin = cargador.load();
 
+                AdminController controlador = cargador.getController();
+                controlador.setEmpleado(empleado);
+
                 Scene escenaAdmin = new Scene(vistaAdmin, 1400, 900);
 
                 ventana.setScene(escenaAdmin);
