@@ -4,12 +4,16 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import models.Producto;
 import user.Empleado;
 import user.Almacen;
+import services.MotorCSV;
+
+import java.util.List;
 
 public class AlmacenController {
 
@@ -49,8 +53,12 @@ public class AlmacenController {
     @FXML
     private Label mensaje;
 
+    @FXML
+    private VBox tablaInventario;
+
     private Empleado empleado;
     private Almacen almacen;
+    private MotorCSV motorCSV;
 
     public void setEmpleado(Empleado empleado) {
         this.empleado = empleado;
@@ -59,6 +67,8 @@ public class AlmacenController {
             empleado.getNombre(),
             empleado.getContrasena()
         );
+        this.motorCSV = new MotorCSV();
+        cargarInventario();
     }
 
     @FXML
@@ -68,6 +78,78 @@ public class AlmacenController {
             etiquetaAlmacen.setText("Almacenero: " + empleado.getNombre());
         }
     }
+
+    /* ===================== INVENTARIO ===================== */
+
+    private void cargarInventario() {
+        tablaInventario.getChildren().clear();
+
+        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("inventario.csv").toString());
+
+        // Cabecera de la tabla
+        HBox cabecera = new HBox(15);
+        cabecera.setAlignment(Pos.CENTER_LEFT);
+        cabecera.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #2563eb;");
+
+        Label colId = new Label("ID");
+        colId.setPrefWidth(80);
+        Label colNombre = new Label("Nombre");
+        colNombre.setPrefWidth(160);
+        Label colMarca = new Label("Marca");
+        colMarca.setPrefWidth(100);
+        Label colCategoria = new Label("Categoría");
+        colCategoria.setPrefWidth(100);
+        Label colPrecioE = new Label("P. Entrada");
+        colPrecioE.setPrefWidth(90);
+        Label colPrecioV = new Label("P. Venta");
+        colPrecioV.setPrefWidth(80);
+        Label colStock = new Label("Stock");
+        colStock.setPrefWidth(70);
+
+        cabecera.getChildren().addAll(colId, colNombre, colMarca, colCategoria, colPrecioE, colPrecioV, colStock);
+        tablaInventario.getChildren().add(cabecera);
+
+        Separator sep = new Separator();
+        tablaInventario.getChildren().add(sep);
+
+        for (int i = 1; i < filas.size(); i++) {
+            String[] fila = filas.get(i);
+            if (fila.length < 8 || fila[0].equalsIgnoreCase("idProducto")) {
+                continue;
+            }
+            HBox filaH = new HBox(15);
+            filaH.setAlignment(Pos.CENTER_LEFT);
+            filaH.setStyle("-fx-padding: 4 0;");
+
+            Label id = new Label(fila[0]);
+            id.setPrefWidth(80);
+            Label nombre = new Label(fila[1]);
+            nombre.setPrefWidth(160);
+            Label marca = new Label(fila[2]);
+            marca.setPrefWidth(100);
+            Label categoria = new Label(fila[3]);
+            categoria.setPrefWidth(100);
+            Label precioE = new Label(fila[5]);
+            precioE.setPrefWidth(90);
+            Label precioV = new Label(fila[6]);
+            precioV.setPrefWidth(80);
+            Label stock = new Label(fila[7]);
+            stock.setPrefWidth(70);
+
+            // Resaltar stock bajo
+            try {
+                int s = Integer.parseInt(fila[7]);
+                if (s <= 5) {
+                    stock.setStyle("-fx-text-fill: #fca5a5; -fx-font-weight: bold;");
+                }
+            } catch (NumberFormatException ignored) {}
+
+            filaH.getChildren().addAll(id, nombre, marca, categoria, precioE, precioV, stock);
+            tablaInventario.getChildren().add(filaH);
+        }
+    }
+
+    /* ===================== FORMULARIOS ===================== */
 
     @FXML
     private void ingresarProductoNuevo() {
@@ -107,6 +189,7 @@ public class AlmacenController {
             mensaje.setText("-fx-text-fill: #4ade80;");
             mensaje.setText("Producto ingresado correctamente.");
             limpiarCamposProducto();
+            cargarInventario();
         } else {
             mensaje.setText("No se pudo ingresar el producto. Verifica que el ID no exista.");
         }
@@ -142,10 +225,33 @@ public class AlmacenController {
             mensaje.setText("Stock reabastecido correctamente.");
             campoCodigoExistente.clear();
             campoCantidadExistente.clear();
+            cargarInventario();
         } else {
             mensaje.setText("No se pudo reabastecer. Verifica que el código exista.");
         }
     }
+
+    /* ===================== IMPORTAR ENTRADAS ===================== */
+
+    @FXML
+    private void importarEntradasDesdeArchivo() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Importar entradas");
+        dialog.setHeaderText("Ingresa la ruta del archivo CSV/TXT de recepciones:");
+        dialog.setContentText("Ruta:");
+        dialog.showAndWait().ifPresent(ruta -> {
+            boolean ok = almacen.ingresarEntradaDesdeArchivo(ruta);
+            if (ok) {
+                mensaje.setText("-fx-text-fill: #4ade80;");
+                mensaje.setText("Entradas importadas correctamente.");
+                cargarInventario();
+            } else {
+                mensaje.setText("No se pudo importar el archivo. Verifica el formato y columnas.");
+            }
+        });
+    }
+
+    /* ===================== CERRAR SESIÓN ===================== */
 
     @FXML
     private void cerrarSesion() {
@@ -159,6 +265,8 @@ public class AlmacenController {
             Stage ventana = (Stage) campoId.getScene().getWindow();
             ventana.setScene(escenaLogin);
             ventana.setTitle("Tech-Flow | Iniciar sesión");
+            ventana.setMinWidth(600);
+            ventana.setMinHeight(400);
             ventana.setWidth(800);
             ventana.setHeight(650);
             ventana.centerOnScreen();

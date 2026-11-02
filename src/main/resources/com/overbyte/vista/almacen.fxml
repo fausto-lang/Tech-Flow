@@ -7,128 +7,166 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ScrollPane?>
 
 <VBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.overbyte.controllers.AlmacenController"
-      alignment="CENTER"
-      spacing="20"
+      spacing="0"
       stylesheets="@../styles/estilos.css"
       styleClass="fondo-login">
 
     <padding>
-        <Insets top="30" right="30" bottom="30" left="30"/>
+        <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
 
-    <VBox alignment="CENTER" spacing="8" styleClass="encabezado">
+    <!-- ENCABEZADO -->
+    <VBox alignment="CENTER_LEFT" spacing="8">
         <Label text="📦" styleClass="icono-logo"/>
         <Label text="ALMACÉN / INVENTARIO" styleClass="titulo"/>
-        <Label text="Sistema de gestión de inventario y ventas"
+        <Label text="Gestión de productos y existencias"
                styleClass="subtitulo"/>
     </VBox>
 
-    <VBox alignment="CENTER_LEFT"
-          spacing="16"
-          maxWidth="430"
-          styleClass="tarjeta-login">
+    <HBox spacing="20" alignment="TOP_LEFT" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
 
-        <Label text="Registrar producto" styleClass="titulo-formulario"/>
-        <Label text="Producto nuevo o reabastecimiento"
-               styleClass="texto-secundario"/>
+        <!-- FORMULARIO IZQUIERDA -->
+        <VBox alignment="TOP_LEFT" spacing="15" maxWidth="420"
+              styleClass="tarjeta-login" VBox.vgrow="ALWAYS">
 
-        <VBox spacing="7">
-            <Label text="ID producto" styleClass="etiqueta"/>
-            <TextField fx:id="campoId"
-                       promptText="Ej: PROD-001"
-                       styleClass="campo"/>
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+
+            <Label text="Registrar producto" styleClass="titulo-formulario"/>
+            <Label text="Producto nuevo o reabastecimiento"
+                   styleClass="texto-secundario"/>
+
+            <VBox spacing="8">
+                <Label text="ID producto" styleClass="etiqueta"/>
+                <TextField fx:id="campoId"
+                           promptText="Ej: PROD-001"
+                           styleClass="campo"/>
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Nombre" styleClass="etiqueta"/>
+                <TextField fx:id="campoNombre"
+                           promptText="Nombre del producto"
+                           styleClass="campo"/>
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Marca" styleClass="etiqueta"/>
+                <TextField fx:id="campoMarca"
+                           promptText="Marca"
+                           styleClass="campo"/>
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Categoría" styleClass="etiqueta"/>
+                <TextField fx:id="campoCategoria"
+                           promptText="Categoría"
+                           styleClass="campo"/>
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Descripción" styleClass="etiqueta"/>
+                <TextField fx:id="campoDescripcion"
+                           promptText="Descripción"
+                           styleClass="campo"/>
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Precio entrada" styleClass="etiqueta"/>
+                <TextField fx:id="campoPrecioEntrada"
+                           promptText="0.00"
+                           styleClass="campo"/>
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Precio venta" styleClass="etiqueta"/>
+                <TextField fx:id="campoPrecioVenta"
+                           promptText="0.00"
+                           styleClass="campo"/>
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Stock inicial" styleClass="etiqueta"/>
+                <TextField fx:id="campoStock"
+                           promptText="0"
+                           styleClass="campo"/>
+            </VBox>
+
+            <Label fx:id="etiquetaAlmacen"
+                   text="Almacenero: --"
+                   styleClass="texto-secundario"/>
+
+            <Label fx:id="mensaje"
+                   text=""
+                   wrapText="true"
+                   styleClass="mensaje"/>
+
+            <Button text="INGRESAR PRODUCTO NUEVO"
+                    onAction="#ingresarProductoNuevo"
+                    maxWidth="Infinity"
+                    styleClass="boton-principal"/>
+
+            <Separator fx:id="sepReabastecer"/>
+
+            <VBox spacing="8">
+                <Label text="Reabastecer producto existente" styleClass="etiqueta"/>
+                <HBox spacing="10" alignment="CENTER">
+                    <TextField fx:id="campoCodigoExistente"
+                               promptText="Código"
+                               styleClass="campo"
+                               maxWidth="Infinity"/>
+                    <TextField fx:id="campoCantidadExistente"
+                               promptText="Cantidad"
+                               styleClass="campo"
+                               maxWidth="Infinity"/>
+                </HBox>
+            </VBox>
+
+            <Button text="REABASTECER STOCK"
+                    onAction="#ingresarProductoExistente"
+                    maxWidth="Infinity"
+                    styleClass="boton-rol"/>
+
+            <Button text="IMPORTAR ENTRADAS CSV"
+                    onAction="#importarEntradasDesdeArchivo"
+                    maxWidth="Infinity"
+                    styleClass="boton-rol"/>
+
+            <Button text="Cerrar sesión"
+                    onAction="#cerrarSesion"
+                    maxWidth="Infinity"
+                    styleClass="boton-rol"/>
+
+            <Label text="Acceso seguro · Tech-Flow"
+                   styleClass="pie-tarjeta"/>
         </VBox>
 
-        <VBox spacing="7">
-            <Label text="Nombre" styleClass="etiqueta"/>
-            <TextField fx:id="campoNombre"
-                       promptText="Nombre del producto"
-                       styleClass="campo"/>
+        <!-- TABLA DERECHA -->
+        <VBox alignment="TOP_LEFT" spacing="10" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+            <padding>
+                <Insets top="0" right="0" bottom="0" left="0"/>
+            </padding>
+            <Label text="Inventario actual" styleClass="titulo-formulario"/>
+
+            <ScrollPane fx:id="scrollInventario"
+                        fitToWidth="true"
+                        hbarPolicy="NEVER"
+                        vbarPolicy="AS_NEEDED"
+                        VBox.vgrow="ALWAYS"
+                        prefHeight="500">
+                <VBox fx:id="tablaInventario"
+                      alignment="TOP_LEFT"
+                      spacing="6"
+                      VBox.vgrow="ALWAYS"/>
+            </ScrollPane>
         </VBox>
 
-        <VBox spacing="7">
-            <Label text="Marca" styleClass="etiqueta"/>
-            <TextField fx:id="campoMarca"
-                       promptText="Marca"
-                       styleClass="campo"/>
-        </VBox>
-
-        <VBox spacing="7">
-            <Label text="Categoría" styleClass="etiqueta"/>
-            <TextField fx:id="campoCategoria"
-                       promptText="Categoría"
-                       styleClass="campo"/>
-        </VBox>
-
-        <VBox spacing="7">
-            <Label text="Descripción" styleClass="etiqueta"/>
-            <TextField fx:id="campoDescripcion"
-                       promptText="Descripción"
-                       styleClass="campo"/>
-        </VBox>
-
-        <VBox spacing="7">
-            <Label text="Precio entrada" styleClass="etiqueta"/>
-            <TextField fx:id="campoPrecioEntrada"
-                       promptText="0.00"
-                       styleClass="campo"/>
-        </VBox>
-
-        <VBox spacing="7">
-            <Label text="Precio venta" styleClass="etiqueta"/>
-            <TextField fx:id="campoPrecioVenta"
-                       promptText="0.00"
-                       styleClass="campo"/>
-        </VBox>
-
-        <VBox spacing="7">
-            <Label text="Stock inicial" styleClass="etiqueta"/>
-            <TextField fx:id="campoStock"
-                       promptText="0"
-                       styleClass="campo"/>
-        </VBox>
-
-        <Label fx:id="etiquetaAlmacen"
-               text="Almacenero: --"
-               styleClass="texto-secundario"/>
-
-        <Label fx:id="mensaje"
-               text=""
-               wrapText="true"
-               styleClass="mensaje"/>
-
-        <Button text="INGRESAR PRODUCTO NUEVO"
-                onAction="#ingresarProductoNuevo"
-                maxWidth="Infinity"
-                styleClass="boton-principal"/>
-
-        <HBox spacing="8" alignment="CENTER">
-            <TextField fx:id="campoCodigoExistente"
-                       promptText="Código producto"
-                       styleClass="campo"
-                       maxWidth="Infinity"/>
-            <TextField fx:id="campoCantidadExistente"
-                       promptText="Cantidad"
-                       styleClass="campo"
-                       maxWidth="Infinity"/>
-        </HBox>
-
-        <Button text="REABASTECER PRODUCTO EXISTENTE"
-                onAction="#ingresarProductoExistente"
-                maxWidth="Infinity"
-                styleClass="boton-rol"/>
-
-        <Button text="Cerrar sesión"
-                onAction="#cerrarSesion"
-                maxWidth="Infinity"
-                styleClass="boton-rol"/>
-
-        <Label text="Acceso seguro · Tech-Flow"
-               styleClass="pie-tarjeta"/>
-    </VBox>
+    </HBox>
 
 </VBox>
