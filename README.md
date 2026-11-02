@@ -1,3 +1,6 @@
+FAUSTO VENDE HUMO
+NO MODFICASTE EN DANA LA GUI
+
 i feel like Nicole 
 Thunder 
 
