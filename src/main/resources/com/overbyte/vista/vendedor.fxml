@@ -1,74 +1,91 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx/17"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.overbyte.controllers.VendedorController"
-      spacing="10"
-      stylesheets="@../styles/estilos.css"
-      styleClass="fondo-login">
-
-    <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
-
-    <!-- Encabezado -->
-    <VBox alignment="CENTER_LEFT" spacing="4">
-        <Label text="&#128176;" styleClass="icono-logo"/>
-        <Label text="PUNTO DE VENTA" styleClass="titulo"/>
-        <Label text="Sistema de gestion de inventario y ventas" styleClass="subtitulo"/>
-    </VBox>
-
-    <HBox spacing="16" alignment="TOP_LEFT" VBox.vgrow="ALWAYS">
-
-        <!-- Busqueda de productos -->
-        <VBox alignment="TOP_LEFT" spacing="12" styleClass="tarjeta-login, tarjeta-compacta" HBox.hgrow="ALWAYS">
-            <Label text="Buscar producto" styleClass="titulo-formulario"/>
-            <VBox spacing="8">
-                <Label text="Codigo, nombre o marca" styleClass="etiqueta"/>
-                <TextField fx:id="campoBusqueda" promptText="Buscar producto..." styleClass="campo"/>
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.overbyte.controllers.VendedorController"
+            stylesheets="@../styles/estilos.css" styleClass="app-root">
+    <top>
+        <HBox styleClass="pos-topbar" alignment="CENTER_LEFT" spacing="14">
+            <VBox spacing="2">
+                <Label text="TECH-FLOW  /  OPERACIONES" styleClass="topbar-kicker"/>
+                <Label text="Punto de venta" styleClass="page-title"/>
             </VBox>
-            <Button text="BUSCAR" onAction="#buscarProducto" maxWidth="Infinity" styleClass="boton-principal"/>
-            <Label text="Productos disponibles" styleClass="etiqueta"/>
-            <ScrollPane fx:id="scrollProductos" styleClass="rejilla" fitToWidth="true"
-                        hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS" prefHeight="400">
-                <VBox fx:id="tablaProductos" alignment="TOP_LEFT"/>
-            </ScrollPane>
-        </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="etiquetaVendedor" text="Vendedor: --" styleClass="user-chip"/>
+            <Button text="Cerrar sesión" onAction="#cerrarSesion" styleClass="quiet-button"/>
+        </HBox>
+    </top>
+    <center>
+        <SplitPane dividerPositions="0.60" styleClass="pos-split">
+            <items>
+                <VBox styleClass="surface-panel" spacing="14">
+                    <VBox spacing="4">
+                        <Label text="CATÁLOGO" styleClass="section-kicker"/>
+                        <Label text="Encuentra tus productos" styleClass="section-title"/>
+                        <Label text="Busca por código, nombre o marca y agrega unidades al carrito."
+                               styleClass="muted-text" wrapText="true"/>
+                    </VBox>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <TextField fx:id="campoBusqueda" promptText="Buscar producto..."
+                                   styleClass="input-field" HBox.hgrow="ALWAYS"
+                                   onAction="#buscarProducto"/>
+                        <Button text="Buscar" onAction="#buscarProducto" styleClass="primary-button"/>
+                    </HBox>
+                    <Separator/>
+                    <Label text="RESULTADOS" styleClass="field-label"/>
+                    <ScrollPane fx:id="scrollProductos" fitToWidth="true"
+                                hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED"
+                                styleClass="data-scroll" VBox.vgrow="ALWAYS">
+                        <VBox fx:id="tablaProductos" spacing="7" styleClass="data-list"/>
+                    </ScrollPane>
+                    <Label fx:id="mensaje" text="" wrapText="true" styleClass="status-error"/>
+                </VBox>
 
-        <!-- Carrito -->
-        <VBox alignment="TOP_LEFT" spacing="12" styleClass="tarjeta-login, tarjeta-compacta" HBox.hgrow="ALWAYS">
-            <Label text="Carrito de compra" styleClass="titulo-formulario"/>
-            <VBox spacing="8">
-                <Label text="Nombre del cliente" styleClass="etiqueta"/>
-                <TextField fx:id="campoCliente" promptText="Consumidor final" styleClass="campo"/>
-            </VBox>
-            <Label text="Items en carrito" styleClass="etiqueta"/>
-            <ScrollPane fx:id="scrollCarrito" styleClass="rejilla" fitToWidth="true"
-                        hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS" prefHeight="300">
-                <VBox fx:id="tablaCarrito" alignment="TOP_LEFT"/>
-            </ScrollPane>
-            <Label fx:id="lblTotalCarrito" text="Total: $0.00" styleClass="titulo-formulario"/>
-            <HBox spacing="8">
-                <Button text="VENDER CARRITO" onAction="#venderCarrito" maxWidth="Infinity"
-                        styleClass="boton-principal" HBox.hgrow="ALWAYS"/>
-                <Button text="Vaciar" onAction="#vaciarCarrito" styleClass="boton-rol"/>
-            </HBox>
-            <Separator/>
-            <Label text="Otras operaciones" styleClass="etiqueta"/>
-            <HBox spacing="8" alignment="CENTER">
-                <Button text="Eliminar venta" onAction="#eliminarVenta" maxWidth="Infinity" styleClass="boton-rol" HBox.hgrow="ALWAYS"/>
-                <Button text="Consultar garantia" onAction="#consultarGarantia" maxWidth="Infinity" styleClass="boton-rol" HBox.hgrow="ALWAYS"/>
-            </HBox>
-            <Button text="Importar orden CSV" onAction="#importarOrdenDesdeArchivo" maxWidth="Infinity" styleClass="boton-rol"/>
-            <Label fx:id="etiquetaVendedor" text="Vendedor: --" styleClass="texto-secundario"/>
-            <Label fx:id="mensaje" text="" wrapText="true" styleClass="mensaje"/>
-            <Button text="Cerrar sesion" onAction="#cerrarSesion" maxWidth="Infinity" styleClass="boton-rol"/>
-        </VBox>
-    </HBox>
-</VBox>
+                <VBox styleClass="cart-panel" spacing="13">
+                    <VBox spacing="4">
+                        <Label text="VENTA ACTUAL" styleClass="section-kicker"/>
+                        <Label text="Carrito" styleClass="section-title"/>
+                    </VBox>
+                    <VBox spacing="6">
+                        <Label text="CLIENTE" styleClass="field-label"/>
+                        <TextField fx:id="campoCliente" promptText="Consumidor final"
+                                   styleClass="input-field"/>
+                    </VBox>
+                    <Separator/>
+                    <Label text="PRODUCTOS SELECCIONADOS" styleClass="field-label"/>
+                    <ScrollPane fx:id="scrollCarrito" fitToWidth="true"
+                                hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED"
+                                styleClass="data-scroll" VBox.vgrow="ALWAYS">
+                        <VBox fx:id="tablaCarrito" spacing="7" styleClass="data-list"/>
+                    </ScrollPane>
+                    <VBox styleClass="total-panel" spacing="5">
+                        <Label text="TOTAL A COBRAR" styleClass="field-label"/>
+                        <Label fx:id="lblTotalCarrito" text="Total: $0.00" styleClass="total-amount"/>
+                    </VBox>
+                    <Button text="CONFIRMAR Y COBRAR  →" onAction="#venderCarrito"
+                            maxWidth="Infinity" styleClass="primary-button"/>
+                    <Button text="Vaciar carrito" onAction="#vaciarCarrito"
+                            maxWidth="Infinity" styleClass="quiet-button"/>
+                    <Separator/>
+                    <Label text="OTRAS OPERACIONES" styleClass="field-label"/>
+                    <GridPane hgap="7" vgap="7">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="ALWAYS" percentWidth="50"/>
+                            <ColumnConstraints hgrow="ALWAYS" percentWidth="50"/>
+                        </columnConstraints>
+                        <Button text="Anular venta" onAction="#eliminarVenta" maxWidth="Infinity"
+                                styleClass="utility-button" GridPane.columnIndex="0"/>
+                        <Button text="Consultar garantía" onAction="#consultarGarantia" maxWidth="Infinity"
+                                styleClass="utility-button" GridPane.columnIndex="1"/>
+                        <Button text="Importar orden" onAction="#importarOrdenDesdeArchivo"
+                                maxWidth="Infinity" styleClass="utility-button"
+                                GridPane.columnIndex="0" GridPane.columnSpan="2"/>
+                    </GridPane>
+                </VBox>
+            </items>
+        </SplitPane>
+    </center>
+</BorderPane>
