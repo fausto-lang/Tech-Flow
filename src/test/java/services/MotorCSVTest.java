@@ -253,16 +253,43 @@ class MotorCSVTest {
     }
 
     @Test
-    @DisplayName("No importa un origen inexistente, vacio o con solo cabecera")
-    void importarDatosRechazaOrigenSinDatos() {
+    @DisplayName("Importar datos con origen nulo devuelve false")
+    void importarDatosConOrigenNuloDevuelveFalse() {
         String destino = tempDir.resolve("destino.csv").toString();
         assertFalse(motor.importarDatos(null, destino));
-        assertFalse(motor.importarDatos("", destino));
-        assertFalse(motor.importarDatos(tempDir.resolve("no-existe.csv").toString(), destino));
+    }
 
+    @Test
+    @DisplayName("Importar datos con origen vacio devuelve false")
+    void importarDatosConOrigenVacioDevuelveFalse() {
+        String destino = tempDir.resolve("destino.csv").toString();
+        assertFalse(motor.importarDatos("", destino));
+    }
+
+    @Test
+    @DisplayName("Importar datos con origen inexistente devuelve false")
+    void importarDatosConOrigenInexistenteDevuelveFalse() {
+        String destino = tempDir.resolve("destino.csv").toString();
+        assertFalse(motor.importarDatos(tempDir.resolve("no-existe.csv").toString(), destino));
+    }
+
+    @Test
+    @DisplayName("Importar datos con solo cabecera devuelve false")
+    void importarDatosConSoloCabeceraDevuelveFalse() {
+        String destino = tempDir.resolve("destino.csv").toString();
         String soloCabecera = tempDir.resolve("solo-cabecera.csv").toString();
         motor.inicializarCSV(soloCabecera, new String[]{"id", "nombre"});
         assertFalse(motor.importarDatos(soloCabecera, destino));
+    }
+
+    @Test
+    @DisplayName("Importar datos devuelve true")
+    void importarDatosDevuelveTrue() {
+        String origen = tempDir.resolve("origen.csv").toString();
+        String destino = tempDir.resolve("destino.csv").toString();
+        motor.escribirCSV(origen, filas(new String[]{"id", "nombre"}, new String[]{"1", "Origen"}));
+        motor.escribirCSV(destino, filas(new String[]{"codigo", "detalle"}, new String[]{"D-1", "Existente"}));
+        assertTrue(motor.importarDatos(origen, destino));
     }
 
     @Test
@@ -272,9 +299,18 @@ class MotorCSVTest {
         String destino = tempDir.resolve("destino.csv").toString();
         motor.escribirCSV(origen, filas(new String[]{"id", "nombre"}, new String[]{"1", "Origen"}));
         motor.escribirCSV(destino, filas(new String[]{"codigo", "detalle"}, new String[]{"D-1", "Existente"}));
-
-        assertTrue(motor.importarDatos(origen, destino));
+        motor.importarDatos(origen, destino);
         assertArrayEquals(new String[]{"codigo", "detalle"}, motor.leerCSV(destino).get(0));
+    }
+
+    @Test
+    @DisplayName("Importar datos agrega la fila del origen al destino")
+    void importarDatosAgregaFilaDelOrigen() {
+        String origen = tempDir.resolve("origen.csv").toString();
+        String destino = tempDir.resolve("destino.csv").toString();
+        motor.escribirCSV(origen, filas(new String[]{"id", "nombre"}, new String[]{"1", "Origen"}));
+        motor.escribirCSV(destino, filas(new String[]{"codigo", "detalle"}, new String[]{"D-1", "Existente"}));
+        motor.importarDatos(origen, destino);
         assertEquals("1", motor.leerCSV(destino).get(2)[0]);
     }
 
@@ -289,10 +325,20 @@ class MotorCSVTest {
     }
 
     @Test
-    @DisplayName("Las operaciones con rutas nulas no lanzan excepciones")
-    void rutasNulasNoLanzanExcepciones() {
+    @DisplayName("Leer CSV con ruta nula no lanza excepcion")
+    void leerCSVConRutaNulaNoLanzaExcepcion() {
         assertDoesNotThrow(() -> motor.leerCSV(null));
+    }
+
+    @Test
+    @DisplayName("Escribir CSV con ruta nula no lanza excepcion")
+    void escribirCSVConRutaNulaNoLanzaExcepcion() {
         assertDoesNotThrow(() -> motor.escribirCSV(null, filas(new String[]{"dato"})));
+    }
+
+    @Test
+    @DisplayName("Verificar existencia con ruta nula no lanza excepcion")
+    void existeArchivoConRutaNulaNoLanzaExcepcion() {
         assertDoesNotThrow(() -> motor.existeArchivo(null));
     }
 }

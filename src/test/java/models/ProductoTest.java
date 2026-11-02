@@ -13,16 +13,58 @@ class ProductoTest {
     }
 
     @Test
-    @DisplayName("El constructor mapea los argumentos en el orden correcto")
-    void constructorMapeaArgumentos() {
+    @DisplayName("El constructor mapea el id del producto")
+    void constructorMapeaIdProducto() {
         Producto p = base();
         assertEquals("P1", p.getIdProducto());
+    }
+
+    @Test
+    @DisplayName("El constructor mapea el nombre del producto")
+    void constructorMapeaNombre() {
+        Producto p = base();
         assertEquals("Auriculares", p.getNombre());
+    }
+
+    @Test
+    @DisplayName("El constructor mapea el precio de entrada")
+    void constructorMapeaPrecioEntrada() {
+        Producto p = base();
         assertEquals(10.0, p.getPrecioEntrada(), 1e-9);
+    }
+
+    @Test
+    @DisplayName("El constructor mapea el precio de venta")
+    void constructorMapeaPrecioVenta() {
+        Producto p = base();
         assertEquals(20.0, p.getPrecioVenta(), 1e-9);
+    }
+
+    @Test
+    @DisplayName("El constructor mapea la descripcion del producto")
+    void constructorMapeaDescripcion() {
+        Producto p = base();
         assertEquals("desc", p.getDescripcion());
+    }
+
+    @Test
+    @DisplayName("El constructor mapea el stock del producto")
+    void constructorMapeaStock() {
+        Producto p = base();
         assertEquals(5, p.getStock());
+    }
+
+    @Test
+    @DisplayName("El constructor mapea la marca del producto")
+    void constructorMapeaMarca() {
+        Producto p = base();
         assertEquals("Sony", p.getMarca());
+    }
+
+    @Test
+    @DisplayName("El constructor mapea la categoria del producto")
+    void constructorMapeaCategoria() {
+        Producto p = base();
         assertEquals("Audio", p.getCategoria());
     }
 

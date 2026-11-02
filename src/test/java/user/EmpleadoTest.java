@@ -19,12 +19,30 @@ class EmpleadoTest {
     }
 
     @Test
-    @DisplayName("El constructor completo asigna ci, nombre, contraseña y rol")
-    void constructorCompleto() {
+    @DisplayName("El constructor completo asigna la ci")
+    void constructorCompletoAsignaCi() {
         Empleado e = base();
         assertEquals("CI-1", e.getCi());
+    }
+
+    @Test
+    @DisplayName("El constructor completo asigna el nombre")
+    void constructorCompletoAsignaNombre() {
+        Empleado e = base();
         assertEquals("Ana", e.getNombre());
+    }
+
+    @Test
+    @DisplayName("El constructor completo asigna la contrasena")
+    void constructorCompletoAsignaContrasena() {
+        Empleado e = base();
         assertEquals("pw", e.getContrasena());
+    }
+
+    @Test
+    @DisplayName("El constructor completo asigna el rol")
+    void constructorCompletoAsignaRol() {
+        Empleado e = base();
         assertEquals(Rol.CAJERO, e.getRol());
     }
 

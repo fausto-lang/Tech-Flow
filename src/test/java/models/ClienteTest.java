@@ -25,10 +25,16 @@ class ClienteTest {
     }
 
     @Test
-    @DisplayName("El constructor completo asigna ci y nombre")
-    void constructorCompleto() {
+    @DisplayName("El constructor completo asigna la ci")
+    void constructorCompletoAsignaCi() {
         Cliente c = base();
         assertEquals("CLI-1", c.getCi());
+    }
+
+    @Test
+    @DisplayName("El constructor completo asigna el nombre")
+    void constructorCompletoAsignaNombre() {
+        Cliente c = base();
         assertEquals("Ana", c.getNombre());
     }
 

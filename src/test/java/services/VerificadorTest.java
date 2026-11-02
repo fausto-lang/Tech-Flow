@@ -123,15 +123,35 @@ class VerificadorTest {
     }
 
     @Test
-    @DisplayName("El rol seleccionado debe coincidir con el rol registrado")
-    void validaRolSeleccionado() {
+    @DisplayName("Verificar con rol CAJERO devuelve el rol registrado")
+    void verificarConRolCajeroDevuelveRolCajero() {
         MotorCSV csv = new MotorCSV(directorio);
         csv.escribirCSV(csv.rutaDatos("empleado.csv").toString(), List.of(
                 new String[]{"ci", "nombre", "rol", "contrasena"},
                 new String[]{"CI-1", "Cajero", "CAJERO", "pw"}));
         Verificador verificador = new Verificador(directorio);
         assertEquals(Rol.CAJERO, verificador.iniciarSesion("Cajero", "pw", Rol.CAJERO).getRol());
+    }
+
+    @Test
+    @DisplayName("Verificar con rol no coincidente devuelve null")
+    void verificarConRolNoCoincidenteDevuelveNull() {
+        MotorCSV csv = new MotorCSV(directorio);
+        csv.escribirCSV(csv.rutaDatos("empleado.csv").toString(), List.of(
+                new String[]{"ci", "nombre", "rol", "contrasena"},
+                new String[]{"CI-1", "Cajero", "CAJERO", "pw"}));
+        Verificador verificador = new Verificador(directorio);
         assertNull(verificador.iniciarSesion("Cajero", "pw", Rol.ADMINISTRADOR));
+    }
+
+    @Test
+    @DisplayName("Verificar con contraseña incorrecta devuelve null")
+    void verificarConContrasenaIncorrectaDevuelveNull() {
+        MotorCSV csv = new MotorCSV(directorio);
+        csv.escribirCSV(csv.rutaDatos("empleado.csv").toString(), List.of(
+                new String[]{"ci", "nombre", "rol", "contrasena"},
+                new String[]{"CI-1", "Cajero", "CAJERO", "pw"}));
+        Verificador verificador = new Verificador(directorio);
         assertNull(verificador.iniciarSesion("Cajero", "incorrecta", Rol.CAJERO));
     }
 
@@ -149,5 +169,60 @@ class VerificadorTest {
         Verificador v = new Verificador();
         v.registrarUsuario("CI-1", "pw");
         assertFalse(v.verificarUsuario("ci-1", "pw"));
+    }
+
+    @Test
+    @DisplayName("isCajaAbierta devuelve true cuando la caja esta abierta")
+    public void isCajaAbiertaDevuelveTrueConCajaAbierta() {
+        MotorCSV csv = new MotorCSV(directorio);
+        csv.escribirCSV(csv.rutaDatos("caja.csv").toString(), List.of(
+                new String[]{"estado", "fechaApertura", "fechaCierre", "ciEmpleado"},
+                new String[]{"ABIERTA", "2026-11-02", "", "CI-ADM"}));
+        assertTrue(Verificador.isCajaAbierta(csv.rutaDatos("caja.csv")));
+    }
+
+    @Test
+    @DisplayName("isCajaAbierta devuelve false cuando la caja esta cerrada")
+    public void isCajaAbiertaDevuelveFalseConCajaCerrada() {
+        MotorCSV csv = new MotorCSV(directorio);
+        csv.escribirCSV(csv.rutaDatos("caja.csv").toString(), List.of(
+                new String[]{"estado", "fechaApertura", "fechaCierre", "ciEmpleado"},
+                new String[]{"CERRADA", "", "2026-11-02", "CI-ADM"}));
+        assertFalse(Verificador.isCajaAbierta(csv.rutaDatos("caja.csv")));
+    }
+
+    @Test
+    @DisplayName("isCajaAbierta devuelve false cuando el archivo de caja no existe")
+    public void isCajaAbiertaDevuelveFalseSinArchivoDeCaja() {
+        assertFalse(Verificador.isCajaAbierta(directorio.resolve("caja.csv")));
+    }
+
+    @Test
+    @DisplayName("iniciarSesion con credenciales correctas y sin rol devuelve un Gestor")
+    public void iniciarSesionSinRolConCredencialesCorrectasDevuelveGestor() {
+        Verificador verificador = new Verificador(directorio);
+        Empleado empleado = verificador.iniciarSesion("adm", "user");
+        assertInstanceOf(Gestor.class, empleado);
+    }
+
+    @Test
+    @DisplayName("iniciarSesion con nombre null devuelve null")
+    public void iniciarSesionConNombreNullDevuelveNull() {
+        Verificador verificador = new Verificador(directorio);
+        assertNull(verificador.iniciarSesion(null, "user"));
+    }
+
+    @Test
+    @DisplayName("iniciarSesion con nombre en blanco devuelve null")
+    public void iniciarSesionConNombreEnBlancoDevuelveNull() {
+        Verificador verificador = new Verificador(directorio);
+        assertNull(verificador.iniciarSesion("   ", "user"));
+    }
+
+    @Test
+    @DisplayName("iniciarSesion con contrasena incorrecta devuelve null")
+    public void iniciarSesionConContrasenaIncorrectaDevuelveNull() {
+        Verificador verificador = new Verificador(directorio);
+        assertNull(verificador.iniciarSesion("adm", "incorrecta"));
     }
 }
