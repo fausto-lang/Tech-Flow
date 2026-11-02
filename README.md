@@ -4,8 +4,7 @@ Tech-Flow — Sistema de gestión de inventario y ventas con interfaz gráfica J
 
 ## Descripción
 
-Tech-Flow es una aplicación de escritorio desarrollada en Java 17 con JavaFX 17 para la gestión de inventario, ventas y punto de venta. Permite operar por roles (Administrador, Cajero/Vendedor, Almacenero) con persistencia en archivos CSV y una interfaz gráfica intuitiva.
-
+Fausto vende humo ...............................
 ## Arquitectura
 
 El proyecto sigue una estructura por capas con separación de responsabilidades:
