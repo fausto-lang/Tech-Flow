@@ -5,3 +5,4 @@ target/
 .vscode/
 users/gui.log
 run-gui.sh
+gui_run.log
