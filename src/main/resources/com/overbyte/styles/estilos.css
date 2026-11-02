@@ -2,8 +2,8 @@
 .root {
     -fx-font-family: "Inter", "Segoe UI", "Arial", sans-serif;
     -fx-font-size: 13px;
-    -fx-base: #E2C4EA;
-    -fx-background: #E2C4EA;
+    -fx-base: #C58AD6;
+    -fx-background: #C58AD6;
     -fx-focus-color: #9560d4;
     -fx-faint-focus-color: rgba(149,96,212,0.12);
     -fx-purple: #8951c7;
@@ -15,7 +15,7 @@
     -fx-surface: #ffffff;
 }
 .label { -fx-text-fill: -fx-ink; }
-.app-root, .login-root { -fx-background-color: #E2C4EA; }
+.app-root, .login-root { -fx-background-color: #C58AD6; }
 .login-root { -fx-padding: 34px; }
 .login-shell {
     -fx-background-color: white; -fx-background-radius: 18px;
@@ -74,7 +74,7 @@
 .mensaje-ok { -fx-text-fill: #23845c; }
 
 /* Admin workspace */
-.sidebar { -fx-background-color: #E2C4EA; -fx-border-color: transparent #e9e2ef transparent transparent; }
+.sidebar { -fx-background-color: #C58AD6; -fx-border-color: transparent #e9e2ef transparent transparent; }
 .sidebar-brand { -fx-padding: 25px 19px 23px 19px; -fx-border-color: transparent transparent #eee8f3 transparent; }
 .sidebar-symbol { -fx-background-color: #8951c7; -fx-background-radius: 10px; -fx-padding: 7px 11px; -fx-text-fill: white; -fx-font-size: 20px; }
 .sidebar-title { -fx-font-size: 16px; -fx-font-weight: 900; -fx-text-fill: #3c2c4e; }
@@ -89,7 +89,7 @@
 }
 .nav-button:hover { -fx-background-color: #f0e8fa; -fx-text-fill: #60318f; }
 .nav-logout { -fx-text-fill: #a34e6a; }
-.workspace { -fx-background-color: #E2C4EA; }
+.workspace { -fx-background-color: #C58AD6; }
 .topbar, .pos-topbar {
     -fx-background-color: white; -fx-padding: 17px 27px;
     -fx-border-color: transparent transparent #ebe5f0 transparent;
@@ -97,10 +97,10 @@
 .topbar-kicker { -fx-text-fill: #9a8da6; }
 .page-title { -fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #38274a; }
 .user-chip { -fx-background-color: #f1eafa; -fx-background-radius: 20px; -fx-padding: 8px 12px; -fx-text-fill: #694198; -fx-font-size: 10px; -fx-font-weight: bold; }
-.workspace-content { -fx-padding: 23px; -fx-background-color: #E2C4EA; }
+.workspace-content { -fx-padding: 23px; -fx-background-color: #C58AD6; }
 
 /* Sales and warehouse surfaces */
-.pos-split, .warehouse-split { -fx-background-color: #E2C4EA; -fx-padding: 16px; }
+.pos-split, .warehouse-split { -fx-background-color: #C58AD6; -fx-padding: 16px; }
 .pos-split > .split-pane-divider, .warehouse-split > .split-pane-divider {
     -fx-background-color: transparent; -fx-padding: 0 5px;
 }
@@ -116,7 +116,7 @@
 .data-list { -fx-padding: 9px; -fx-background-color: white; }
 .total-panel { -fx-background-color: #f1eafa; -fx-background-radius: 10px; -fx-padding: 13px 15px; }
 .total-amount { -fx-font-size: 25px; -fx-font-weight: 900; -fx-text-fill: #63378f; }
-.warehouse-workspace { -fx-padding: 20px; -fx-background-color: #E2C4EA; }
+.warehouse-workspace { -fx-padding: 20px; -fx-background-color: #C58AD6; }
 .warehouse-heading { -fx-padding: 0 2px 3px 2px; }
 .form-scroll { -fx-background-color: transparent; -fx-background: transparent; }
 .form-scroll > .viewport { -fx-background-color: transparent; }
