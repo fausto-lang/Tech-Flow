@@ -18,25 +18,26 @@
       styleClass="fondo-login">
 
     <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
+        <Insets top="16" right="16" bottom="16" left="16"/>
     </padding>
 
     <!-- ENCABEZADO -->
-    <VBox alignment="CENTER_LEFT" spacing="8">
+    <VBox alignment="CENTER_LEFT" spacing="6">
         <Label text="💰" styleClass="icono-logo"/>
         <Label text="PUNTO DE VENTA" styleClass="titulo"/>
         <Label text="Sistema de gestión de inventario y ventas"
                styleClass="subtitulo"/>
     </VBox>
 
-    <HBox spacing="20" alignment="TOP_LEFT" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+    <HBox spacing="16" alignment="TOP_LEFT" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
 
         <!-- PRODUCTOS DISPONIBLES IZQUIERDA -->
-        <VBox alignment="TOP_LEFT" spacing="15" maxWidth="460"
-              styleClass="tarjeta-login" VBox.vgrow="ALWAYS">
+        <VBox alignment="TOP_LEFT" spacing="12"
+              styleClass="tarjeta-login" VBox.vgrow="ALWAYS"
+              HBox.hgrow="1">
 
             <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
+                <Insets top="16" right="16" bottom="16" left="16"/>
             </padding>
 
             <Label text="Buscar producto" styleClass="titulo-formulario"/>
@@ -60,7 +61,7 @@
                         hbarPolicy="NEVER"
                         vbarPolicy="AS_NEEDED"
                         VBox.vgrow="ALWAYS"
-                        prefHeight="350">
+                        prefHeight="400">
                 <VBox fx:id="tablaProductos"
                       alignment="TOP_LEFT"
                       spacing="6"
@@ -69,11 +70,12 @@
         </VBox>
 
         <!-- CARRITO DERECHA -->
-        <VBox alignment="TOP_LEFT" spacing="15" maxWidth="420"
-              styleClass="tarjeta-login" VBox.vgrow="ALWAYS">
+        <VBox alignment="TOP_LEFT" spacing="12"
+              styleClass="tarjeta-login" VBox.vgrow="ALWAYS"
+              HBox.hgrow="1">
 
             <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
+                <Insets top="16" right="16" bottom="16" left="16"/>
             </padding>
 
             <Label text="Carrito de compra" styleClass="titulo-formulario"/>
@@ -92,7 +94,7 @@
                         hbarPolicy="NEVER"
                         vbarPolicy="AS_NEEDED"
                         VBox.vgrow="ALWAYS"
-                        prefHeight="250">
+                        prefHeight="300">
                 <VBox fx:id="tablaCarrito"
                       alignment="TOP_LEFT"
                       spacing="6"
@@ -107,11 +109,6 @@
                     onAction="#venderCarrito"
                     maxWidth="Infinity"
                     styleClass="boton-principal"/>
-
-            <Button text="VACIAR CARRITO"
-                    onAction="#vaciarCarrito"
-                    maxWidth="Infinity"
-                    styleClass="boton-rol"/>
 
             <Separator fx:id="sepOtras"/>
 

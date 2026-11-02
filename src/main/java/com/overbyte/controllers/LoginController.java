@@ -142,14 +142,14 @@ public class LoginController {
                 VendedorController controlador = cargador.getController();
                 controlador.setEmpleado(empleado);
 
-                Scene escenaVendedor = new Scene(vistaVendedor, 800, 650);
+                Scene escenaVendedor = new Scene(vistaVendedor, 1100, 750);
 
                 ventana.setScene(escenaVendedor);
                 ventana.setTitle("Tech-Flow | Punto de Venta");
-                ventana.setMinWidth(600);
-                ventana.setMinHeight(400);
-                ventana.setWidth(800);
-                ventana.setHeight(650);
+                ventana.setMinWidth(900);
+                ventana.setMinHeight(600);
+                ventana.setWidth(1100);
+                ventana.setHeight(750);
                 ventana.centerOnScreen();
 
             } else if (rol == Rol.ALMACENERO) {
@@ -165,14 +165,14 @@ public class LoginController {
                 AlmacenController controlador = cargador.getController();
                 controlador.setEmpleado(empleado);
 
-                Scene escenaAlmacen = new Scene(vistaAlmacen, 800, 650);
+                Scene escenaAlmacen = new Scene(vistaAlmacen, 1100, 750);
 
                 ventana.setScene(escenaAlmacen);
                 ventana.setTitle("Tech-Flow | Almacén");
-                ventana.setMinWidth(600);
-                ventana.setMinHeight(400);
-                ventana.setWidth(800);
-                ventana.setHeight(650);
+                ventana.setMinWidth(900);
+                ventana.setMinHeight(600);
+                ventana.setWidth(1100);
+                ventana.setHeight(750);
                 ventana.centerOnScreen();
 
             } else {

@@ -18,25 +18,26 @@
       styleClass="fondo-login">
 
     <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
+        <Insets top="16" right="16" bottom="16" left="16"/>
     </padding>
 
     <!-- ENCABEZADO -->
-    <VBox alignment="CENTER_LEFT" spacing="8">
+    <VBox alignment="CENTER_LEFT" spacing="6">
         <Label text="📦" styleClass="icono-logo"/>
         <Label text="ALMACÉN / INVENTARIO" styleClass="titulo"/>
         <Label text="Gestión de productos y existencias"
                styleClass="subtitulo"/>
     </VBox>
 
-    <HBox spacing="20" alignment="TOP_LEFT" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+    <HBox spacing="16" alignment="TOP_LEFT" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
 
         <!-- FORMULARIO IZQUIERDA -->
-        <VBox alignment="TOP_LEFT" spacing="15" maxWidth="420"
-              styleClass="tarjeta-login" VBox.vgrow="ALWAYS">
+        <VBox alignment="TOP_LEFT" spacing="12"
+              styleClass="tarjeta-login" VBox.vgrow="ALWAYS"
+              HBox.hgrow="1">
 
             <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
+                <Insets top="16" right="16" bottom="16" left="16"/>
             </padding>
 
             <Label text="Registrar producto" styleClass="titulo-formulario"/>
@@ -99,15 +100,6 @@
                            styleClass="campo"/>
             </VBox>
 
-            <Label fx:id="etiquetaAlmacen"
-                   text="Almacenero: --"
-                   styleClass="texto-secundario"/>
-
-            <Label fx:id="mensaje"
-                   text=""
-                   wrapText="true"
-                   styleClass="mensaje"/>
-
             <Button text="INGRESAR PRODUCTO NUEVO"
                     onAction="#ingresarProductoNuevo"
                     maxWidth="Infinity"
@@ -139,17 +131,24 @@
                     maxWidth="Infinity"
                     styleClass="boton-rol"/>
 
+            <Label fx:id="etiquetaAlmacen"
+                   text="Almacenero: --"
+                   styleClass="texto-secundario"/>
+
+            <Label fx:id="mensaje"
+                   text=""
+                   wrapText="true"
+                   styleClass="mensaje"/>
+
             <Button text="Cerrar sesión"
                     onAction="#cerrarSesion"
                     maxWidth="Infinity"
                     styleClass="boton-rol"/>
-
-            <Label text="Acceso seguro · Tech-Flow"
-                   styleClass="pie-tarjeta"/>
         </VBox>
 
         <!-- TABLA DERECHA -->
-        <VBox alignment="TOP_LEFT" spacing="10" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+        <VBox alignment="TOP_LEFT" spacing="10"
+              HBox.hgrow="1" VBox.vgrow="ALWAYS">
             <padding>
                 <Insets top="0" right="0" bottom="0" left="0"/>
             </padding>
