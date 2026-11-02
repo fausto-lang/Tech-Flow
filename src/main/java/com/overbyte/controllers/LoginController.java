@@ -104,7 +104,9 @@ public class LoginController {
                 .getScene()
                 .getWindow();
 
-            if (empleado.getRol() == Rol.ADMINISTRADOR) {
+            Rol rol = empleado.getRol();
+
+            if (rol == Rol.ADMINISTRADOR) {
 
                 FXMLLoader cargador = new FXMLLoader(
                     getClass().getResource(
@@ -122,6 +124,52 @@ public class LoginController {
                 ventana.setMinHeight(700);
                 ventana.setWidth(1400);
                 ventana.setHeight(900);
+                ventana.centerOnScreen();
+
+            } else if (rol == Rol.CAJERO) {
+
+                FXMLLoader cargador = new FXMLLoader(
+                    getClass().getResource(
+                        "/com/overbyte/vista/vendedor.fxml"
+                    )
+                );
+
+                Parent vistaVendedor = cargador.load();
+
+                VendedorController controlador = cargador.getController();
+                controlador.setEmpleado(empleado);
+
+                Scene escenaVendedor = new Scene(vistaVendedor, 800, 650);
+
+                ventana.setScene(escenaVendedor);
+                ventana.setTitle("Tech-Flow | Punto de Venta");
+                ventana.setMinWidth(600);
+                ventana.setMinHeight(400);
+                ventana.setWidth(800);
+                ventana.setHeight(650);
+                ventana.centerOnScreen();
+
+            } else if (rol == Rol.ALMACENERO) {
+
+                FXMLLoader cargador = new FXMLLoader(
+                    getClass().getResource(
+                        "/com/overbyte/vista/almacen.fxml"
+                    )
+                );
+
+                Parent vistaAlmacen = cargador.load();
+
+                AlmacenController controlador = cargador.getController();
+                controlador.setEmpleado(empleado);
+
+                Scene escenaAlmacen = new Scene(vistaAlmacen, 800, 650);
+
+                ventana.setScene(escenaAlmacen);
+                ventana.setTitle("Tech-Flow | Almacén");
+                ventana.setMinWidth(600);
+                ventana.setMinHeight(400);
+                ventana.setWidth(800);
+                ventana.setHeight(650);
                 ventana.centerOnScreen();
 
             } else {

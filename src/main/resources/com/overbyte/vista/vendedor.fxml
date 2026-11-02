@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.overbyte.controllers.VendedorController"
+      alignment="CENTER"
+      spacing="20"
+      stylesheets="@../styles/estilos.css"
+      styleClass="fondo-login">
+
+    <padding>
+        <Insets top="30" right="30" bottom="30" left="30"/>
+    </padding>
+
+    <VBox alignment="CENTER" spacing="8" styleClass="encabezado">
+        <Label text="💰" styleClass="icono-logo"/>
+        <Label text="PUNTO DE VENTA" styleClass="titulo"/>
+        <Label text="Sistema de gestión de inventario y ventas"
+               styleClass="subtitulo"/>
+    </VBox>
+
+    <VBox alignment="CENTER_LEFT"
+          spacing="16"
+          maxWidth="430"
+          styleClass="tarjeta-login">
+
+        <Label text="Vender producto" styleClass="titulo-formulario"/>
+        <Label text="Ingresa código, cantidad y cliente"
+               styleClass="texto-secundario"/>
+
+        <VBox spacing="7">
+            <Label text="Código de producto" styleClass="etiqueta"/>
+            <TextField fx:id="campoCodigo"
+                       promptText="Ej: PROD-001"
+                       styleClass="campo"/>
+        </VBox>
+
+        <VBox spacing="7">
+            <Label text="Cantidad" styleClass="etiqueta"/>
+            <TextField fx:id="campoCantidad"
+                       promptText="1"
+                       styleClass="campo"/>
+        </VBox>
+
+        <VBox spacing="7">
+            <Label text="Nombre del cliente" styleClass="etiqueta"/>
+            <TextField fx:id="campoCliente"
+                       promptText="Consumidor final"
+                       styleClass="campo"/>
+        </VBox>
+
+        <Label fx:id="etiquetaVendedor"
+               text="Vendedor: --"
+               styleClass="texto-secundario"/>
+
+        <Label fx:id="mensaje"
+               text=""
+               wrapText="true"
+               styleClass="mensaje"/>
+
+        <Button text="VENDER PRODUCTO"
+                onAction="#venderProducto"
+                maxWidth="Infinity"
+                styleClass="boton-principal"/>
+
+        <Button text="Cerrar sesión"
+                onAction="#cerrarSesion"
+                maxWidth="Infinity"
+                styleClass="boton-rol"/>
+
+        <Label text="Acceso seguro · Tech-Flow"
+               styleClass="pie-tarjeta"/>
+    </VBox>
+
+</VBox>
