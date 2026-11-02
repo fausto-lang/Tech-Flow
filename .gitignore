@@ -3,4 +3,5 @@ target/
 .idea/
 *.iml
 .vscode/
-users/
+users/gui.log
+run-gui.sh
