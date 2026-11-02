@@ -34,7 +34,7 @@
         <!-- FORMULARIO IZQUIERDA -->
         <VBox alignment="TOP_LEFT" spacing="12"
               styleClass="tarjeta-login" VBox.vgrow="ALWAYS"
-              HBox.hgrow="1">
+              HBox.hgrow="ALWAYS">
 
             <padding>
                 <Insets top="16" right="16" bottom="16" left="16"/>
