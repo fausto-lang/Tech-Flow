@@ -105,7 +105,7 @@
                     maxWidth="Infinity"
                     styleClass="boton-principal"/>
 
-            <Separator fx:id="sepReabastecer"/>
+            <Separator/>
 
             <VBox spacing="8">
                 <Label text="Reabastecer producto existente" styleClass="etiqueta"/>
@@ -148,7 +148,7 @@
 
         <!-- TABLA DERECHA -->
         <VBox alignment="TOP_LEFT" spacing="10"
-              HBox.hgrow="1" VBox.vgrow="ALWAYS">
+              HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
             <padding>
                 <Insets top="0" right="0" bottom="0" left="0"/>
             </padding>

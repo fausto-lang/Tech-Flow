@@ -34,7 +34,7 @@
         <!-- PRODUCTOS DISPONIBLES IZQUIERDA -->
         <VBox alignment="TOP_LEFT" spacing="12"
               styleClass="tarjeta-login" VBox.vgrow="ALWAYS"
-              HBox.hgrow="1">
+              HBox.hgrow="ALWAYS">
 
             <padding>
                 <Insets top="16" right="16" bottom="16" left="16"/>
@@ -72,7 +72,7 @@
         <!-- CARRITO DERECHA -->
         <VBox alignment="TOP_LEFT" spacing="12"
               styleClass="tarjeta-login" VBox.vgrow="ALWAYS"
-              HBox.hgrow="1">
+              HBox.hgrow="ALWAYS">
 
             <padding>
                 <Insets top="16" right="16" bottom="16" left="16"/>
@@ -110,7 +110,7 @@
                     maxWidth="Infinity"
                     styleClass="boton-principal"/>
 
-            <Separator fx:id="sepOtras"/>
+            <Separator/>
 
             <Label text="Otras operaciones" styleClass="etiqueta"/>
 
