@@ -119,14 +119,14 @@ public class LoginController {
                 AdminController controlador = cargador.getController();
                 controlador.setEmpleado(empleado);
 
-                Scene escenaAdmin = new Scene(vistaAdmin, 1400, 900);
+                Scene escenaAdmin = new Scene(vistaAdmin, 1200, 800);
 
                 ventana.setScene(escenaAdmin);
                 ventana.setTitle("Tech-Flow | Administrador");
-                ventana.setMinWidth(1100);
+                ventana.setMinWidth(1000);
                 ventana.setMinHeight(700);
-                ventana.setWidth(1400);
-                ventana.setHeight(900);
+                ventana.setWidth(1200);
+                ventana.setHeight(800);
                 ventana.centerOnScreen();
 
             } else if (rol == Rol.CAJERO) {
