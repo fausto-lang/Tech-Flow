@@ -1,61 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.overbyte.controllers.AdminController"
-            stylesheets="@../styles/estilos.css"
-            styleClass="app-root">
-    <left>
-        <VBox styleClass="sidebar" prefWidth="224" minWidth="205">
-            <VBox styleClass="sidebar-brand" alignment="CENTER_LEFT" spacing="5">
-                <HBox alignment="CENTER_LEFT" spacing="10">
-                    <Label text="✦" styleClass="sidebar-symbol"/>
-                    <VBox spacing="0">
-                        <Label text="TECH-FLOW" styleClass="sidebar-title"/>
-                        <Label text="OVER-BYTE SYSTEMS" styleClass="sidebar-caption"/>
-                    </VBox>
-                </HBox>
-            </VBox>
-            <VBox styleClass="sidebar-section" spacing="7">
-                <Label text="ESPACIO DE TRABAJO" styleClass="sidebar-section-label"/>
-                <Button fx:id="navCaja" text="▣   Caja" onAction="#mostrarCaja"
-                        styleClass="nav-button" maxWidth="Infinity"/>
-                <Button fx:id="navInventario" text="▤   Inventario" onAction="#mostrarInventario"
-                        styleClass="nav-button" maxWidth="Infinity"/>
-                <Button fx:id="navVentas" text="↗   Ventas" onAction="#mostrarVentas"
-                        styleClass="nav-button" maxWidth="Infinity"/>
-            </VBox>
-            <VBox styleClass="sidebar-section" spacing="7">
-                <Label text="GESTIÓN" styleClass="sidebar-section-label"/>
-                <Button fx:id="navProductos" text="▦   Productos" onAction="#mostrarProductos"
-                        styleClass="nav-button" maxWidth="Infinity"/>
-                <Button fx:id="navProveedores" text="◇   Proveedores" onAction="#mostrarProveedores"
-                        styleClass="nav-button" maxWidth="Infinity"/>
-                <Button fx:id="navEmpleados" text="♙   Empleados" onAction="#mostrarEmpleados"
-                        styleClass="nav-button" maxWidth="Infinity"/>
-            </VBox>
-            <Region VBox.vgrow="ALWAYS"/>
-            <VBox styleClass="sidebar-bottom" spacing="10">
-                <Label text="PANEL ADMINISTRATIVO" styleClass="sidebar-caption"/>
-                <Button text="↪   Cerrar sesión" onAction="#cerrarSesion"
-                        styleClass="nav-button nav-logout" maxWidth="Infinity"/>
-            </VBox>
+<HBox styleClass="main-window"
+      stylesheets="@../styles/estilos.css"
+      xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.overbyte.controllers.AdminController">
+
+    <!-- Barra lateral -->
+    <VBox styleClass="sidebar" maxWidth="220" minWidth="200">
+        <VBox alignment="CENTER" styleClass="logo-container" maxWidth="Infinity">
+            <Button styleClass="logo-icon" text="&#127968;"/>
+            <Label styleClass="logo-text" text="Over-Byte"/>
         </VBox>
-    </left>
-    <center>
-        <VBox styleClass="workspace" spacing="0">
-            <HBox styleClass="topbar" alignment="CENTER_LEFT" spacing="12">
-                <VBox spacing="3">
-                    <Label text="GESTIÓN DEL NEGOCIO" styleClass="topbar-kicker"/>
-                    <Label fx:id="lblTituloSeccion" text="Caja" styleClass="page-title"/>
-                </VBox>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Label text="ADMINISTRADOR" styleClass="user-chip"/>
-            </HBox>
-            <VBox fx:id="contenidoCentro" styleClass="workspace-content"
-                  spacing="16" VBox.vgrow="ALWAYS" minHeight="0"/>
+        <VBox styleClass="nav-menu" spacing="4" maxWidth="Infinity">
+            <Button fx:id="navCaja" styleClass="nav-button" text="Caja" onAction="#mostrarCaja" maxWidth="Infinity"/>
+            <Button fx:id="navInventario" styleClass="nav-button" text="Inventario" onAction="#mostrarInventario" maxWidth="Infinity"/>
+            <Button fx:id="navVentas" styleClass="nav-button" text="Ventas" onAction="#mostrarVentas" maxWidth="Infinity"/>
+            <Button fx:id="navEmpleados" styleClass="nav-button" text="Empleados" onAction="#mostrarEmpleados" maxWidth="Infinity"/>
+            <Button fx:id="navProductos" styleClass="nav-button" text="Productos" onAction="#mostrarProductos" maxWidth="Infinity"/>
+            <Button fx:id="navProveedores" styleClass="nav-button" text="Proveedores" onAction="#mostrarProveedores" maxWidth="Infinity"/>
         </VBox>
-    </center>
-</BorderPane>
+        <Region VBox.vgrow="ALWAYS"/>
+        <VBox styleClass="nav-menu" maxWidth="Infinity">
+            <Button styleClass="nav-button" text="Cerrar sesion" onAction="#cerrarSesion" maxWidth="Infinity"/>
+        </VBox>
+    </VBox>
+
+    <!-- Contenido principal -->
+    <VBox styleClass="main-content" HBox.hgrow="ALWAYS">
+        <HBox alignment="CENTER_LEFT" styleClass="header">
+            <Label fx:id="lblTituloSeccion" styleClass="header-title" text="Caja"/>
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
+        <VBox fx:id="contenidoCentro" styleClass="contenido-centro" VBox.vgrow="ALWAYS" prefHeight="550" minHeight="450"/>
+    </VBox>
+</HBox>

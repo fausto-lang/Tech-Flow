@@ -1,66 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<StackPane xmlns="http://javafx.com/javafx/17"
-           xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="com.overbyte.controllers.LoginController"
-           stylesheets="@../styles/estilos.css"
-           styleClass="login-root">
-    <HBox styleClass="login-shell" maxWidth="1040" maxHeight="650">
-        <VBox styleClass="login-brand" alignment="CENTER_LEFT" spacing="18"
-              HBox.hgrow="ALWAYS">
-            <Label text="✦" styleClass="brand-mark"/>
-            <VBox spacing="4">
-                <Label text="TECH-FLOW" styleClass="brand-title"/>
-                <Label text="CONTROL • INVENTARIO • VENTAS" styleClass="brand-kicker"/>
-            </VBox>
-            <Region VBox.vgrow="ALWAYS"/>
-            <Label text="Una plataforma para mantener
-cada operación bajo control."
-                   styleClass="brand-copy" wrapText="true"/>
-            <Label text="OVER-BYTE  /  GESTIÓN COMERCIAL" styleClass="brand-foot"/>
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.overbyte.controllers.LoginController"
+      alignment="CENTER"
+      spacing="20"
+      stylesheets="@../styles/estilos.css"
+      styleClass="fondo-login">
+
+    <padding><Insets top="30" right="30" bottom="30" left="30"/></padding>
+
+    <!-- Encabezado -->
+    <VBox alignment="CENTER" spacing="8" styleClass="encabezado">
+        <Label text="&#9672;" styleClass="icono-logo"/>
+        <Label text="TECH-FLOW" styleClass="titulo"/>
+        <Label text="Sistema de gestion de inventario y ventas" styleClass="subtitulo"/>
+    </VBox>
+
+    <!-- Tarjeta de login -->
+    <VBox alignment="CENTER_LEFT" spacing="16" maxWidth="430" styleClass="tarjeta-login">
+        <Label text="Bienvenido de nuevo" styleClass="titulo-formulario"/>
+        <Label text="Ingresa tus datos para continuar" styleClass="texto-secundario"/>
+
+        <VBox spacing="7">
+            <Label text="Nombre de usuario" styleClass="etiqueta"/>
+            <TextField fx:id="campoNombre" promptText="Escribe tu nombre de usuario" styleClass="campo"/>
         </VBox>
 
-        <VBox styleClass="login-form-panel" alignment="CENTER_LEFT" spacing="19"
-              prefWidth="440" minWidth="360">
-            <VBox spacing="6">
-                <Label text="Bienvenido de nuevo" styleClass="form-heading"/>
-                <Label text="Inicia sesión para acceder a tu espacio de trabajo."
-                       styleClass="form-subheading" wrapText="true"/>
-            </VBox>
-
-            <VBox spacing="7">
-                <Label text="USUARIO" styleClass="field-label"/>
-                <TextField fx:id="campoNombre" promptText="Tu nombre de usuario"
-                           styleClass="input-field"/>
-            </VBox>
-
-            <VBox spacing="9">
-                <Label text="TIPO DE ACCESO" styleClass="field-label"/>
-                <HBox spacing="7">
-                    <Button fx:id="btnAdministrador" text="Admin" onAction="#seleccionarAdministrador"
-                            styleClass="role-button" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-                    <Button fx:id="btnCajero" text="Cajero" onAction="#seleccionarCajero"
-                            styleClass="role-button" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-                    <Button fx:id="btnAlmacen" text="Almacén" onAction="#seleccionarAlmacen"
-                            styleClass="role-button" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-                </HBox>
-                <Label fx:id="etiquetaRol" text="Selecciona el perfil correspondiente"
-                       styleClass="muted-text"/>
-            </VBox>
-
-            <VBox spacing="7">
-                <Label text="CONTRASEÑA" styleClass="field-label"/>
-                <PasswordField fx:id="campoContrasena" promptText="Introduce tu contraseña"
-                               styleClass="input-field"/>
-            </VBox>
-
-            <Label fx:id="mensaje" text="" wrapText="true" styleClass="status-error"/>
-            <Button text="ENTRAR AL SISTEMA  →" onAction="#iniciarSesion"
-                    maxWidth="Infinity" styleClass="primary-button"/>
-            <Label text="Acceso interno · Tech-Flow" styleClass="form-foot"/>
+        <VBox spacing="7">
+            <Label text="Selecciona tu rol" styleClass="etiqueta"/>
+            <HBox spacing="8" alignment="CENTER">
+                <Button fx:id="btnAdministrador" text="Administrador" onAction="#seleccionarAdministrador"
+                        styleClass="boton-rol" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button fx:id="btnCajero" text="Cajero" onAction="#seleccionarCajero"
+                        styleClass="boton-rol" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button fx:id="btnAlmacen" text="Almacen" onAction="#seleccionarAlmacen"
+                        styleClass="boton-rol" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            </HBox>
+            <Label fx:id="etiquetaRol" text="Selecciona un rol para continuar" styleClass="texto-secundario"/>
         </VBox>
-    </HBox>
-</StackPane>
+
+        <VBox spacing="7">
+            <Label text="Contrasena" styleClass="etiqueta"/>
+            <PasswordField fx:id="campoContrasena" promptText="Escribe tu contrasena" styleClass="campo"/>
+        </VBox>
+
+        <Label fx:id="mensaje" text="" wrapText="true" styleClass="mensaje"/>
+        <Button text="INICIAR SESION" onAction="#iniciarSesion" maxWidth="Infinity" styleClass="boton-principal"/>
+        <Label text="Acceso seguro · Tech-Flow" styleClass="pie-tarjeta"/>
+    </VBox>
+</VBox>
