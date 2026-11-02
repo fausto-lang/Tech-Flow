@@ -64,15 +64,28 @@ public class Main {
             if (!scanner.hasNextLine()) {
                 return null;
             }
-            System.out.println("Tipo de operador: 1) Administrador  2) Cajero  3) Almacen  0) Salir del sistema");
+            System.out.println("Tipo de operador: 1) Administrador  2) Cajero  3) Almacen  g) Modo GUI  0) Salir del sistema");
             String seleccion = leerTexto(scanner, "> ").trim().toLowerCase();
             switch (seleccion) {
                 case "1", "admin", "administrador", "adm" -> { return Rol.ADMINISTRADOR; }
                 case "2", "cajero", "vendedor" -> { return Rol.CAJERO; }
                 case "3", "almacen", "almacenero" -> { return Rol.ALMACENERO; }
+                case "g", "gui", "grafico", "ventana" -> {
+                    lanzarGUI();
+                    return null;
+                }
                 case "0", "salir" -> { return null; }
                 default -> System.out.println("Seleccion no valida.");
             }
+        }
+    }
+
+    private static void lanzarGUI() {
+        try {
+            com.overbyte.Main.main(new String[]{});
+        } catch (Exception e) {
+            System.out.println("No se pudo iniciar la interfaz grafica.");
+            e.printStackTrace();
         }
     }
 
