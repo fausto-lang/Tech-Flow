@@ -74,7 +74,9 @@
 
         <VBox fx:id="contenidoCentro"
               HBox.hgrow="ALWAYS"
-              VBox.vgrow="ALWAYS"/>
+              VBox.vgrow="ALWAYS"
+              prefHeight="500"
+              minHeight="400"/>
 
         <padding>
             <Insets top="25" right="25" bottom="25" left="25"/>

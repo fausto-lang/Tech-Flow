@@ -50,7 +50,7 @@ public class AdminController {
         lblTituloSeccion.setText("Caja");
         contenidoCentro.getChildren().clear();
 
-        List<String[]> caja = motorCSV.leerCSV("caja.csv");
+        List<String[]> caja = motorCSV.leerCSV(motorCSV.rutaDatos("caja.csv").toString());
         boolean abierta = caja.size() > 1
                 && caja.get(1).length > 0
                 && caja.get(1)[0].equalsIgnoreCase("ABIERTA");
@@ -87,7 +87,7 @@ public class AdminController {
         lblTituloSeccion.setText("Inventario");
         contenidoCentro.getChildren().clear();
 
-        List<String[]> filas = motorCSV.leerCSV("inventario.csv");
+        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("inventario.csv").toString());
 
         VBox tabla = new VBox(8);
         tabla.setStyle("-fx-alignment: CENTER_LEFT;");
@@ -134,6 +134,7 @@ public class AdminController {
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scroll.setPrefHeight(450);
 
         contenidoCentro.getChildren().add(scroll);
     }
@@ -143,7 +144,7 @@ public class AdminController {
         lblTituloSeccion.setText("Ventas");
         contenidoCentro.getChildren().clear();
 
-        List<String[]> filas = motorCSV.leerCSV("ventas.csv");
+        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("ventas.csv").toString());
 
         double totalDia = 0;
         int count = 0;
@@ -195,6 +196,7 @@ public class AdminController {
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scroll.setPrefHeight(450);
 
         contenidoCentro.getChildren().add(scroll);
     }
@@ -204,7 +206,7 @@ public class AdminController {
         lblTituloSeccion.setText("Empleados");
         contenidoCentro.getChildren().clear();
 
-        List<String[]> filas = motorCSV.leerCSV("empleado.csv");
+        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("empleado.csv").toString());
 
         VBox lista = new VBox(8);
         lista.setStyle("-fx-alignment: CENTER_LEFT;");
@@ -232,6 +234,7 @@ public class AdminController {
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scroll.setPrefHeight(450);
 
         contenidoCentro.getChildren().add(scroll);
     }
@@ -241,7 +244,7 @@ public class AdminController {
         lblTituloSeccion.setText("Productos");
         contenidoCentro.getChildren().clear();
 
-        List<String[]> filas = motorCSV.leerCSV("inventario.csv");
+        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("inventario.csv").toString());
 
         VBox lista = new VBox(8);
         lista.setStyle("-fx-alignment: CENTER_LEFT;");
@@ -271,6 +274,7 @@ public class AdminController {
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scroll.setPrefHeight(450);
 
         contenidoCentro.getChildren().add(scroll);
     }
