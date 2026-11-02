@@ -1,6 +1,6 @@
 # I Feel Like Nicole........
 
-Tech-Flow — Sistema de gestión de inventario y ventas con interfaz gráfica JavaFX.
+-------------------------------
 
 ## Descripción
 
