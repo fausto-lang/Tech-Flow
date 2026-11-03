@@ -47,6 +47,12 @@ class MainTest {
                 }
             });
         }
+        // El estado real de la caja del escritorio no debe decidir el resultado:
+        // cada prueba parte de una caja abierta y la cierra si lo necesita.
+        Files.writeString(directorioDatos.resolve("caja.csv"),
+                "estado,fechaApertura,fechaCierre,ciEmpleado\nABIERTA,"
+                        + java.time.LocalDate.now() + ",,ADM-001\n",
+                StandardCharsets.UTF_8);
         System.setProperty(PROPIEDAD_DATOS, directorioDatos.toString());
         salida = new ByteArrayOutputStream();
     }
