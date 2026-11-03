@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -98,12 +99,14 @@ public class Vendedor extends Empleado {
         if (idVenta == null || idVenta.isBlank()) {
             return false;
         }
+        String referencia = idVenta.trim();
         List<String[]> ventas = leerVentas();
         boolean encontrada = false;
         boolean confirmada = false;
         boolean anulada = false;
         for (String[] fila : ventas) {
-            if (fila.length > 2 && (fila[0].equals(idVenta) || fila[1].equals(idVenta))) {
+            if (fila.length > 2
+                    && (fila[0].equalsIgnoreCase(referencia) || fila[1].equalsIgnoreCase(referencia))) {
                 encontrada = true;
                 confirmada |= fila[2].equals("CONFIRMADA");
                 anulada |= fila[2].equals("ANULADA");
@@ -115,11 +118,12 @@ public class Vendedor extends Empleado {
         if (!encontrada) {
             return false;
         }
-        if (confirmada && !actualizarStockDesdeVentas(ventas, idVenta, true)) {
+        if (confirmada && !actualizarStockDesdeVentas(ventas, referencia, true)) {
             return false;
         }
         for (String[] fila : ventas) {
-            if (fila.length > 1 && (fila[0].equals(idVenta) || fila[1].equals(idVenta))) {
+            if (fila.length > 1
+                    && (fila[0].equalsIgnoreCase(referencia) || fila[1].equalsIgnoreCase(referencia))) {
                 fila[2] = "ANULADA";
             }
         }
@@ -327,16 +331,18 @@ public class Vendedor extends Empleado {
         return calcularCosto(pCosto, oCosto, iva);
     }
 
-    /** Busca productos por nombre o marca y los devuelve indexados por su identificador. */
+    /** Busca coincidencias parciales por ID, nombre o marca, indexadas por identificador. */
     public Map<String, Object> buscarPorRazon(String razon) {
         Map<String, Object> resultados = new HashMap<>();
         if (razon == null || razon.isBlank()) {
             return resultados;
         }
-        String criterio = razon.trim().toLowerCase();
+        String criterio = razon.trim().toLowerCase(Locale.ROOT);
         for (String[] fila : motorCSV.leerCSV(ruta(ARCHIVO_INVENTARIO))) {
             if (fila.length >= 8 && !fila[0].equalsIgnoreCase("idProducto")
-                    && (fila[1].toLowerCase().contains(criterio) || fila[2].toLowerCase().contains(criterio))) {
+                    && (fila[0].toLowerCase(Locale.ROOT).contains(criterio)
+                    || fila[1].toLowerCase(Locale.ROOT).contains(criterio)
+                    || fila[2].toLowerCase(Locale.ROOT).contains(criterio))) {
                 resultados.put(fila[0], fila[1] + " | Marca: " + fila[2] + " | Stock: " + fila[7]);
             }
         }
@@ -347,7 +353,7 @@ public class Vendedor extends Empleado {
         List<String[]> inventario = motorCSV.leerCSV(ruta(ARCHIVO_INVENTARIO));
         Map<String, Integer> cantidades = new HashMap<>();
         for (String[] fila : ventas) {
-            if (fila.length > 7 && (fila[0].equals(id) || fila[1].equals(id))
+            if (fila.length > 7 && (fila[0].equalsIgnoreCase(id) || fila[1].equalsIgnoreCase(id))
                     && (!devolver || fila[2].equals("CONFIRMADA"))) {
                 cantidades.merge(fila[5], Integer.valueOf(fila[7]), Integer::sum);
             }

@@ -56,52 +56,69 @@
 
             <VBox fx:id="vistaNuevaVenta" spacing="14" VBox.vgrow="ALWAYS">
                 <VBox alignment="TOP_LEFT" spacing="12"
-                      styleClass="tarjeta-login, tarjeta-compacta" VBox.vgrow="ALWAYS">
-                    <Label text="Buscar producto" styleClass="titulo-formulario"/>
+                      styleClass="tarjeta-login, tarjeta-compacta, venta-card" VBox.vgrow="ALWAYS">
+                    <VBox spacing="4">
+                        <Label text="Buscar productos" styleClass="titulo-formulario"/>
+                        <Label text="Encuentra por código, nombre o marca y añade unidades al carrito."
+                               styleClass="venta-ayuda"/>
+                    </VBox>
                     <VBox spacing="8">
                         <Label text="Código, nombre o marca" styleClass="etiqueta"/>
-                        <TextField fx:id="campoBusqueda" promptText="Buscar producto..." styleClass="campo"/>
+                        <TextField fx:id="campoBusqueda" promptText="Buscar producto..." styleClass="campo"
+                                   onAction="#buscarProducto"/>
                     </VBox>
                     <Button text="BUSCAR" onAction="#buscarProducto"
-                            maxWidth="Infinity" styleClass="boton-principal"/>
-                    <Label text="Productos disponibles" styleClass="etiqueta"/>
-                    <ScrollPane fx:id="scrollProductos" styleClass="rejilla" fitToWidth="true"
-                                hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS"
-                                prefHeight="400">
-                        <VBox fx:id="tablaProductos" alignment="TOP_LEFT"/>
+                            maxWidth="Infinity" styleClass="boton-principal boton-buscar-producto"/>
+                    <Label text="PRODUCTOS DISPONIBLES" styleClass="venta-subtitulo"/>
+                    <ScrollPane fx:id="scrollProductos" styleClass="rejilla lista-venta" fitToWidth="true"
+                                hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS"
+                                minHeight="320" prefHeight="520">
+                        <VBox fx:id="tablaProductos" alignment="TOP_LEFT" spacing="5"
+                              styleClass="lista-productos-contenido"/>
                     </ScrollPane>
                 </VBox>
             </VBox>
 
             <VBox fx:id="vistaCarrito" spacing="12" visible="false" managed="false"
-                  styleClass="tarjeta-login, tarjeta-compacta" VBox.vgrow="ALWAYS">
-                <Label text="Carrito de compra" styleClass="titulo-formulario"/>
-                <VBox spacing="8">
-                    <Label text="Nombre del cliente" styleClass="etiqueta"/>
-                    <TextField fx:id="campoCliente" promptText="Consumidor final" styleClass="campo"/>
+                  styleClass="tarjeta-login, tarjeta-compacta, carrito-card" VBox.vgrow="ALWAYS">
+                <VBox spacing="4">
+                    <Label text="Tu carrito" styleClass="titulo-formulario"/>
+                    <Label text="Revisa los productos y elige si deseas confirmar la compra o generar una cotización."
+                           styleClass="venta-ayuda"/>
                 </VBox>
-                <Label text="Artículos en carrito" styleClass="etiqueta"/>
-                <ScrollPane fx:id="scrollCarrito" styleClass="rejilla" fitToWidth="true"
-                            hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS"
-                            prefHeight="300">
-                    <VBox fx:id="tablaCarrito" alignment="TOP_LEFT"/>
+                <VBox spacing="8" styleClass="comprador-panel">
+                    <Label text="Nombre del cliente" styleClass="etiqueta"/>
+                    <TextField fx:id="campoCliente" promptText="Nombre obligatorio del comprador" styleClass="campo"/>
+                </VBox>
+                <Label text="Productos seleccionados" styleClass="venta-subtitulo"/>
+                <ScrollPane fx:id="scrollCarrito" styleClass="rejilla lista-carrito" fitToWidth="true"
+                            hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS"
+                            minHeight="240" prefHeight="480">
+                    <VBox fx:id="tablaCarrito" alignment="TOP_LEFT" spacing="5"
+                          styleClass="lista-carrito-contenido"/>
                 </ScrollPane>
-                <Label fx:id="lblTotalCarrito" text="Total: $0.00" styleClass="titulo-formulario"/>
-                <HBox spacing="8">
-                    <Button text="VENDER CARRITO" onAction="#venderCarrito"
-                            maxWidth="Infinity" styleClass="boton-principal" HBox.hgrow="ALWAYS"/>
-                    <Button text="Vaciar" onAction="#vaciarCarrito" styleClass="boton-rol"/>
+                <Label fx:id="lblTotalCarrito" text="Total: $0.00"
+                       styleClass="titulo-formulario, carrito-total"/>
+                <HBox spacing="10" styleClass="carrito-acciones">
+                    <Button text="CONFIRMAR VENTA" onAction="#confirmarVenta"
+                            maxWidth="Infinity" styleClass="boton-principal boton-carrito-confirmar"
+                            HBox.hgrow="ALWAYS"/>
+                    <Button text="HACER PROFORMA" onAction="#hacerProforma"
+                            maxWidth="Infinity" styleClass="boton-exportar boton-carrito-proforma"
+                            HBox.hgrow="ALWAYS"/>
+                    <Button text="VACIAR CARRITO" onAction="#vaciarCarrito"
+                            maxWidth="Infinity" styleClass="boton-rol boton-carrito-vaciar"
+                            HBox.hgrow="ALWAYS"/>
                 </HBox>
                 <Separator/>
-                <Label text="Otras operaciones" styleClass="etiqueta"/>
                 <HBox spacing="8" alignment="CENTER">
-                    <Button text="Eliminar venta" onAction="#eliminarVenta"
-                            maxWidth="Infinity" styleClass="boton-rol" HBox.hgrow="ALWAYS"/>
+                    <Button text="Anular compra o proforma" onAction="#eliminarVenta"
+                            maxWidth="Infinity" styleClass="boton-peligro" HBox.hgrow="ALWAYS"/>
                     <Button text="Consultar garantía" onAction="#consultarGarantia"
                             maxWidth="Infinity" styleClass="boton-rol" HBox.hgrow="ALWAYS"/>
+                    <Button text="Importar orden CSV" onAction="#importarOrdenDesdeArchivo"
+                            maxWidth="Infinity" styleClass="boton-rol" HBox.hgrow="ALWAYS"/>
                 </HBox>
-                <Button text="Importar orden CSV" onAction="#importarOrdenDesdeArchivo"
-                        maxWidth="Infinity" styleClass="boton-rol"/>
             </VBox>
         </VBox>
         <padding><Insets top="22" right="24" bottom="22" left="24"/></padding>

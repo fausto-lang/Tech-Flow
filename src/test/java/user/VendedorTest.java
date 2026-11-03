@@ -733,6 +733,18 @@ class VendedorTest {
     }
 
     @Test
+    @DisplayName("Anular una compra acepta el ID con espacios y distintas mayúsculas")
+    void anularVentaAceptaIdConEspaciosYMayusculasDistintas() {
+        Vendedor vendedor = vendedor();
+        vendedor.venderProducto("P1", "Cliente", 2);
+        MotorCSV csv = new MotorCSV(directorio);
+        String idVenta = csv.leerCSV(csv.rutaDatos("ventas.csv").toString()).get(1)[0];
+
+        assertTrue(vendedor.eliminarVenta(" " + idVenta.toLowerCase(java.util.Locale.ROOT) + " "));
+        assertEquals(10, vendedor.buscarEnInventario("P1").getStock());
+    }
+
+    @Test
     @DisplayName("Anular dos veces la misma venta devuelve false")
     void anularDosVecesLaMismaVentaDevuelveFalse() {
         Vendedor vendedor = vendedor();
@@ -904,6 +916,16 @@ class VendedorTest {
     }
 
     @Test
+    @DisplayName("Buscar por aproximación encuentra coincidencias parciales de ID, nombre o marca")
+    void buscarPorRazonEncuentraCoincidenciasParciales() {
+        Vendedor vendedor = vendedor();
+
+        assertTrue(vendedor.buscarPorRazon("1").containsKey("P1"));
+        assertTrue(vendedor.buscarPorRazon("duct").containsKey("P1"));
+        assertTrue(vendedor.buscarPorRazon("ARC").containsKey("P1"));
+    }
+
+    @Test
     @DisplayName("Buscar producto con id nulo devuelve null")
     void buscarProductoConIdNuloDevuelveNull() {
         Vendedor vendedor = vendedor();
@@ -1001,6 +1023,13 @@ class VendedorTest {
     public void venderConClienteEnBlancoDevuelveFalse() {
         Vendedor vendedor = vendedor();
         assertFalse(vendedor.venderProducto("P1", "   ", 1));
+    }
+
+    @Test
+    @DisplayName("Generar una orden con nombre de comprador en blanco devuelve nulo")
+    void generarOrdenConCompradorEnBlancoDevuelveNulo() {
+        Vendedor vendedor = vendedor();
+        assertNull(vendedor.generarOrdenDeVenta("   ", Map.of("P1", 1)));
     }
 
     @Test
