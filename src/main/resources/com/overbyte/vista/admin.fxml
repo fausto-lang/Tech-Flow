@@ -34,6 +34,11 @@
                     graphicTextGap="13" maxWidth="Infinity">
                 <graphic><Label text="↗" styleClass="nav-icon"/></graphic>
             </Button>
+            <Button fx:id="navEntradas" styleClass="nav-button" text="Entradas"
+                    accessibleText="Mostrar entradas de productos" onAction="#mostrarEntradas"
+                    graphicTextGap="13" maxWidth="Infinity">
+                <graphic><Label text="↙" styleClass="nav-icon"/></graphic>
+            </Button>
             <Button fx:id="navEmpleados" styleClass="nav-button" text="Empleados"
                     accessibleText="Mostrar empleados" onAction="#mostrarEmpleados"
                     graphicTextGap="13" maxWidth="Infinity">

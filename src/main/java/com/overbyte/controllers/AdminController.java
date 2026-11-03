@@ -51,6 +51,9 @@ public class AdminController {
     private Button navVentas;
 
     @FXML
+    private Button navEntradas;
+
+    @FXML
     private Button navEmpleados;
 
     @FXML
@@ -88,6 +91,7 @@ public class AdminController {
         configurarAnimacionNavegacion(navCaja);
         configurarAnimacionNavegacion(navInventario);
         configurarAnimacionNavegacion(navVentas);
+        configurarAnimacionNavegacion(navEntradas);
         configurarAnimacionNavegacion(navEmpleados);
         configurarAnimacionNavegacion(navProductos);
         configurarAnimacionNavegacion(navProveedores);
@@ -434,6 +438,194 @@ public class AdminController {
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         VBox.setVgrow(scroll, Priority.ALWAYS);
         contenidoCentro.getChildren().add(scroll);
+    }
+
+    @FXML
+    private void mostrarEntradas() {
+        seleccionarPestana(navEntradas);
+        lblTituloSeccion.setText("Entradas de productos");
+        contenidoCentro.getChildren().clear();
+
+        VBox seccion = new VBox(15);
+        seccion.setAlignment(Pos.TOP_LEFT);
+        List<String[]> entradas = motorCSV.leerCSV(motorCSV.rutaDatos("entradas.csv").toString());
+        List<String[]> proveedores = motorCSV.leerCSV(motorCSV.rutaDatos("proveedores.csv").toString());
+        TableView<String[]> tabla = new TableView<>();
+        configurarTablaAdmin(tabla);
+        tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        agregarColumnaEntrada(tabla, "ID de entrada", 0, 130);
+        agregarColumnaEntrada(tabla, "Proveedor", 1, 150);
+        agregarColumnaEntrada(tabla, "ID producto", 2, 110);
+        agregarColumnaEntrada(tabla, "Producto", 3, 210);
+        agregarColumnaEntrada(tabla, "Fecha", 4, 110);
+        agregarColumnaEntrada(tabla, "Unidades", 5, 90);
+        agregarColumnaEntrada(tabla, "Precio unitario", 6, 120);
+        agregarColumnaEntrada(tabla, "Total de entrada", 7, 130);
+        agregarColumnaEntrada(tabla, "Registrado por", 8, 120);
+
+        int cantidadEntradas = 0;
+        int unidadesTotales = 0;
+        double costoTotal = 0;
+        for (int i = 1; i < entradas.size(); i++) {
+            String[] fila = entradas.get(i);
+            if (fila.length < 8 || fila[0].equalsIgnoreCase("idEntrada")) {
+                continue;
+            }
+
+            String proveedorId = valorVenta(fila, 1);
+            String proveedorNombre = buscarNombreProveedor(proveedores, proveedorId);
+            String unidadesTexto = valorVenta(fila, 4);
+            String precioTexto = formatearTotalVenta(valorVenta(fila, 5));
+            String totalTexto = "—";
+            try {
+                int unidades = Integer.parseInt(fila[4]);
+                double precio = Double.parseDouble(fila[5]);
+                double total = unidades * precio;
+                unidadesTotales += unidades;
+                costoTotal += total;
+                totalTexto = String.format(Locale.ROOT, "$%.2f", total);
+            } catch (NumberFormatException ignored) {
+                // Mantiene la entrada visible aunque sus datos numéricos estén dañados.
+            }
+
+            tabla.getItems().add(new String[]{
+                valorVenta(fila, 0), proveedorNombre, valorVenta(fila, 2),
+                valorVenta(fila, 3), formatearFechaEntrada(fila[6]),
+                unidadesTexto, precioTexto, totalTexto, valorVenta(fila, 7)
+            });
+            cantidadEntradas++;
+        }
+
+        Label etiquetaResumen = new Label("ENTRADAS REGISTRADAS");
+        etiquetaResumen.getStyleClass().add("ventas-total-etiqueta");
+        Label valorResumen = new Label(cantidadEntradas + " registros · " + unidadesTotales + " unidades");
+        valorResumen.getStyleClass().add("ventas-total-valor");
+        Label detalleResumen = new Label(
+            "Costo de compra acumulado: " + String.format(Locale.ROOT, "$%.2f", costoTotal)
+        );
+        detalleResumen.getStyleClass().add("ventas-total-detalle");
+        VBox resumen = new VBox(5, etiquetaResumen, valorResumen, detalleResumen);
+        resumen.getStyleClass().add("ventas-resumen");
+
+        Button btnExportar = new Button("Exportar informe");
+        btnExportar.getStyleClass().add("boton-exportar");
+        double costoInforme = costoTotal;
+        int registrosInforme = cantidadEntradas;
+        int unidadesInforme = unidadesTotales;
+        btnExportar.setOnAction(event ->
+            exportarInformeEntradas(tabla, costoInforme, registrosInforme, unidadesInforme)
+        );
+
+        Label titulo = new Label("Historial de entradas");
+        titulo.getStyleClass().add("ventas-titulo");
+        Label subtitulo = new Label("Productos recibidos e ingresados al inventario");
+        subtitulo.getStyleClass().add("ventas-subtitulo");
+        VBox textoEncabezado = new VBox(4, titulo, subtitulo);
+        Region espacio = new Region();
+        HBox.setHgrow(espacio, Priority.ALWAYS);
+        HBox encabezado = new HBox(12, textoEncabezado, espacio, btnExportar);
+        encabezado.setAlignment(Pos.CENTER_LEFT);
+
+        VBox tarjeta = new VBox(14, resumen, tabla);
+        tarjeta.getStyleClass().add("ventas-tabla-card");
+        VBox.setVgrow(tabla, Priority.ALWAYS);
+        VBox.setVgrow(tarjeta, Priority.ALWAYS);
+        seccion.getChildren().addAll(encabezado, tarjeta);
+
+        ScrollPane scroll = new ScrollPane(seccion);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        VBox.setVgrow(scroll, Priority.ALWAYS);
+        contenidoCentro.getChildren().add(scroll);
+    }
+
+    private void agregarColumnaEntrada(
+            TableView<String[]> tabla, String titulo, int indice, double ancho) {
+        TableColumn<String[], String> columna = new TableColumn<>(titulo);
+        columna.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(
+            valorVenta(param.getValue(), indice)
+        ));
+        columna.setPrefWidth(ancho);
+        tabla.getColumns().add(columna);
+    }
+
+    private String buscarNombreProveedor(List<String[]> proveedores, String idProveedor) {
+        if (idProveedor.equals("—")) {
+            return "Ingreso manual";
+        }
+        for (int i = 1; i < proveedores.size(); i++) {
+            String[] proveedor = proveedores.get(i);
+            if (proveedor.length > 1 && proveedor[0].equalsIgnoreCase(idProveedor)) {
+                return proveedor[1];
+            }
+        }
+        return idProveedor;
+    }
+
+    private String formatearFechaEntrada(String fecha) {
+        try {
+            return LocalDate.parse(fecha).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        } catch (DateTimeParseException e) {
+            return fecha;
+        }
+    }
+
+    private void exportarInformeEntradas(
+            TableView<String[]> tabla, double costoTotal, int registros, int unidades) {
+        FileChooser selector = new FileChooser();
+        selector.setTitle("Guardar informe de entradas");
+        selector.setInitialFileName("informe-entradas-" + LocalDate.now() + ".txt");
+        selector.getExtensionFilters().add(
+            new FileChooser.ExtensionFilter("Informe de texto (*.txt)", "*.txt")
+        );
+        java.io.File archivo = selector.showSaveDialog(contenidoCentro.getScene().getWindow());
+        if (archivo == null) {
+            return;
+        }
+
+        try {
+            Path ruta = archivo.toPath();
+            if (!ruta.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".txt")) {
+                ruta = ruta.resolveSibling(ruta.getFileName() + ".txt");
+            }
+            Files.writeString(
+                ruta,
+                crearContenidoInformeEntradas(tabla.getItems(), costoTotal, registros, unidades),
+                StandardCharsets.UTF_8
+            );
+            mostrarAlerta("Informe exportado", "El informe se guardó correctamente en:\n" + ruta);
+        } catch (IOException e) {
+            mostrarAlerta("Error al exportar", "No se pudo guardar el informe: " + e.getMessage());
+        }
+    }
+
+    private String crearContenidoInformeEntradas(
+            List<String[]> entradas, double costoTotal, int registros, int unidades) {
+        int[] anchos = {14, 22, 14, 28, 12, 9, 15, 16, 16};
+        String[] encabezados = {
+            "ID ENTRADA", "PROVEEDOR", "ID PRODUCTO", "PRODUCTO",
+            "FECHA", "UNIDADES", "PRECIO UNIT.", "TOTAL", "REGISTRADO POR"
+        };
+        String borde = crearBordeTabla(anchos);
+        StringBuilder informe = new StringBuilder()
+            .append("TECH-FLOW | INFORME DE ENTRADAS DE PRODUCTOS\n")
+            .append("Fecha del informe: ").append(LocalDate.now()).append('\n')
+            .append("Generado: ").append(LocalDateTime.now().format(
+                DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+            )).append('\n')
+            .append("Registros: ").append(registros)
+            .append("    Unidades recibidas: ").append(unidades)
+            .append("    Costo acumulado: ")
+            .append(String.format(Locale.ROOT, "$%.2f", costoTotal)).append("\n\n")
+            .append(borde).append('\n')
+            .append(filaInforme(encabezados, anchos)).append('\n')
+            .append(borde).append('\n');
+        for (String[] entrada : entradas) {
+            informe.append(filaInforme(entrada, anchos)).append('\n');
+        }
+        return informe.append(borde).append('\n').append("Fin del informe").toString();
     }
 
     private void exportarInformeVentas(TableView<String[]> tabla, double totalDia, int cantidadVentas) {
@@ -1230,7 +1422,7 @@ public class AdminController {
 
     private void seleccionarPestana(Button seleccionada) {
         for (Button pestana : List.of(
-                navCaja, navInventario, navVentas,
+                navCaja, navInventario, navVentas, navEntradas,
                 navEmpleados, navProductos, navProveedores)) {
             pestana.getStyleClass().remove("nav-button-activo");
         }

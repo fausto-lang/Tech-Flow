@@ -13,7 +13,7 @@
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.overbyte.controllers.VendedorController"
       stylesheets="@../styles/estilos.css"
-      styleClass="main-window">
+styleClass="main-window vendedor-window">
 
     <VBox styleClass="sidebar" maxWidth="240" minWidth="220" prefWidth="230">
         <VBox alignment="CENTER" styleClass="logo-container" maxWidth="Infinity">

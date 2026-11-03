@@ -225,6 +225,42 @@
     -fx-padding: 22px;
     -fx-effect: dropshadow(gaussian, rgba(91, 42, 145, 0.10), 16, 0.12, 0, 4);
 }
+.vendedor-window,
+.vendedor-window .main-content,
+.vendedor-window .role-content {
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+.vendedor-window .venta-card,
+.vendedor-window .carrito-card {
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-effect: none;
+}
+.vendedor-window .comprador-panel {
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+.vendedor-window .lista-venta,
+.vendedor-window .lista-carrito {
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-background-color: #FBF9FD;
+}
+.vendedor-window .lista-venta > .viewport,
+.vendedor-window .lista-carrito > .viewport {
+    -fx-border-color: transparent;
+    -fx-background-color: #FBF9FD;
+}
+.vendedor-window .venta-producto-fila,
+.vendedor-window .carrito-producto-fila {
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+.vendedor-window .venta-producto-fila:hover,
+.vendedor-window .carrito-producto-fila:hover {
+    -fx-border-color: transparent;
+}
 .venta-ayuda {
     -fx-font-size: 11px;
     -fx-text-fill: -fx-texto-suave;
@@ -694,6 +730,107 @@
 .venta-cantidad {
     -fx-alignment: CENTER;
     -fx-pref-height: 36px;
+}
+.almacen-lista {
+    -fx-background-color: #FBF9FD;
+    -fx-background-radius: 10px;
+    -fx-border-color: -fx-rejilla;
+    -fx-border-radius: 10px;
+}
+.almacen-acciones {
+    -fx-alignment: CENTER_LEFT;
+}
+.almacen-accion {
+    -fx-min-height: 42px;
+    -fx-padding: 9px 16px;
+}
+.almacen-lista-contenido {
+    -fx-padding: 10px;
+}
+.entrada-dialog {
+    -fx-background-color: white;
+    -fx-background-radius: 12px;
+    -fx-border-color: -fx-rejilla;
+    -fx-border-radius: 12px;
+    -fx-padding: 14px;
+}
+.entrada-dialog-content {
+    -fx-background-color: #FBF9FD;
+    -fx-background-radius: 9px;
+    -fx-border-color: -fx-rejilla;
+    -fx-border-radius: 9px;
+    -fx-padding: 14px;
+}
+.entrada-panel {
+    -fx-background-color: white;
+    -fx-background-radius: 9px;
+    -fx-border-color: #E8DFF0;
+    -fx-border-radius: 9px;
+    -fx-padding: 10px;
+}
+.entrada-producto-fila,
+.entrada-carrito-fila {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-border-color: #E8DFF0;
+    -fx-border-radius: 8px;
+    -fx-min-height: 52px;
+    -fx-padding: 8px;
+}
+.entrada-producto-fila:hover,
+.entrada-carrito-fila:hover {
+    -fx-background-color: #F8F3FC;
+    -fx-border-color: #CBB2E2;
+}
+.almacen-lista .fila-cabecera {
+    -fx-background-color: #F3EDF8;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px 10px;
+}
+.almacen-producto-fila {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-border-color: #E8DFF0;
+    -fx-border-radius: 8px;
+    -fx-min-height: 54px;
+    -fx-padding: 9px 10px;
+}
+.almacen-producto-fila:hover {
+    -fx-background-color: #F8F3FC;
+    -fx-border-color: #CBB2E2;
+}
+.almacen-producto-id {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-primario-oscuro;
+}
+.almacen-producto-nombre {
+    -fx-font-weight: bold;
+}
+.almacen-precio {
+    -fx-text-fill: -fx-texto-suave;
+}
+.almacen-precio-venta {
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-primario-oscuro;
+}
+.almacen-stock {
+    -fx-alignment: CENTER;
+    -fx-background-radius: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 5px 8px;
+}
+.almacen-stock-normal {
+    -fx-background-color: #E9F6EF;
+    -fx-text-fill: -fx-ok;
+}
+.almacen-stock-bajo {
+    -fx-background-color: #FCE8EF;
+    -fx-text-fill: -fx-peligro;
+}
+.almacen-stock-invalido {
+    -fx-background-color: -fx-panel;
+    -fx-text-fill: -fx-texto-suave;
 }
 
 /* ---------- Scroll, separadores, dialogos ---------- */
