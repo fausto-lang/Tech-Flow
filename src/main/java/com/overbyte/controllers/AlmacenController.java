@@ -1,13 +1,17 @@
 package com.overbyte.controllers;
 
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import models.Producto;
 import user.Empleado;
 import user.Almacen;
@@ -54,6 +58,30 @@ public class AlmacenController {
     private Label mensaje;
 
     @FXML
+    private Label lblTituloSeccion;
+
+    @FXML
+    private VBox paginaInventario;
+
+    @FXML
+    private ScrollPane paginaRegistro;
+
+    @FXML
+    private ScrollPane paginaEntradas;
+
+    @FXML
+    private Button navInventario;
+
+    @FXML
+    private Button navRegistrar;
+
+    @FXML
+    private Button navEntradas;
+
+    @FXML
+    private Button navCerrarSesion;
+
+    @FXML
     private VBox tablaInventario;
 
     private Empleado empleado;
@@ -74,9 +102,69 @@ public class AlmacenController {
     @FXML
     private void initialize() {
         mensaje.setText("");
+        configurarAnimacionNavegacion(navInventario);
+        configurarAnimacionNavegacion(navRegistrar);
+        configurarAnimacionNavegacion(navEntradas);
+        configurarAnimacionNavegacion(navCerrarSesion);
+        mostrarInventario();
         if (empleado != null) {
             etiquetaAlmacen.setText("Almacenero: " + empleado.getNombre());
         }
+    }
+
+    @FXML
+    private void mostrarInventario() {
+        mostrarSeccion(paginaInventario, navInventario, "Inventario");
+    }
+
+    @FXML
+    private void mostrarRegistro() {
+        mostrarSeccion(paginaRegistro, navRegistrar, "Registrar producto");
+    }
+
+    @FXML
+    private void mostrarEntradas() {
+        mostrarSeccion(paginaEntradas, navEntradas, "Entradas y stock");
+    }
+
+    private void mostrarSeccion(Node pagina, Button pestana, String titulo) {
+        paginaInventario.setVisible(pagina == paginaInventario);
+        paginaInventario.setManaged(pagina == paginaInventario);
+        paginaRegistro.setVisible(pagina == paginaRegistro);
+        paginaRegistro.setManaged(pagina == paginaRegistro);
+        paginaEntradas.setVisible(pagina == paginaEntradas);
+        paginaEntradas.setManaged(pagina == paginaEntradas);
+        lblTituloSeccion.setText(titulo);
+        navInventario.getStyleClass().remove("nav-button-activo");
+        navRegistrar.getStyleClass().remove("nav-button-activo");
+        navEntradas.getStyleClass().remove("nav-button-activo");
+        if (!pestana.getStyleClass().contains("nav-button-activo")) {
+            pestana.getStyleClass().add("nav-button-activo");
+        }
+    }
+
+    private void configurarAnimacionNavegacion(Button boton) {
+        ScaleTransition escala = new ScaleTransition(Duration.millis(140), boton);
+        TranslateTransition desplazamiento =
+                new TranslateTransition(Duration.millis(140), boton);
+        boton.setOnMouseEntered(event -> {
+            escala.stop();
+            escala.setToX(1.015);
+            escala.setToY(1.015);
+            escala.playFromStart();
+            desplazamiento.stop();
+            desplazamiento.setToX(3);
+            desplazamiento.playFromStart();
+        });
+        boton.setOnMouseExited(event -> {
+            escala.stop();
+            escala.setToX(1);
+            escala.setToY(1);
+            escala.playFromStart();
+            desplazamiento.stop();
+            desplazamiento.setToX(0);
+            desplazamiento.playFromStart();
+        });
     }
 
     /* ===================== INVENTARIO ===================== */

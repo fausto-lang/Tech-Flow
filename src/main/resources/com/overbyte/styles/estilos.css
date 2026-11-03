@@ -133,7 +133,7 @@
 
 /* ---------- Panel de administracion: barra lateral ---------- */
 .sidebar {
-    -fx-background-color: -fx-panel;
+    -fx-background-color: #FBF9FD;
     -fx-border-color: transparent -fx-rejilla transparent transparent;
     -fx-border-width: 1px;
 }
@@ -153,24 +153,55 @@
 }
 .logo-text { -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; }
 
-.nav-menu { -fx-padding: 14px 10px; }
+.nav-menu { -fx-padding: 18px 12px; }
+.nav-caption {
+    -fx-padding: 0 10px 9px 10px;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-texto-suave;
+}
 .nav-button {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
+    -fx-background-radius: 9px;
+    -fx-border-radius: 9px;
     -fx-alignment: CENTER_LEFT;
-    -fx-padding: 10px 14px;
+    -fx-content-display: LEFT;
+    -fx-min-height: 42px;
+    -fx-padding: 9px 13px;
     -fx-text-fill: -fx-texto;
     -fx-font-size: 13px;
+    -fx-font-weight: normal;
+    -fx-cursor: hand;
 }
-.nav-button:hover { -fx-background-color: -fx-primario-claro; -fx-border-color: transparent; }
+.nav-button:hover {
+    -fx-background-color: #F0E7F8;
+    -fx-border-color: transparent;
+    -fx-text-fill: -fx-primario-oscuro;
+}
+.nav-icon {
+    -fx-alignment: CENTER;
+    -fx-min-width: 20px;
+    -fx-pref-width: 20px;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-primario;
+}
+.nav-button:hover .nav-icon { -fx-text-fill: -fx-primario-oscuro; }
 .nav-button-activo,
 .nav-button-activo:hover {
-    -fx-background-color: white;
-    -fx-border-color: transparent transparent transparent -fx-primario;
-    -fx-border-width: 0 0 0 4;
+    -fx-background-color: -fx-primario-claro;
+    -fx-border-color: -fx-primario;
+    -fx-border-width: 1px;
     -fx-text-fill: -fx-primario-oscuro;
     -fx-font-weight: bold;
 }
+.nav-button-activo .nav-icon,
+.nav-button-activo:hover .nav-icon { -fx-text-fill: -fx-primario-oscuro; }
+.nav-logout { -fx-text-fill: -fx-texto-suave; }
+.nav-logout:hover { -fx-background-color: #FCE8EF; -fx-text-fill: -fx-peligro; }
+.nav-logout .nav-icon { -fx-text-fill: -fx-texto-suave; }
+.nav-logout:hover .nav-icon { -fx-text-fill: -fx-peligro; }
 
 /* ---------- Panel de administracion: cabecera tipo cinta de Excel ---------- */
 .main-content { -fx-background-color: white; }
@@ -181,7 +212,9 @@
     -fx-padding: 0 24px;
 }
 .header-title { -fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold; }
+.header-subtitle { -fx-text-fill: rgba(255, 255, 255, 0.82); -fx-font-size: 11px; }
 .contenido-centro { -fx-padding: 20px; -fx-background-color: white; }
+.role-content { -fx-padding: 16px 20px 20px 20px; -fx-background-color: white; }
 
 /* ---------- Formularios del panel ---------- */
 .formulario {
@@ -259,3 +292,73 @@
 .dialog-pane:header .header-panel .label { -fx-text-fill: white; -fx-font-weight: bold; }
 .dialog-pane > .content.label { -fx-text-fill: -fx-texto; }
 .dialog-pane > .button-bar > .container { -fx-background-color: -fx-panel; }
+
+/* ---------- Modal de apertura y cierre de caja ---------- */
+.caja-dialog {
+    -fx-background-color: white;
+    -fx-background-radius: 14px;
+    -fx-border-color: -fx-rejilla;
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+    -fx-padding: 24px;
+}
+.caja-dialog > .button-bar > .container {
+    -fx-background-color: white;
+    -fx-padding: 16px 0 0 0;
+}
+.caja-dialog-content {
+    -fx-alignment: center;
+    -fx-padding: 8px 12px 10px 12px;
+}
+.caja-dialog-icon {
+    -fx-alignment: center;
+    -fx-min-width: 58px;
+    -fx-min-height: 58px;
+    -fx-max-width: 58px;
+    -fx-max-height: 58px;
+    -fx-background-radius: 29px;
+    -fx-font-size: 25px;
+    -fx-font-weight: bold;
+}
+.caja-dialog-icon-cerrada {
+    -fx-background-color: -fx-primario-claro;
+    -fx-text-fill: -fx-primario-oscuro;
+}
+.caja-dialog-icon-abierta {
+    -fx-background-color: #DDF4E9;
+    -fx-text-fill: -fx-ok;
+}
+.caja-dialog-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-texto;
+}
+.caja-dialog-description {
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-texto-suave;
+    -fx-text-alignment: center;
+    -fx-max-width: 330px;
+}
+.caja-dialog-status {
+    -fx-background-radius: 14px;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 7px 12px;
+}
+.caja-dialog-status-cerrada {
+    -fx-background-color: #FCE8EF;
+    -fx-text-fill: -fx-peligro;
+}
+.caja-dialog-status-abierta {
+    -fx-background-color: #DDF4E9;
+    -fx-text-fill: -fx-ok;
+}
+.caja-dialog-cancelar {
+    -fx-background-color: white;
+    -fx-border-color: -fx-rejilla;
+    -fx-text-fill: -fx-texto-suave;
+}
+.caja-dialog-cancelar:hover {
+    -fx-background-color: -fx-panel;
+    -fx-border-color: -fx-primario;
+}

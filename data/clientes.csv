@@ -1,2 +1,3 @@
-idCliente,nombreCliente
-CLI-985B6A7C,1
+idCliente,nombreCliente,ci,telefono
+CLI-985B6A7C,1,,
+CLI-CA0A3EAD,Fernando,,

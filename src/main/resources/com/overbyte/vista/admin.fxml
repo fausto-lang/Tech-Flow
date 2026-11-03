@@ -12,22 +12,51 @@
       fx:controller="com.overbyte.controllers.AdminController">
 
     <!-- Barra lateral -->
-    <VBox styleClass="sidebar" maxWidth="220" minWidth="200">
+    <VBox styleClass="sidebar" maxWidth="240" minWidth="220" prefWidth="230">
         <VBox alignment="CENTER" styleClass="logo-container" maxWidth="Infinity">
             <Button styleClass="logo-icon" text="&#127968;"/>
             <Label styleClass="logo-text" text="Over-Byte"/>
         </VBox>
         <VBox styleClass="nav-menu" spacing="4" maxWidth="Infinity">
-            <Button fx:id="navCaja" styleClass="nav-button" text="Caja" onAction="#mostrarCaja" maxWidth="Infinity"/>
-            <Button fx:id="navInventario" styleClass="nav-button" text="Inventario" onAction="#mostrarInventario" maxWidth="Infinity"/>
-            <Button fx:id="navVentas" styleClass="nav-button" text="Ventas" onAction="#mostrarVentas" maxWidth="Infinity"/>
-            <Button fx:id="navEmpleados" styleClass="nav-button" text="Empleados" onAction="#mostrarEmpleados" maxWidth="Infinity"/>
-            <Button fx:id="navProductos" styleClass="nav-button" text="Productos" onAction="#mostrarProductos" maxWidth="Infinity"/>
-            <Button fx:id="navProveedores" styleClass="nav-button" text="Proveedores" onAction="#mostrarProveedores" maxWidth="Infinity"/>
+            <Label text="MENU PRINCIPAL" styleClass="nav-caption"/>
+            <Button fx:id="navCaja" styleClass="nav-button" text="Caja"
+                    accessibleText="Abrir la gestión de caja" onAction="#mostrarCaja"
+                    graphicTextGap="13" maxWidth="Infinity">
+                <graphic><Label text="▣" styleClass="nav-icon"/></graphic>
+            </Button>
+            <Button fx:id="navInventario" styleClass="nav-button" text="Inventario"
+                    accessibleText="Mostrar inventario" onAction="#mostrarInventario"
+                    graphicTextGap="13" maxWidth="Infinity">
+                <graphic><Label text="▦" styleClass="nav-icon"/></graphic>
+            </Button>
+            <Button fx:id="navVentas" styleClass="nav-button" text="Ventas"
+                    accessibleText="Mostrar ventas" onAction="#mostrarVentas"
+                    graphicTextGap="13" maxWidth="Infinity">
+                <graphic><Label text="↗" styleClass="nav-icon"/></graphic>
+            </Button>
+            <Button fx:id="navEmpleados" styleClass="nav-button" text="Empleados"
+                    accessibleText="Mostrar empleados" onAction="#mostrarEmpleados"
+                    graphicTextGap="13" maxWidth="Infinity">
+                <graphic><Label text="♙" styleClass="nav-icon"/></graphic>
+            </Button>
+            <Button fx:id="navProductos" styleClass="nav-button" text="Productos"
+                    accessibleText="Mostrar productos" onAction="#mostrarProductos"
+                    graphicTextGap="13" maxWidth="Infinity">
+                <graphic><Label text="◇" styleClass="nav-icon"/></graphic>
+            </Button>
+            <Button fx:id="navProveedores" styleClass="nav-button" text="Proveedores"
+                    accessibleText="Mostrar proveedores" onAction="#mostrarProveedores"
+                    graphicTextGap="13" maxWidth="Infinity">
+                <graphic><Label text="▤" styleClass="nav-icon"/></graphic>
+            </Button>
         </VBox>
         <Region VBox.vgrow="ALWAYS"/>
         <VBox styleClass="nav-menu" maxWidth="Infinity">
-            <Button styleClass="nav-button" text="Cerrar sesion" onAction="#cerrarSesion" maxWidth="Infinity"/>
+            <Button fx:id="navCerrarSesion" styleClass="nav-button nav-logout"
+                    text="Cerrar sesión" onAction="#cerrarSesion"
+                    graphicTextGap="13" maxWidth="Infinity">
+                <graphic><Label text="↪" styleClass="nav-icon"/></graphic>
+            </Button>
         </VBox>
     </VBox>
 

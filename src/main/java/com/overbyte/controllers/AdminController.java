@@ -1,5 +1,8 @@
 package com.overbyte.controllers;
 
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -8,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import user.Empleado;
 import user.Gestor;
 import user.Rol;
@@ -26,9 +30,31 @@ public class AdminController {
     @FXML
     private Label lblTituloSeccion;
 
+    @FXML
+    private Button navCaja;
+
+    @FXML
+    private Button navInventario;
+
+    @FXML
+    private Button navVentas;
+
+    @FXML
+    private Button navEmpleados;
+
+    @FXML
+    private Button navProductos;
+
+    @FXML
+    private Button navProveedores;
+
+    @FXML
+    private Button navCerrarSesion;
+
     private Empleado empleado;
     private Gestor gestor;
     private MotorCSV motorCSV;
+    private boolean dialogoCajaMostrado;
 
     public void setEmpleado(Empleado empleado) {
         this.empleado = empleado;
@@ -38,58 +64,105 @@ public class AdminController {
             empleado.getContrasena()
         );
         this.motorCSV = new MotorCSV();
-        mostrarCaja();
+        mostrarVentas();
+        if (!dialogoCajaMostrado) {
+            dialogoCajaMostrado = true;
+            Platform.runLater(this::mostrarDialogoCaja);
+        }
     }
 
     @FXML
     private void initialize() {
         lblTituloSeccion.setText("Caja");
+        configurarAnimacionNavegacion(navCaja);
+        configurarAnimacionNavegacion(navInventario);
+        configurarAnimacionNavegacion(navVentas);
+        configurarAnimacionNavegacion(navEmpleados);
+        configurarAnimacionNavegacion(navProductos);
+        configurarAnimacionNavegacion(navProveedores);
+        configurarAnimacionNavegacion(navCerrarSesion);
+        seleccionarPestana(navVentas);
     }
 
     /* ===================== SECCIONES ===================== */
 
     @FXML
     private void mostrarCaja() {
-        lblTituloSeccion.setText("Caja");
-        contenidoCentro.getChildren().clear();
+        seleccionarPestana(navCaja);
+        mostrarDialogoCaja();
+    }
 
-        List<String[]> caja = motorCSV.leerCSV(motorCSV.rutaDatos("caja.csv").toString());
-        boolean abierta = caja.size() > 1
-                && caja.get(1).length > 0
-                && caja.get(1)[0].equalsIgnoreCase("ABIERTA");
+    private void mostrarDialogoCaja() {
+        List<String[]> filasCaja = motorCSV.leerCSV(
+            motorCSV.rutaDatos("caja.csv").toString()
+        );
+        boolean abierta = filasCaja.size() > 1
+                && filasCaja.get(1).length > 0
+                && filasCaja.get(1)[0].equalsIgnoreCase("ABIERTA");
+        ButtonType accion = new ButtonType(
+            abierta ? "Cerrar caja" : "Abrir caja",
+            ButtonBar.ButtonData.OK_DONE
+        );
+        ButtonType cancelar = new ButtonType(
+            abierta ? "Volver al panel" : "Ahora no",
+            ButtonBar.ButtonData.CANCEL_CLOSE
+        );
 
-        Label lblEstado = new Label(
-            abierta ? "CAJA ABIERTA" : "CAJA CERRADA"
+        Dialog<ButtonType> dialogo = new Dialog<>();
+        dialogo.setTitle("Gestión de caja");
+        dialogo.initOwner(contenidoCentro.getScene().getWindow());
+        dialogo.getDialogPane().getButtonTypes().addAll(accion, cancelar);
+        dialogo.getDialogPane().getStylesheets().add(
+            getClass().getResource("/com/overbyte/styles/estilos.css").toExternalForm()
         );
-        lblEstado.setStyle(
-            "-fx-font-size: 18px; -fx-font-weight: bold; " +
-            (abierta ? "-fx-text-fill: #4ade80;" : "-fx-text-fill: #fca5a5;")
+        dialogo.getDialogPane().getStyleClass().add("caja-dialog");
+
+        VBox contenido = new VBox(12);
+        contenido.setAlignment(Pos.CENTER);
+        contenido.getStyleClass().add("caja-dialog-content");
+
+        Label icono = new Label(abierta ? "✓" : "$");
+        icono.getStyleClass().addAll(
+            "caja-dialog-icon",
+            abierta ? "caja-dialog-icon-abierta" : "caja-dialog-icon-cerrada"
+        );
+        Label titulo = new Label(abierta ? "La caja está abierta" : "¿Abrimos la caja?");
+        titulo.getStyleClass().add("caja-dialog-title");
+        Label descripcion = new Label(abierta
+            ? "El punto de venta ya puede registrar operaciones."
+            : "Confirma para habilitar las operaciones de venta.");
+        descripcion.getStyleClass().add("caja-dialog-description");
+        descripcion.setWrapText(true);
+
+        Label estado = new Label(abierta ? "ESTADO ACTUAL · ABIERTA" : "ESTADO ACTUAL · CERRADA");
+        estado.getStyleClass().addAll(
+            "caja-dialog-status",
+            abierta ? "caja-dialog-status-abierta" : "caja-dialog-status-cerrada"
         );
 
-        Button btnAccion = new Button(
-            abierta ? "CERRAR CAJA" : "ABRIR CAJA"
-        );
-        btnAccion.setStyle("-fx-padding: 10px 20px; -fx-font-size: 14px;");
-        btnAccion.setOnAction(event -> {
-            if (abierta) {
-                gestor.cerrarCaja();
-            } else {
-                gestor.abrirCaja();
+        contenido.getChildren().addAll(icono, titulo, descripcion, estado);
+        dialogo.getDialogPane().setContent(contenido);
+
+        Button botonAccion = (Button) dialogo.getDialogPane().lookupButton(accion);
+        botonAccion.getStyleClass().add(abierta ? "boton-peligro" : "boton-mas");
+        Button botonCancelar = (Button) dialogo.getDialogPane().lookupButton(cancelar);
+        botonCancelar.getStyleClass().add("caja-dialog-cancelar");
+
+        dialogo.showAndWait().ifPresent(resultado -> {
+            if (resultado == accion) {
+                boolean actualizado = abierta ? gestor.cerrarCaja() : gestor.abrirCaja();
+                if (!actualizado) {
+                    mostrarAlerta("Error", "No se pudo actualizar el estado de la caja.");
+                }
             }
-            mostrarCaja();
         });
-
-        VBox contenedor = new VBox(15, lblEstado, btnAccion);
-        contenedor.setAlignment(Pos.CENTER);
-        contenedor.setPrefHeight(450);
-
-        contenidoCentro.getChildren().add(contenedor);
     }
 
     /* ----------- INVENTARIO ----------- */
 
     @FXML
     private void mostrarInventario() {
+        seleccionarPestana(navInventario);
         lblTituloSeccion.setText("Inventario");
         contenidoCentro.getChildren().clear();
 
@@ -177,6 +250,7 @@ public class AdminController {
 
     @FXML
     private void mostrarVentas() {
+        seleccionarPestana(navVentas);
         lblTituloSeccion.setText("Ventas");
         contenidoCentro.getChildren().clear();
 
@@ -276,6 +350,7 @@ public class AdminController {
 
     @FXML
     private void mostrarEmpleados() {
+        seleccionarPestana(navEmpleados);
         lblTituloSeccion.setText("Empleados");
         contenidoCentro.getChildren().clear();
 
@@ -407,6 +482,7 @@ public class AdminController {
 
     @FXML
     private void mostrarProductos() {
+        seleccionarPestana(navProductos);
         lblTituloSeccion.setText("Productos");
         contenidoCentro.getChildren().clear();
 
@@ -574,6 +650,7 @@ public class AdminController {
 
     @FXML
     private void mostrarProveedores() {
+        seleccionarPestana(navProveedores);
         lblTituloSeccion.setText("Proveedores");
         contenidoCentro.getChildren().clear();
 
@@ -724,6 +801,43 @@ public class AdminController {
     }
 
     /* ===================== UTILIDADES ===================== */
+
+    private void seleccionarPestana(Button seleccionada) {
+        for (Button pestana : List.of(
+                navCaja, navInventario, navVentas,
+                navEmpleados, navProductos, navProveedores)) {
+            pestana.getStyleClass().remove("nav-button-activo");
+        }
+        if (!seleccionada.getStyleClass().contains("nav-button-activo")) {
+            seleccionada.getStyleClass().add("nav-button-activo");
+        }
+    }
+
+    private void configurarAnimacionNavegacion(Button boton) {
+        ScaleTransition escala = new ScaleTransition(Duration.millis(140), boton);
+        TranslateTransition desplazamiento =
+                new TranslateTransition(Duration.millis(140), boton);
+        boton.setOnMouseEntered(event -> {
+            escala.stop();
+            escala.setToX(1.015);
+            escala.setToY(1.015);
+            escala.playFromStart();
+
+            desplazamiento.stop();
+            desplazamiento.setToX(3);
+            desplazamiento.playFromStart();
+        });
+        boton.setOnMouseExited(event -> {
+            escala.stop();
+            escala.setToX(1);
+            escala.setToY(1);
+            escala.playFromStart();
+
+            desplazamiento.stop();
+            desplazamiento.setToX(0);
+            desplazamiento.playFromStart();
+        });
+    }
 
     private void mostrarAlerta(String titulo, String mensaje) {
         Alert alerta = new Alert(Alert.AlertType.INFORMATION);

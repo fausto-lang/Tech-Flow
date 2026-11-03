@@ -1,13 +1,18 @@
 package com.overbyte.controllers;
 
+import javafx.animation.ScaleTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import services.Verificador;
 import user.Empleado;
 import user.Rol;
@@ -26,6 +31,18 @@ public class LoginController {
     @FXML
     private Label mensaje;
 
+    @FXML
+    private Button btnAdministrador;
+
+    @FXML
+    private Button btnCajero;
+
+    @FXML
+    private Button btnAlmacen;
+
+    @FXML
+    private Button btnIniciarSesion;
+
     private Rol rolSeleccionado;
 
     private final Verificador verificador = new Verificador();
@@ -35,8 +52,16 @@ public class LoginController {
         rolSeleccionado = null;
         mensaje.setText("");
 
-        campoNombre.setOnAction(event -> campoContrasena.requestFocus());
+        campoNombre.setOnAction(event -> btnAdministrador.requestFocus());
         campoContrasena.setOnAction(event -> iniciarSesion());
+
+        configurarBotonRol(btnAdministrador, Rol.ADMINISTRADOR, "Administrador");
+        configurarBotonRol(btnCajero, Rol.CAJERO, "Cajero");
+        configurarBotonRol(btnAlmacen, Rol.ALMACENERO, "Almacén");
+        configurarAnimacionHover(btnAdministrador);
+        configurarAnimacionHover(btnCajero);
+        configurarAnimacionHover(btnAlmacen);
+        configurarAnimacionHover(btnIniciarSesion);
     }
 
     @FXML
@@ -58,6 +83,43 @@ public class LoginController {
         rolSeleccionado = rol;
         etiquetaRol.setText("Rol seleccionado: " + nombreRol);
         mensaje.setText("");
+        actualizarEstiloRol(btnAdministrador, rol == Rol.ADMINISTRADOR);
+        actualizarEstiloRol(btnCajero, rol == Rol.CAJERO);
+        actualizarEstiloRol(btnAlmacen, rol == Rol.ALMACENERO);
+        campoContrasena.requestFocus();
+    }
+
+    private void configurarBotonRol(Button boton, Rol rol, String nombreRol) {
+        boton.addEventHandler(KeyEvent.KEY_PRESSED, evento -> {
+            if (evento.getCode() == KeyCode.ENTER) {
+                seleccionarRol(rol, nombreRol);
+                evento.consume();
+            }
+        });
+    }
+
+    private void actualizarEstiloRol(Button boton, boolean seleccionado) {
+        if (seleccionado) {
+            if (!boton.getStyleClass().contains("boton-rol-activo")) {
+                boton.getStyleClass().add("boton-rol-activo");
+            }
+        } else {
+            boton.getStyleClass().remove("boton-rol-activo");
+        }
+    }
+
+    private void configurarAnimacionHover(Button boton) {
+        ScaleTransition animacion = new ScaleTransition(Duration.millis(130), boton);
+        boton.setOnMouseEntered(event -> {
+            animacion.setToX(1.04);
+            animacion.setToY(1.04);
+            animacion.playFromStart();
+        });
+        boton.setOnMouseExited(event -> {
+            animacion.setToX(1);
+            animacion.setToY(1);
+            animacion.playFromStart();
+        });
     }
 
     @FXML

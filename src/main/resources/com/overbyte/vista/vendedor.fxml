@@ -6,69 +6,104 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/17"
+<HBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.overbyte.controllers.VendedorController"
-      spacing="10"
       stylesheets="@../styles/estilos.css"
-      styleClass="fondo-login">
+      styleClass="main-window">
 
-    <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
-
-    <!-- Encabezado -->
-    <VBox alignment="CENTER_LEFT" spacing="4">
-        <Label text="&#128176;" styleClass="icono-logo"/>
-        <Label text="PUNTO DE VENTA" styleClass="titulo"/>
-        <Label text="Sistema de gestion de inventario y ventas" styleClass="subtitulo"/>
+    <VBox styleClass="sidebar" maxWidth="240" minWidth="220" prefWidth="230">
+        <VBox alignment="CENTER" styleClass="logo-container" maxWidth="Infinity">
+            <Button styleClass="logo-icon" text="₿"/>
+            <Label text="Punto de venta" styleClass="logo-text"/>
+        </VBox>
+        <VBox spacing="4" styleClass="nav-menu" maxWidth="Infinity">
+            <Label text="MENU PRINCIPAL" styleClass="nav-caption"/>
+            <Button fx:id="navNuevaVenta" text="Nueva venta" styleClass="nav-button"
+                    onAction="#mostrarNuevaVenta" graphicTextGap="13" maxWidth="Infinity">
+                <graphic><Label text="＋" styleClass="nav-icon"/></graphic>
+            </Button>
+            <Button fx:id="navCarrito" text="Carrito" styleClass="nav-button"
+                    onAction="#mostrarCarrito" graphicTextGap="13" maxWidth="Infinity">
+                <graphic><Label text="▣" styleClass="nav-icon"/></graphic>
+            </Button>
+        </VBox>
+        <Region VBox.vgrow="ALWAYS"/>
+        <VBox spacing="8" styleClass="nav-menu" maxWidth="Infinity">
+            <Label fx:id="etiquetaVendedor" text="Cajero: --" styleClass="texto-secundario"/>
+            <Button fx:id="navCerrarSesion" text="Cerrar sesión"
+                    styleClass="nav-button nav-logout" onAction="#cerrarSesion"
+                    graphicTextGap="13" maxWidth="Infinity">
+                <graphic><Label text="↪" styleClass="nav-icon"/></graphic>
+            </Button>
+        </VBox>
     </VBox>
 
-    <HBox spacing="16" alignment="TOP_LEFT" VBox.vgrow="ALWAYS">
-
-        <!-- Busqueda de productos -->
-        <VBox alignment="TOP_LEFT" spacing="12" styleClass="tarjeta-login, tarjeta-compacta" HBox.hgrow="ALWAYS">
-            <Label text="Buscar producto" styleClass="titulo-formulario"/>
-            <VBox spacing="8">
-                <Label text="Codigo, nombre o marca" styleClass="etiqueta"/>
-                <TextField fx:id="campoBusqueda" promptText="Buscar producto..." styleClass="campo"/>
+    <VBox styleClass="main-content" HBox.hgrow="ALWAYS">
+        <HBox alignment="CENTER_LEFT" styleClass="header">
+            <VBox spacing="3">
+                <Label fx:id="lblTituloSeccion" text="Nueva venta" styleClass="header-title"/>
+                <Label text="Sistema de gestión de inventario y ventas" styleClass="header-subtitle"/>
             </VBox>
-            <Button text="BUSCAR" onAction="#buscarProducto" maxWidth="Infinity" styleClass="boton-principal"/>
-            <Label text="Productos disponibles" styleClass="etiqueta"/>
-            <ScrollPane fx:id="scrollProductos" styleClass="rejilla" fitToWidth="true"
-                        hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS" prefHeight="400">
-                <VBox fx:id="tablaProductos" alignment="TOP_LEFT"/>
-            </ScrollPane>
-        </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
 
-        <!-- Carrito -->
-        <VBox alignment="TOP_LEFT" spacing="12" styleClass="tarjeta-login, tarjeta-compacta" HBox.hgrow="ALWAYS">
-            <Label text="Carrito de compra" styleClass="titulo-formulario"/>
-            <VBox spacing="8">
-                <Label text="Nombre del cliente" styleClass="etiqueta"/>
-                <TextField fx:id="campoCliente" promptText="Consumidor final" styleClass="campo"/>
-            </VBox>
-            <Label text="Items en carrito" styleClass="etiqueta"/>
-            <ScrollPane fx:id="scrollCarrito" styleClass="rejilla" fitToWidth="true"
-                        hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS" prefHeight="300">
-                <VBox fx:id="tablaCarrito" alignment="TOP_LEFT"/>
-            </ScrollPane>
-            <Label fx:id="lblTotalCarrito" text="Total: $0.00" styleClass="titulo-formulario"/>
-            <HBox spacing="8">
-                <Button text="VENDER CARRITO" onAction="#venderCarrito" maxWidth="Infinity"
-                        styleClass="boton-principal" HBox.hgrow="ALWAYS"/>
-                <Button text="Vaciar" onAction="#vaciarCarrito" styleClass="boton-rol"/>
-            </HBox>
-            <Separator/>
-            <Label text="Otras operaciones" styleClass="etiqueta"/>
-            <HBox spacing="8" alignment="CENTER">
-                <Button text="Eliminar venta" onAction="#eliminarVenta" maxWidth="Infinity" styleClass="boton-rol" HBox.hgrow="ALWAYS"/>
-                <Button text="Consultar garantia" onAction="#consultarGarantia" maxWidth="Infinity" styleClass="boton-rol" HBox.hgrow="ALWAYS"/>
-            </HBox>
-            <Button text="Importar orden CSV" onAction="#importarOrdenDesdeArchivo" maxWidth="Infinity" styleClass="boton-rol"/>
-            <Label fx:id="etiquetaVendedor" text="Vendedor: --" styleClass="texto-secundario"/>
+        <VBox spacing="14" styleClass="role-content" VBox.vgrow="ALWAYS">
             <Label fx:id="mensaje" text="" wrapText="true" styleClass="mensaje"/>
-            <Button text="Cerrar sesion" onAction="#cerrarSesion" maxWidth="Infinity" styleClass="boton-rol"/>
+
+            <VBox fx:id="vistaNuevaVenta" spacing="14" VBox.vgrow="ALWAYS">
+                <VBox alignment="TOP_LEFT" spacing="12"
+                      styleClass="tarjeta-login, tarjeta-compacta" VBox.vgrow="ALWAYS">
+                    <Label text="Buscar producto" styleClass="titulo-formulario"/>
+                    <VBox spacing="8">
+                        <Label text="Código, nombre o marca" styleClass="etiqueta"/>
+                        <TextField fx:id="campoBusqueda" promptText="Buscar producto..." styleClass="campo"/>
+                    </VBox>
+                    <Button text="BUSCAR" onAction="#buscarProducto"
+                            maxWidth="Infinity" styleClass="boton-principal"/>
+                    <Label text="Productos disponibles" styleClass="etiqueta"/>
+                    <ScrollPane fx:id="scrollProductos" styleClass="rejilla" fitToWidth="true"
+                                hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS"
+                                prefHeight="400">
+                        <VBox fx:id="tablaProductos" alignment="TOP_LEFT"/>
+                    </ScrollPane>
+                </VBox>
+            </VBox>
+
+            <VBox fx:id="vistaCarrito" spacing="12" visible="false" managed="false"
+                  styleClass="tarjeta-login, tarjeta-compacta" VBox.vgrow="ALWAYS">
+                <Label text="Carrito de compra" styleClass="titulo-formulario"/>
+                <VBox spacing="8">
+                    <Label text="Nombre del cliente" styleClass="etiqueta"/>
+                    <TextField fx:id="campoCliente" promptText="Consumidor final" styleClass="campo"/>
+                </VBox>
+                <Label text="Artículos en carrito" styleClass="etiqueta"/>
+                <ScrollPane fx:id="scrollCarrito" styleClass="rejilla" fitToWidth="true"
+                            hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS"
+                            prefHeight="300">
+                    <VBox fx:id="tablaCarrito" alignment="TOP_LEFT"/>
+                </ScrollPane>
+                <Label fx:id="lblTotalCarrito" text="Total: $0.00" styleClass="titulo-formulario"/>
+                <HBox spacing="8">
+                    <Button text="VENDER CARRITO" onAction="#venderCarrito"
+                            maxWidth="Infinity" styleClass="boton-principal" HBox.hgrow="ALWAYS"/>
+                    <Button text="Vaciar" onAction="#vaciarCarrito" styleClass="boton-rol"/>
+                </HBox>
+                <Separator/>
+                <Label text="Otras operaciones" styleClass="etiqueta"/>
+                <HBox spacing="8" alignment="CENTER">
+                    <Button text="Eliminar venta" onAction="#eliminarVenta"
+                            maxWidth="Infinity" styleClass="boton-rol" HBox.hgrow="ALWAYS"/>
+                    <Button text="Consultar garantía" onAction="#consultarGarantia"
+                            maxWidth="Infinity" styleClass="boton-rol" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <Button text="Importar orden CSV" onAction="#importarOrdenDesdeArchivo"
+                        maxWidth="Infinity" styleClass="boton-rol"/>
+            </VBox>
         </VBox>
-    </HBox>
-</VBox>
+        <padding><Insets top="22" right="24" bottom="22" left="24"/></padding>
+    </VBox>
+</HBox>

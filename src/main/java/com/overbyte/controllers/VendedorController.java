@@ -1,5 +1,7 @@
 package com.overbyte.controllers;
 
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -8,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import models.Producto;
 import user.Empleado;
 import user.Vendedor;
@@ -36,6 +39,24 @@ public class VendedorController {
     private Label mensaje;
 
     @FXML
+    private Label lblTituloSeccion;
+
+    @FXML
+    private VBox vistaNuevaVenta;
+
+    @FXML
+    private VBox vistaCarrito;
+
+    @FXML
+    private Button navNuevaVenta;
+
+    @FXML
+    private Button navCarrito;
+
+    @FXML
+    private Button navCerrarSesion;
+
+    @FXML
     private VBox tablaProductos;
 
     @FXML
@@ -55,15 +76,67 @@ public class VendedorController {
             empleado.getContrasena()
         );
         this.motorCSV = new MotorCSV();
+        etiquetaVendedor.setText("Cajero: " + empleado.getNombre());
     }
 
     @FXML
     private void initialize() {
         mensaje.setText("");
         actualizarTotalCarrito();
+        configurarAnimacionNavegacion(navNuevaVenta);
+        configurarAnimacionNavegacion(navCarrito);
+        configurarAnimacionNavegacion(navCerrarSesion);
+        mostrarNuevaVenta();
         if (empleado != null) {
-            etiquetaVendedor.setText("Vendedor: " + empleado.getNombre());
+            etiquetaVendedor.setText("Cajero: " + empleado.getNombre());
         }
+    }
+
+    @FXML
+    private void mostrarNuevaVenta() {
+        mostrarSeccion(vistaNuevaVenta, navNuevaVenta, "Nueva venta");
+    }
+
+    @FXML
+    private void mostrarCarrito() {
+        mostrarSeccion(vistaCarrito, navCarrito, "Carrito");
+    }
+
+    private void mostrarSeccion(VBox vista, Button pestana, String titulo) {
+        vistaNuevaVenta.setVisible(vista == vistaNuevaVenta);
+        vistaNuevaVenta.setManaged(vista == vistaNuevaVenta);
+        vistaCarrito.setVisible(vista == vistaCarrito);
+        vistaCarrito.setManaged(vista == vistaCarrito);
+        lblTituloSeccion.setText(titulo);
+        navNuevaVenta.getStyleClass().remove("nav-button-activo");
+        navCarrito.getStyleClass().remove("nav-button-activo");
+        if (!pestana.getStyleClass().contains("nav-button-activo")) {
+            pestana.getStyleClass().add("nav-button-activo");
+        }
+    }
+
+    private void configurarAnimacionNavegacion(Button boton) {
+        ScaleTransition escala = new ScaleTransition(Duration.millis(140), boton);
+        TranslateTransition desplazamiento =
+                new TranslateTransition(Duration.millis(140), boton);
+        boton.setOnMouseEntered(event -> {
+            escala.stop();
+            escala.setToX(1.015);
+            escala.setToY(1.015);
+            escala.playFromStart();
+            desplazamiento.stop();
+            desplazamiento.setToX(3);
+            desplazamiento.playFromStart();
+        });
+        boton.setOnMouseExited(event -> {
+            escala.stop();
+            escala.setToX(1);
+            escala.setToY(1);
+            escala.playFromStart();
+            desplazamiento.stop();
+            desplazamiento.setToX(0);
+            desplazamiento.playFromStart();
+        });
     }
 
     /* ===================== BUSCAR PRODUCTOS ===================== */

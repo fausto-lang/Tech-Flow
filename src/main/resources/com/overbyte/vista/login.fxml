@@ -53,7 +53,8 @@
         </VBox>
 
         <Label fx:id="mensaje" text="" wrapText="true" styleClass="mensaje"/>
-        <Button text="INICIAR SESION" onAction="#iniciarSesion" maxWidth="Infinity" styleClass="boton-principal"/>
+        <Button fx:id="btnIniciarSesion" text="INICIAR SESION" onAction="#iniciarSesion"
+                maxWidth="Infinity" styleClass="boton-principal"/>
         <Label text="Acceso seguro · Tech-Flow" styleClass="pie-tarjeta"/>
     </VBox>
 </VBox>
