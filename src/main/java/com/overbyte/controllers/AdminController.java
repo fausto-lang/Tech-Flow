@@ -3,6 +3,7 @@ package com.overbyte.controllers;
 import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -10,8 +11,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
 import user.Empleado;
 import user.Gestor;
 import user.Rol;
@@ -19,6 +22,14 @@ import models.Producto;
 import models.Proveedor;
 import services.MotorCSV;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Locale;
 
@@ -173,6 +184,7 @@ public class AdminController {
         List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("inventario.csv").toString());
 
         TableView<String[]> tabla = new TableView<>();
+        configurarTablaAdmin(tabla);
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         TableColumn<String[], String> colId = new TableColumn<>("ID Producto");
@@ -210,33 +222,98 @@ public class AdminController {
             tabla.getItems().add(fila);
         }
 
-        tabla.setPrefHeight(320);
-
-        ScrollPane scrollTabla = new ScrollPane(tabla);
-        scrollTabla.setFitToWidth(true);
-        scrollTabla.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollTabla.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollTabla.setPrefHeight(340);
-
-        // Mini formulario: productos proximos a agotarse
-        Label lblBajoStock = new Label("Productos con stock bajo (<= 5):");
-        lblBajoStock.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #fca5a5;");
+        tabla.setPrefHeight(400);
+        VBox inventarioCompleto = new VBox(12);
+        inventarioCompleto.getStyleClass().add("inventario-apartado");
+        Label tituloInventario = new Label("Inventario completo");
+        tituloInventario.getStyleClass().add("inventario-titulo");
+        Label descripcionInventario = new Label(
+            "Todos los productos registrados en el sistema."
+        );
+        descripcionInventario.getStyleClass().add("inventario-descripcion");
+        VBox.setVgrow(tabla, Priority.ALWAYS);
+        inventarioCompleto.getChildren().addAll(
+            tituloInventario, descripcionInventario, tabla
+        );
 
         List<Producto> bajos = gestor.listarProductosProximosAAgotarse();
-        VBox listaBajoStock = new VBox(6);
+        VBox listaBajoStock = new VBox(8);
         listaBajoStock.setAlignment(Pos.TOP_LEFT);
         if (bajos.isEmpty()) {
-            listaBajoStock.getChildren().add(new Label("Sin productos con stock bajo."));
+            Label sinCriticos = new Label("No hay productos con stock crítico.");
+            sinCriticos.getStyleClass().add("inventario-vacio");
+            listaBajoStock.getChildren().add(sinCriticos);
         } else {
             for (Producto p : bajos) {
-                Label lbl = new Label(p.getIdProducto() + " | " + p.getNombre() + " | Stock: " + p.getStock());
-                lbl.setStyle("-fx-font-size: 12px;");
-                listaBajoStock.getChildren().add(lbl);
+                Label nombre = new Label(p.getNombre());
+                nombre.getStyleClass().add("critico-producto-nombre");
+                Label codigo = new Label(p.getIdProducto() + " · " + p.getCategoria());
+                codigo.getStyleClass().add("critico-producto-detalle");
+                VBox detalles = new VBox(4, nombre, codigo);
+                HBox.setHgrow(detalles, Priority.ALWAYS);
+
+                Label stock = new Label(p.getStock() + " uds.");
+                stock.getStyleClass().add("critico-stock");
+                HBox filaCritica = new HBox(10, detalles, stock);
+                filaCritica.setAlignment(Pos.CENTER_LEFT);
+                filaCritica.getStyleClass().add("critico-producto");
+                listaBajoStock.getChildren().add(filaCritica);
             }
         }
 
-        seccion.getChildren().addAll(scrollTabla, lblBajoStock, listaBajoStock);
-        seccion.setPrefHeight(550);
+        VBox inventarioCritico = new VBox(12);
+        inventarioCritico.getStyleClass().add("inventario-apartado");
+        Label tituloCritico = new Label("Productos por agotarse");
+        tituloCritico.getStyleClass().add("inventario-titulo");
+        Label descripcionCritico = new Label(
+            "Stock crítico: 5 unidades o menos."
+        );
+        descripcionCritico.getStyleClass().add("inventario-descripcion");
+        Label cantidadCritica = new Label(String.valueOf(bajos.size()));
+        cantidadCritica.getStyleClass().add("critico-contador");
+        HBox encabezadoCritico = new HBox(10, tituloCritico, cantidadCritica);
+        encabezadoCritico.setAlignment(Pos.CENTER_LEFT);
+
+        ScrollPane scrollCritico = new ScrollPane(listaBajoStock);
+        scrollCritico.setFitToWidth(true);
+        scrollCritico.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollCritico.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        VBox.setVgrow(scrollCritico, Priority.ALWAYS);
+        inventarioCritico.getChildren().addAll(
+            encabezadoCritico, descripcionCritico, scrollCritico
+        );
+
+        Button selectorCompleto = crearSelectorInventario(
+            "Inventario completo", filasProductosValidas(filas) + " productos", "▦"
+        );
+        Button selectorCritico = crearSelectorInventario(
+            "Productos por agotarse", bajos.size() + " productos", "!"
+        );
+        HBox selectores = new HBox(12, selectorCompleto, selectorCritico);
+        selectorCompleto.setMaxWidth(Double.MAX_VALUE);
+        selectorCritico.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(selectorCompleto, Priority.ALWAYS);
+        HBox.setHgrow(selectorCritico, Priority.ALWAYS);
+
+        VBox contenidoApartado = new VBox(inventarioCompleto, inventarioCritico);
+        VBox.setVgrow(contenidoApartado, Priority.ALWAYS);
+        VBox.setVgrow(inventarioCompleto, Priority.ALWAYS);
+        VBox.setVgrow(inventarioCritico, Priority.ALWAYS);
+        inventarioCompleto.setMaxHeight(Double.MAX_VALUE);
+        inventarioCritico.setMaxHeight(Double.MAX_VALUE);
+        inventarioCritico.setVisible(false);
+        inventarioCritico.setManaged(false);
+        selectorCompleto.getStyleClass().add("selector-inventario-activo");
+        selectorCompleto.setOnAction(event -> seleccionarApartadoInventario(
+            selectorCompleto, inventarioCompleto, selectorCritico, inventarioCritico
+        ));
+        selectorCritico.setOnAction(event -> seleccionarApartadoInventario(
+            selectorCritico, inventarioCritico, selectorCompleto, inventarioCompleto
+        ));
+
+        seccion.getChildren().addAll(selectores, contenidoApartado);
+        VBox.setVgrow(seccion, Priority.ALWAYS);
+        seccion.setFillWidth(true);
 
         ScrollPane scroll = new ScrollPane(seccion);
         scroll.setFitToWidth(true);
@@ -263,13 +340,29 @@ public class AdminController {
         int count = 0;
 
         TableView<String[]> tabla = new TableView<>();
+        configurarTablaAdmin(tabla);
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         TableColumn<String[], String> colFolio = new TableColumn<>("Folio");
         colFolio.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()[0]));
+        colFolio.setPrefWidth(145);
 
         TableColumn<String[], String> colCliente = new TableColumn<>("Cliente");
         colCliente.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()[4]));
+        colCliente.setPrefWidth(155);
+
+        TableColumn<String[], String> colProducto = new TableColumn<>("Producto");
+        colProducto.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()[6]));
+        colProducto.setPrefWidth(220);
+
+        TableColumn<String[], String> colFecha = new TableColumn<>("Fecha y hora");
+        colFecha.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(
+                formatearFechaVenta(param.getValue()[10])));
+        colFecha.setPrefWidth(155);
+
+        TableColumn<String[], String> colCantidad = new TableColumn<>("Unidades");
+        colCantidad.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()[7]));
+        colCantidad.setPrefWidth(90);
 
         TableColumn<String[], String> colTotal = new TableColumn<>("Total");
         colTotal.setCellValueFactory(param -> {
@@ -277,11 +370,12 @@ public class AdminController {
                 double t = Double.parseDouble(param.getValue()[9]);
                 return new javafx.beans.property.SimpleStringProperty(String.format(Locale.ROOT, "$%.2f", t));
             } catch (NumberFormatException e) {
-                return new javafx.beans.property.SimpleStringProperty("$0.00");
+                return new javafx.beans.property.SimpleStringProperty("—");
             }
         });
+        colTotal.setPrefWidth(110);
 
-        tabla.getColumns().addAll(colFolio, colCliente, colTotal);
+        tabla.getColumns().addAll(colFolio, colCliente, colProducto, colFecha, colCantidad, colTotal);
 
         for (int i = 1; i < filas.size(); i++) {
             String[] fila = filas.get(i);
@@ -300,50 +394,151 @@ public class AdminController {
             tabla.getItems().add(fila);
         }
 
-        Label lblTotal = new Label(
-            "Total del dia: " + String.format(Locale.ROOT, "$%.2f", totalDia) + "  |  "
-            + count + " ventas"
+        Label lblTotal = new Label(String.format(Locale.ROOT, "$%.2f", totalDia));
+        lblTotal.getStyleClass().add("ventas-total-valor");
+        Label lblCantidadVentas = new Label(count + (count == 1 ? " venta confirmada" : " ventas confirmadas"));
+        lblCantidadVentas.getStyleClass().add("ventas-total-detalle");
+        Label etiquetaTotal = new Label("TOTAL DE HOY");
+        etiquetaTotal.getStyleClass().add("ventas-total-etiqueta");
+        VBox resumenVentas = new VBox(5, etiquetaTotal, lblTotal, lblCantidadVentas);
+        resumenVentas.getStyleClass().add("ventas-resumen");
+
+        Button btnExportar = new Button("Exportar informe");
+        btnExportar.getStyleClass().add("boton-exportar");
+        double totalDelDia = totalDia;
+        int cantidadDelDia = count;
+        btnExportar.setOnAction(event ->
+            exportarInformeVentas(tabla, totalDelDia, cantidadDelDia)
         );
-        lblTotal.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2563eb;");
 
-        tabla.setPrefHeight(320);
+        HBox encabezadoSeccion = new HBox(12);
+        encabezadoSeccion.setAlignment(Pos.CENTER_LEFT);
+        Label tituloVentas = new Label("Ventas del día");
+        tituloVentas.getStyleClass().add("ventas-titulo");
+        Label subtituloVentas = new Label("Ventas confirmadas registradas hoy");
+        subtituloVentas.getStyleClass().add("ventas-subtitulo");
+        VBox textoEncabezado = new VBox(4, tituloVentas, subtituloVentas);
+        Region espacio = new Region();
+        HBox.setHgrow(espacio, Priority.ALWAYS);
+        encabezadoSeccion.getChildren().addAll(textoEncabezado, espacio, btnExportar);
 
-        VBox contenedorTabla = new VBox(15, lblTotal, tabla);
-        contenedorTabla.setAlignment(Pos.TOP_LEFT);
-
-        ScrollPane scrollTabla = new ScrollPane(contenedorTabla);
-        scrollTabla.setFitToWidth(true);
-        scrollTabla.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollTabla.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollTabla.setPrefHeight(380);
-
-        // Boton exportar reporte
-        Button btnExportar = new Button("Exportar reporte CSV");
-        btnExportar.setStyle("-fx-padding: 8px 16px; -fx-font-size: 13px;");
-        btnExportar.setOnAction(event -> {
-            TextInputDialog dialog = new TextInputDialog("reporte.csv");
-            dialog.setTitle("Exportar reporte");
-            dialog.setHeaderText("Ingresa la ruta del archivo de salida:");
-            dialog.setContentText("Ruta:");
-            dialog.showAndWait().ifPresent(ruta -> {
-                boolean ok = gestor.exportarReporteExcelOCSV(ruta);
-                if (ok) {
-                    mostrarAlerta("Exito", "Reporte exportado a: " + ruta);
-                } else {
-                    mostrarAlerta("Error", "No se pudo exportar el reporte.");
-                }
-            });
-        });
-
-        seccion.getChildren().addAll(scrollTabla, btnExportar);
-        seccion.setPrefHeight(550);
-
+        VBox contenedorTabla = new VBox(14, resumenVentas, tabla);
+        contenedorTabla.getStyleClass().add("ventas-tabla-card");
+        VBox.setVgrow(tabla, Priority.ALWAYS);
+        VBox.setVgrow(contenedorTabla, Priority.ALWAYS);
+        seccion.getChildren().addAll(encabezadoSeccion, contenedorTabla);
+        seccion.setFillWidth(true);
         ScrollPane scroll = new ScrollPane(seccion);
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-
+        VBox.setVgrow(scroll, Priority.ALWAYS);
         contenidoCentro.getChildren().add(scroll);
+    }
+
+    private void exportarInformeVentas(TableView<String[]> tabla, double totalDia, int cantidadVentas) {
+        FileChooser selector = new FileChooser();
+        selector.setTitle("Guardar informe de ventas");
+        selector.setInitialFileName("informe-ventas-" + LocalDate.now() + ".txt");
+        selector.getExtensionFilters().add(
+            new FileChooser.ExtensionFilter("Informe de texto (*.txt)", "*.txt")
+        );
+        java.io.File archivo = selector.showSaveDialog(contenidoCentro.getScene().getWindow());
+        if (archivo == null) {
+            return;
+        }
+
+        try {
+            Path ruta = archivo.toPath();
+            if (!ruta.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".txt")) {
+                ruta = ruta.resolveSibling(ruta.getFileName() + ".txt");
+            }
+            Files.writeString(
+                ruta,
+                crearContenidoInforme(tabla.getItems(), totalDia, cantidadVentas),
+                StandardCharsets.UTF_8
+            );
+            mostrarAlerta("Informe exportado", "El informe se guardó correctamente en:\n" + ruta);
+        } catch (IOException e) {
+            mostrarAlerta("Error al exportar", "No se pudo guardar el informe: " + e.getMessage());
+        }
+    }
+
+    private String crearContenidoInforme(List<String[]> ventas, double totalDia, int cantidadVentas) {
+        int[] anchos = {14, 20, 26, 16, 8, 12};
+        String[] encabezados = {"FOLIO", "CLIENTE", "PRODUCTO", "FECHA Y HORA", "UNIDADES", "TOTAL"};
+        String borde = crearBordeTabla(anchos);
+        StringBuilder informe = new StringBuilder();
+        String titulo = "TECH-FLOW | INFORME DE VENTAS";
+        informe.append(titulo).append('\n');
+        informe.append("Fecha del informe: ").append(LocalDate.now()).append('\n');
+        informe.append("Generado: ").append(LocalDateTime.now().format(
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+        )).append('\n');
+        informe.append("Ventas confirmadas: ").append(cantidadVentas)
+                .append("    Total del día: ")
+                .append(String.format(Locale.ROOT, "$%.2f", totalDia)).append("\n\n");
+        informe.append(borde).append('\n');
+        informe.append(filaInforme(encabezados, anchos)).append('\n');
+        informe.append(borde).append('\n');
+        for (String[] venta : ventas) {
+            String[] columnas = {
+                valorVenta(venta, 0),
+                valorVenta(venta, 4),
+                valorVenta(venta, 6),
+                formatearFechaVenta(valorVenta(venta, 10)),
+                valorVenta(venta, 7),
+                formatearTotalVenta(valorVenta(venta, 9))
+            };
+            informe.append(filaInforme(columnas, anchos)).append('\n');
+        }
+        informe.append(borde).append('\n');
+        informe.append("Fin del informe");
+        return informe.toString();
+    }
+
+    private String crearBordeTabla(int[] anchos) {
+        StringBuilder borde = new StringBuilder("+");
+        for (int ancho : anchos) {
+            borde.append("-".repeat(ancho + 2)).append('+');
+        }
+        return borde.toString();
+    }
+
+    private String filaInforme(String[] columnas, int[] anchos) {
+        StringBuilder fila = new StringBuilder("|");
+        for (int i = 0; i < anchos.length; i++) {
+            fila.append(' ').append(ajustarTexto(columnas[i], anchos[i])).append(" |");
+        }
+        return fila.toString();
+    }
+
+    private String ajustarTexto(String texto, int ancho) {
+        String limpio = texto.replace('\n', ' ').replace('\r', ' ').replace('|', '/').trim();
+        if (limpio.length() > ancho) {
+            return limpio.substring(0, ancho - 1) + "…";
+        }
+        return String.format("%-" + ancho + "s", limpio);
+    }
+
+    private String valorVenta(String[] fila, int indice) {
+        return indice < fila.length && !fila[indice].isBlank() ? fila[indice].trim() : "—";
+    }
+
+    private String formatearFechaVenta(String fecha) {
+        try {
+            return LocalDateTime.parse(fecha).format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        } catch (DateTimeParseException e) {
+            return fecha.length() > 16 ? fecha.substring(0, 16) : fecha;
+        }
+    }
+
+    private String formatearTotalVenta(String total) {
+        try {
+            return String.format(Locale.ROOT, "$%.2f", Double.parseDouble(total));
+        } catch (NumberFormatException e) {
+            return "—";
+        }
     }
 
     /* ----------- EMPLEADOS ----------- */
@@ -356,126 +551,191 @@ public class AdminController {
 
         VBox seccion = new VBox(15);
         seccion.setAlignment(Pos.TOP_LEFT);
-
-        // Tabla de empleados
         List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("empleado.csv").toString());
 
         TableView<String[]> tabla = new TableView<>();
+        configurarTablaAdmin(tabla);
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        tabla.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
         TableColumn<String[], String> colCi = new TableColumn<>("CI");
         colCi.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()[0]));
+        colCi.setPrefWidth(180);
 
         TableColumn<String[], String> colNombre = new TableColumn<>("Nombre");
         colNombre.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()[1]));
+        colNombre.setPrefWidth(260);
 
         TableColumn<String[], String> colRol = new TableColumn<>("Rol");
         colRol.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()[2]));
+        colRol.setPrefWidth(180);
 
         tabla.getColumns().addAll(colCi, colNombre, colRol);
 
         for (int i = 1; i < filas.size(); i++) {
             String[] fila = filas.get(i);
-            if (fila.length < 4) continue;
+            if (fila.length < 4 || fila[0].equalsIgnoreCase("ci")) {
+                continue;
+            }
             tabla.getItems().add(fila);
         }
 
-        tabla.setPrefHeight(260);
+        Label titulo = new Label("Equipo de trabajo");
+        titulo.getStyleClass().add("ventas-titulo");
+        Label subtitulo = new Label("Consulta y administra los usuarios del sistema.");
+        subtitulo.getStyleClass().add("ventas-subtitulo");
+        Label cantidadEmpleados = new Label(tabla.getItems().size() + " empleados");
+        cantidadEmpleados.getStyleClass().add("critico-contador");
 
-        ScrollPane scrollTabla = new ScrollPane(tabla);
-        scrollTabla.setFitToWidth(true);
-        scrollTabla.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollTabla.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollTabla.setPrefHeight(280);
+        Button btnAnadir = new Button("Añadir empleado");
+        btnAnadir.getStyleClass().add("boton-exportar");
+        btnAnadir.setOnAction(event -> mostrarDialogoAnadirEmpleado());
 
-        // Mini formulario: agregar empleado
-        VBox formAgregar = new VBox(8);
-        formAgregar.setAlignment(Pos.TOP_LEFT);
-        formAgregar.setStyle("-fx-padding: 10; -fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 8;");
+        Button btnEliminar = new Button("Eliminar seleccionado");
+        btnEliminar.getStyleClass().add("boton-eliminar-empleado");
+        btnEliminar.disableProperty().bind(tabla.getSelectionModel().selectedItemProperty().isNull());
+        btnEliminar.setOnAction(event -> eliminarEmpleadoSeleccionado(tabla));
 
-        Label lblForm = new Label("Agregar empleado");
-        lblForm.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
+        HBox acciones = new HBox(10, btnAnadir, btnEliminar);
+        acciones.setAlignment(Pos.CENTER_RIGHT);
+        HBox.setHgrow(titulo, Priority.ALWAYS);
+        VBox encabezado = new VBox(5, titulo, subtitulo);
+        Region espacio = new Region();
+        HBox.setHgrow(espacio, Priority.ALWAYS);
+        HBox cabecera = new HBox(12, encabezado, cantidadEmpleados, espacio, acciones);
+        cabecera.setAlignment(Pos.CENTER_LEFT);
 
-        TextField tfCi = new TextField();
-        tfCi.setPromptText("CI");
-        tfCi.setPrefWidth(120);
-
-        TextField tfNombre = new TextField();
-        tfNombre.setPromptText("Nombre");
-        tfNombre.setPrefWidth(200);
-
-        TextField tfRol = new TextField();
-        tfRol.setPromptText("Rol (ADMINISTRADOR, CAJERO, ALMACENERO)");
-        tfRol.setPrefWidth(260);
-
-        TextField tfContrasena = new TextField();
-        tfContrasena.setPromptText("Contrasena");
-        tfContrasena.setPrefWidth(150);
-
-        Button btnAgregar = new Button("Agregar");
-        btnAgregar.setStyle("-fx-padding: 6px 14px; -fx-font-size: 12px;");
-        btnAgregar.setOnAction(event -> {
-            try {
-                Rol rol = Rol.valueOf(tfRol.getText().trim().toUpperCase());
-                Empleado nuevo = new Empleado(tfCi.getText().trim(), tfNombre.getText().trim(),
-                        tfContrasena.getText().trim(), rol);
-                boolean ok = gestor.anadirEmpleado(nuevo);
-                if (ok) {
-                    mostrarAlerta("Exito", "Empleado agregado correctamente.");
-                    tfCi.clear(); tfNombre.clear(); tfRol.clear(); tfContrasena.clear();
-                    mostrarEmpleados();
-                } else {
-                    mostrarAlerta("Error", "No se pudo agregar el empleado. Verifica los datos.");
-                }
-            } catch (IllegalArgumentException e) {
-                mostrarAlerta("Error", "Rol invalido. Usa: ADMINISTRADOR, CAJERO o ALMACENERO.");
-            }
-        });
-
-        HBox filaForm = new HBox(8, tfCi, tfNombre, tfRol, tfContrasena, btnAgregar);
-        filaForm.setAlignment(Pos.CENTER_LEFT);
-
-        formAgregar.getChildren().addAll(lblForm, filaForm);
-
-        // Mini formulario: eliminar empleado
-        VBox formEliminar = new VBox(8);
-        formEliminar.setAlignment(Pos.TOP_LEFT);
-        formEliminar.setStyle("-fx-padding: 10; -fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 8;");
-
-        Label lblElim = new Label("Eliminar empleado");
-        lblElim.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #fca5a5;");
-
-        TextField tfElimCi = new TextField();
-        tfElimCi.setPromptText("CI del empleado");
-        tfElimCi.setPrefWidth(200);
-
-        Button btnElim = new Button("Eliminar");
-        btnElim.setStyle("-fx-padding: 6px 14px; -fx-font-size: 12px; -fx-background-color: #fca5a5; -fx-text-fill: white;");
-        btnElim.setOnAction(event -> {
-            boolean ok = gestor.eliminarEmpleado(tfElimCi.getText().trim());
-            if (ok) {
-                mostrarAlerta("Exito", "Empleado eliminado correctamente.");
-                tfElimCi.clear();
-                mostrarEmpleados();
-            } else {
-                mostrarAlerta("Error", "No se pudo eliminar. Verifica el CI o que sea el ultimo administrador.");
-            }
-        });
-
-        HBox filaElim = new HBox(8, tfElimCi, btnElim);
-        filaElim.setAlignment(Pos.CENTER_LEFT);
-
-        formEliminar.getChildren().addAll(lblElim, filaElim);
-
-        seccion.getChildren().addAll(scrollTabla, formAgregar, formEliminar);
-        seccion.setPrefHeight(550);
+        VBox tarjeta = new VBox(12, tabla);
+        tarjeta.getStyleClass().add("ventas-tabla-card");
+        VBox.setVgrow(tabla, Priority.ALWAYS);
+        VBox.setVgrow(tarjeta, Priority.ALWAYS);
+        seccion.getChildren().addAll(cabecera, tarjeta);
+        VBox.setVgrow(seccion, Priority.ALWAYS);
+        seccion.setFillWidth(true);
 
         ScrollPane scroll = new ScrollPane(seccion);
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        VBox.setVgrow(scroll, Priority.ALWAYS);
 
         contenidoCentro.getChildren().add(scroll);
+    }
+
+    private void mostrarDialogoAnadirEmpleado() {
+        Dialog<Empleado> dialogo = new Dialog<>();
+        dialogo.setTitle("Añadir empleado");
+        dialogo.setHeaderText("Completa los datos del nuevo usuario.");
+        dialogo.initOwner(contenidoCentro.getScene().getWindow());
+        dialogo.getDialogPane().getStylesheets().add(
+            getClass().getResource("/com/overbyte/styles/estilos.css").toExternalForm()
+        );
+        dialogo.getDialogPane().getStyleClass().add("producto-dialog");
+
+        TextField ci = new TextField();
+        ci.setPromptText("Ej. 12345678");
+        TextField nombre = new TextField();
+        nombre.setPromptText("Nombre completo");
+        ComboBox<Rol> rol = new ComboBox<>();
+        rol.getItems().setAll(Rol.values());
+        rol.setPromptText("Selecciona un rol");
+        rol.setMaxWidth(Double.MAX_VALUE);
+        rol.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Rol valor) {
+                if (valor == null) {
+                    return "";
+                }
+                return switch (valor) {
+                    case ADMINISTRADOR -> "Administrador";
+                    case CAJERO -> "Cajero";
+                    case ALMACENERO -> "Almacenero";
+                };
+            }
+
+            @Override
+            public Rol fromString(String valor) {
+                return null;
+            }
+        });
+        PasswordField contrasena = new PasswordField();
+        contrasena.setPromptText("Contraseña");
+
+        VBox formulario = new VBox(8,
+            etiquetaCampo("Cédula / identificador"), ci,
+            etiquetaCampo("Nombre completo"), nombre,
+            etiquetaCampo("Rol"), rol,
+            etiquetaCampo("Contraseña"), contrasena
+        );
+        formulario.getStyleClass().add("producto-dialog-content");
+        dialogo.getDialogPane().setContent(formulario);
+
+        ButtonType guardar = new ButtonType("Guardar empleado", ButtonBar.ButtonData.OK_DONE);
+        dialogo.getDialogPane().getButtonTypes().addAll(guardar, ButtonType.CANCEL);
+        Button botonGuardar = (Button) dialogo.getDialogPane().lookupButton(guardar);
+        botonGuardar.getStyleClass().add("boton-mas");
+        botonGuardar.addEventFilter(ActionEvent.ACTION, event -> {
+            if (ci.getText().isBlank() || nombre.getText().isBlank()
+                    || contrasena.getText().isBlank() || rol.getValue() == null) {
+                event.consume();
+                mostrarAlerta("Datos incompletos", "Completa todos los campos y selecciona un rol.");
+            }
+        });
+        dialogo.setResultConverter(boton -> {
+            if (boton != guardar) {
+                return null;
+            }
+            return new Empleado(
+                ci.getText().trim(),
+                nombre.getText().trim(),
+                contrasena.getText(),
+                rol.getValue()
+            );
+        });
+
+        dialogo.showAndWait().ifPresent(nuevo -> {
+            if (gestor.anadirEmpleado(nuevo)) {
+                mostrarEmpleados();
+                mostrarAlerta("Empleado añadido", "El empleado se registró correctamente.");
+            } else {
+                mostrarAlerta("No se pudo añadir", "Verifica los datos y que el identificador no exista.");
+            }
+        });
+    }
+
+    private Label etiquetaCampo(String texto) {
+        Label etiqueta = new Label(texto);
+        etiqueta.getStyleClass().add("etiqueta");
+        return etiqueta;
+    }
+
+    private void eliminarEmpleadoSeleccionado(TableView<String[]> tabla) {
+        String[] seleccionado = tabla.getSelectionModel().getSelectedItem();
+        if (seleccionado == null || seleccionado.length == 0) {
+            return;
+        }
+        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmacion.setTitle("Eliminar empleado");
+        confirmacion.setHeaderText("¿Eliminar a " + seleccionado[1] + "?");
+        confirmacion.setContentText(
+            "Se quitará el acceso de este empleado al sistema. Esta acción no se puede deshacer."
+        );
+        confirmacion.initOwner(contenidoCentro.getScene().getWindow());
+        confirmacion.getDialogPane().getStylesheets().add(
+            getClass().getResource("/com/overbyte/styles/estilos.css").toExternalForm()
+        );
+        confirmacion.showAndWait().ifPresent(resultado -> {
+            if (resultado == ButtonType.OK) {
+                if (gestor.eliminarEmpleado(seleccionado[0])) {
+                    mostrarEmpleados();
+                } else {
+                    mostrarAlerta(
+                        "No se pudo eliminar",
+                        "No se puede eliminar el último administrador o el registro cambió."
+                    );
+                }
+            }
+        });
     }
 
     /* ----------- PRODUCTOS ----------- */
@@ -488,162 +748,229 @@ public class AdminController {
 
         VBox seccion = new VBox(15);
         seccion.setAlignment(Pos.TOP_LEFT);
-
-        // Tabla de productos
         List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("inventario.csv").toString());
 
         TableView<String[]> tabla = new TableView<>();
+        configurarTablaAdmin(tabla);
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        tabla.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
         TableColumn<String[], String> colId = new TableColumn<>("ID");
         colId.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()[0]));
+        colId.setPrefWidth(140);
 
         TableColumn<String[], String> colNombre = new TableColumn<>("Nombre");
         colNombre.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()[1]));
+        colNombre.setPrefWidth(220);
+
+        TableColumn<String[], String> colMarca = new TableColumn<>("Marca");
+        colMarca.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()[2]));
+        colMarca.setPrefWidth(130);
+
+        TableColumn<String[], String> colCategoria = new TableColumn<>("Categoría");
+        colCategoria.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()[3]));
+        colCategoria.setPrefWidth(130);
+
+        TableColumn<String[], String> colPrecioEntrada = new TableColumn<>("Precio compra");
+        colPrecioEntrada.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(
+                formatearTotalVenta(param.getValue()[5])));
+        colPrecioEntrada.setPrefWidth(120);
 
         TableColumn<String[], String> colPrecioVenta = new TableColumn<>("Precio Venta");
         colPrecioVenta.setCellValueFactory(param -> {
-            try {
-                double p = Double.parseDouble(param.getValue()[6]);
-                return new javafx.beans.property.SimpleStringProperty(String.format(Locale.ROOT, "$%.2f", p));
-            } catch (NumberFormatException e) {
-                return new javafx.beans.property.SimpleStringProperty("$0.00");
-            }
+            return new javafx.beans.property.SimpleStringProperty(formatearTotalVenta(param.getValue()[6]));
         });
+        colPrecioVenta.setPrefWidth(120);
 
         TableColumn<String[], String> colStock = new TableColumn<>("Stock");
         colStock.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()[7]));
+        colStock.setPrefWidth(90);
 
-        tabla.getColumns().addAll(colId, colNombre, colPrecioVenta, colStock);
+        tabla.getColumns().addAll(
+            colId, colNombre, colMarca, colCategoria,
+            colPrecioEntrada, colPrecioVenta, colStock
+        );
 
         for (int i = 1; i < filas.size(); i++) {
             String[] fila = filas.get(i);
-            if (fila.length < 8 || fila[0].equalsIgnoreCase("idProducto")) continue;
+            if (fila.length < 8 || fila[0].equalsIgnoreCase("idProducto")) {
+                continue;
+            }
             tabla.getItems().add(fila);
         }
 
-        tabla.setPrefHeight(240);
+        Label titulo = new Label("Catálogo de productos");
+        titulo.getStyleClass().add("ventas-titulo");
+        Label subtitulo = new Label("Administra los productos registrados en el inventario.");
+        subtitulo.getStyleClass().add("ventas-subtitulo");
+        VBox encabezado = new VBox(5, titulo, subtitulo);
 
-        ScrollPane scrollTabla = new ScrollPane(tabla);
-        scrollTabla.setFitToWidth(true);
-        scrollTabla.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollTabla.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollTabla.setPrefHeight(260);
+        Label cantidadProductos = new Label(tabla.getItems().size() + " productos");
+        cantidadProductos.getStyleClass().add("critico-contador");
 
-        // Mini formulario: agregar producto
-        VBox formAgregar = new VBox(8);
-        formAgregar.setAlignment(Pos.TOP_LEFT);
-        formAgregar.setStyle("-fx-padding: 10; -fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 8;");
+        Button btnAnadir = new Button("Añadir producto");
+        btnAnadir.getStyleClass().add("boton-exportar");
+        btnAnadir.setOnAction(event -> mostrarDialogoAnadirProducto());
 
-        Label lblForm = new Label("Agregar producto");
-        lblForm.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
+        Button btnEliminar = new Button("Eliminar seleccionado");
+        btnEliminar.getStyleClass().add("boton-eliminar-empleado");
+        btnEliminar.disableProperty().bind(tabla.getSelectionModel().selectedItemProperty().isNull());
+        btnEliminar.setOnAction(event -> eliminarProductoSeleccionado(tabla));
 
-        TextField tfId = new TextField();
-        tfId.setPromptText("ID producto");
-        tfId.setPrefWidth(110);
+        HBox acciones = new HBox(10, btnAnadir, btnEliminar);
+        acciones.setAlignment(Pos.CENTER_RIGHT);
+        Region espacio = new Region();
+        HBox.setHgrow(espacio, Priority.ALWAYS);
+        HBox cabecera = new HBox(12, encabezado, cantidadProductos, espacio, acciones);
+        cabecera.setAlignment(Pos.CENTER_LEFT);
 
-        TextField tfNombre = new TextField();
-        tfNombre.setPromptText("Nombre");
-        tfNombre.setPrefWidth(150);
-
-        TextField tfMarca = new TextField();
-        tfMarca.setPromptText("Marca");
-        tfMarca.setPrefWidth(110);
-
-        TextField tfCategoria = new TextField();
-        tfCategoria.setPromptText("Categoria");
-        tfCategoria.setPrefWidth(110);
-
-        TextField tfDescripcion = new TextField();
-        tfDescripcion.setPromptText("Descripcion");
-        tfDescripcion.setPrefWidth(150);
-
-        TextField tfPrecioE = new TextField();
-        tfPrecioE.setPromptText("Precio entrada");
-        tfPrecioE.setPrefWidth(100);
-
-        TextField tfPrecioV = new TextField();
-        tfPrecioV.setPromptText("Precio venta");
-        tfPrecioV.setPrefWidth(100);
-
-        TextField tfStock = new TextField();
-        tfStock.setPromptText("Stock");
-        tfStock.setPrefWidth(70);
-
-        Button btnAgregar = new Button("Agregar");
-        btnAgregar.setStyle("-fx-padding: 6px 14px; -fx-font-size: 12px;");
-        btnAgregar.setOnAction(event -> {
-            try {
-                Producto producto = new Producto(
-                    tfId.getText().trim(),
-                    tfNombre.getText().trim(),
-                    Double.parseDouble(tfPrecioE.getText().trim()),
-                    Double.parseDouble(tfPrecioV.getText().trim()),
-                    tfDescripcion.getText().trim(),
-                    Integer.parseInt(tfStock.getText().trim()),
-                    tfMarca.getText().trim(),
-                    tfCategoria.getText().trim()
-                );
-                boolean ok = gestor.anadirProducto(producto);
-                if (ok) {
-                    mostrarAlerta("Exito", "Producto agregado correctamente.");
-                    tfId.clear(); tfNombre.clear(); tfMarca.clear(); tfCategoria.clear();
-                    tfDescripcion.clear(); tfPrecioE.clear(); tfPrecioV.clear(); tfStock.clear();
-                    mostrarProductos();
-                } else {
-                    mostrarAlerta("Error", "No se pudo agregar el producto. Verifica que el ID no exista y los datos sean validos.");
-                }
-            } catch (NumberFormatException e) {
-                mostrarAlerta("Error", "Precios y stock deben ser numeros validos.");
-            }
-        });
-
-        HBox fila1 = new HBox(8, tfId, tfNombre, tfMarca, tfCategoria);
-        fila1.setAlignment(Pos.CENTER_LEFT);
-        HBox fila2 = new HBox(8, tfDescripcion, tfPrecioE, tfPrecioV, tfStock, btnAgregar);
-        fila2.setAlignment(Pos.CENTER_LEFT);
-
-        formAgregar.getChildren().addAll(lblForm, fila1, fila2);
-
-        // Mini formulario: eliminar producto
-        VBox formEliminar = new VBox(8);
-        formEliminar.setAlignment(Pos.TOP_LEFT);
-        formEliminar.setStyle("-fx-padding: 10; -fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 8;");
-
-        Label lblElim = new Label("Eliminar producto");
-        lblElim.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #fca5a5;");
-
-        TextField tfElimId = new TextField();
-        tfElimId.setPromptText("ID producto");
-        tfElimId.setPrefWidth(180);
-
-        Button btnElim = new Button("Eliminar");
-        btnElim.setStyle("-fx-padding: 6px 14px; -fx-font-size: 12px; -fx-background-color: #fca5a5; -fx-text-fill: white;");
-        btnElim.setOnAction(event -> {
-            boolean ok = gestor.eliminarProducto(tfElimId.getText().trim());
-            if (ok) {
-                mostrarAlerta("Exito", "Producto eliminado correctamente.");
-                tfElimId.clear();
-                mostrarProductos();
-            } else {
-                mostrarAlerta("Error", "No se pudo eliminar el producto. Verifica el ID.");
-            }
-        });
-
-        HBox filaElim = new HBox(8, tfElimId, btnElim);
-        filaElim.setAlignment(Pos.CENTER_LEFT);
-
-        formEliminar.getChildren().addAll(lblElim, filaElim);
-
-        seccion.getChildren().addAll(scrollTabla, formAgregar, formEliminar);
-        seccion.setPrefHeight(550);
+        VBox tarjeta = new VBox(12, tabla);
+        tarjeta.getStyleClass().add("ventas-tabla-card");
+        VBox.setVgrow(tabla, Priority.ALWAYS);
+        VBox.setVgrow(tarjeta, Priority.ALWAYS);
+        seccion.getChildren().addAll(cabecera, tarjeta);
+        VBox.setVgrow(seccion, Priority.ALWAYS);
+        seccion.setFillWidth(true);
 
         ScrollPane scroll = new ScrollPane(seccion);
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        VBox.setVgrow(scroll, Priority.ALWAYS);
 
         contenidoCentro.getChildren().add(scroll);
+    }
+
+    private void mostrarDialogoAnadirProducto() {
+        Dialog<Producto> dialogo = new Dialog<>();
+        dialogo.setTitle("Añadir producto");
+        dialogo.setHeaderText("Completa los datos del nuevo producto.");
+        dialogo.initOwner(contenidoCentro.getScene().getWindow());
+        dialogo.getDialogPane().getStylesheets().add(
+            getClass().getResource("/com/overbyte/styles/estilos.css").toExternalForm()
+        );
+        dialogo.getDialogPane().getStyleClass().add("empleado-dialog");
+
+        TextField id = new TextField(gestor.generarIdProducto());
+        id.setEditable(false);
+        id.getStyleClass().add("identificador-generado");
+        TextField nombre = new TextField();
+        nombre.setPromptText("Nombre del producto");
+        TextField marca = new TextField();
+        marca.setPromptText("Marca");
+        TextField categoria = new TextField();
+        categoria.setPromptText("Categoría");
+        TextField descripcion = new TextField();
+        descripcion.setPromptText("Descripción (opcional)");
+        TextField precioEntrada = new TextField();
+        precioEntrada.setPromptText("0.00");
+        TextField precioVenta = new TextField();
+        precioVenta.setPromptText("0.00");
+        TextField stock = new TextField();
+        stock.setPromptText("0");
+
+        HBox precios = new HBox(10,
+            campoEnDialogo("Precio de compra", precioEntrada),
+            campoEnDialogo("Precio de venta", precioVenta)
+        );
+        HBox.setHgrow(precios.getChildren().get(0), Priority.ALWAYS);
+        HBox.setHgrow(precios.getChildren().get(1), Priority.ALWAYS);
+        VBox formulario = new VBox(8,
+            campoEnDialogo("ID generado automáticamente", id),
+            campoEnDialogo("Nombre", nombre),
+            campoEnDialogo("Marca", marca),
+            campoEnDialogo("Categoría", categoria),
+            campoEnDialogo("Descripción", descripcion),
+            precios,
+            campoEnDialogo("Stock inicial", stock)
+        );
+        formulario.getStyleClass().add("empleado-dialog-content");
+        dialogo.getDialogPane().setContent(formulario);
+
+        ButtonType guardar = new ButtonType("Guardar producto", ButtonBar.ButtonData.OK_DONE);
+        dialogo.getDialogPane().getButtonTypes().addAll(guardar, ButtonType.CANCEL);
+        Button botonGuardar = (Button) dialogo.getDialogPane().lookupButton(guardar);
+        botonGuardar.getStyleClass().add("boton-mas");
+        botonGuardar.addEventFilter(ActionEvent.ACTION, event -> {
+            if (nombre.getText().isBlank()
+                    || precioEntrada.getText().isBlank()
+                    || precioVenta.getText().isBlank() || stock.getText().isBlank()) {
+                event.consume();
+                mostrarAlerta("Datos incompletos", "Completa el nombre, precios y stock.");
+                return;
+            }
+            try {
+                double compra = Double.parseDouble(precioEntrada.getText().trim().replace(',', '.'));
+                double venta = Double.parseDouble(precioVenta.getText().trim().replace(',', '.'));
+                int unidades = Integer.parseInt(stock.getText().trim());
+                if (!Double.isFinite(compra) || !Double.isFinite(venta)
+                        || compra < 0 || venta < 0 || unidades < 0) {
+                    throw new NumberFormatException();
+                }
+            } catch (NumberFormatException e) {
+                event.consume();
+                mostrarAlerta(
+                    "Datos inválidos",
+                    "Los precios deben ser números válidos y el stock un entero igual o mayor que cero."
+                );
+            }
+        });
+        dialogo.setResultConverter(boton -> {
+            if (boton != guardar) {
+                return null;
+            }
+            return new Producto(
+                id.getText().trim(),
+                nombre.getText().trim(),
+                Double.parseDouble(precioEntrada.getText().trim().replace(',', '.')),
+                Double.parseDouble(precioVenta.getText().trim().replace(',', '.')),
+                descripcion.getText().trim(),
+                Integer.parseInt(stock.getText().trim()),
+                marca.getText().trim(),
+                categoria.getText().trim()
+            );
+        });
+
+        dialogo.showAndWait().ifPresent(producto -> {
+            if (gestor.anadirProducto(producto)) {
+                mostrarProductos();
+                mostrarAlerta("Producto añadido", "El producto se registró correctamente.");
+            } else {
+                mostrarAlerta("No se pudo añadir", "Verifica los datos e inténtalo nuevamente.");
+            }
+        });
+    }
+
+    private VBox campoEnDialogo(String titulo, TextField campo) {
+        VBox contenedor = new VBox(5, etiquetaCampo(titulo), campo);
+        HBox.setHgrow(contenedor, Priority.ALWAYS);
+        return contenedor;
+    }
+
+    private void eliminarProductoSeleccionado(TableView<String[]> tabla) {
+        String[] seleccionado = tabla.getSelectionModel().getSelectedItem();
+        if (seleccionado == null || seleccionado.length == 0) {
+            return;
+        }
+        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmacion.setTitle("Eliminar producto");
+        confirmacion.setHeaderText("¿Eliminar " + seleccionado[1] + "?");
+        confirmacion.setContentText(
+            "Se quitará este producto del inventario. Esta acción no se puede deshacer."
+        );
+        confirmacion.initOwner(contenidoCentro.getScene().getWindow());
+        confirmacion.getDialogPane().getStylesheets().add(
+            getClass().getResource("/com/overbyte/styles/estilos.css").toExternalForm()
+        );
+        confirmacion.showAndWait().ifPresent(resultado -> {
+            if (resultado == ButtonType.OK) {
+                if (gestor.eliminarProducto(seleccionado[0])) {
+                    mostrarProductos();
+                } else {
+                    mostrarAlerta("No se pudo eliminar", "El producto ya no existe en el inventario.");
+                }
+            }
+        });
     }
 
     /* ----------- PROVEEDORES ----------- */
@@ -656,124 +983,176 @@ public class AdminController {
 
         VBox seccion = new VBox(15);
         seccion.setAlignment(Pos.TOP_LEFT);
-
-        // Tabla de proveedores
         List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("proveedores.csv").toString());
 
         TableView<String[]> tabla = new TableView<>();
+        configurarTablaAdmin(tabla);
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        tabla.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
         TableColumn<String[], String> colId = new TableColumn<>("ID Proveedor");
         colId.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()[0]));
+        colId.setPrefWidth(190);
 
         TableColumn<String[], String> colNombre = new TableColumn<>("Nombre");
         colNombre.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()[1]));
+        colNombre.setPrefWidth(320);
 
         TableColumn<String[], String> colContacto = new TableColumn<>("Contacto");
         colContacto.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()[2]));
+        colContacto.setPrefWidth(200);
 
         tabla.getColumns().addAll(colId, colNombre, colContacto);
 
         for (int i = 1; i < filas.size(); i++) {
             String[] fila = filas.get(i);
-            if (fila.length < 3) continue;
+            if (fila.length < 3 || fila[0].equalsIgnoreCase("idProveedor")) {
+                continue;
+            }
             tabla.getItems().add(fila);
         }
 
-        tabla.setPrefHeight(240);
+        Label titulo = new Label("Directorio de proveedores");
+        titulo.getStyleClass().add("ventas-titulo");
+        Label subtitulo = new Label("Consulta y administra tus proveedores.");
+        subtitulo.getStyleClass().add("ventas-subtitulo");
+        VBox encabezado = new VBox(5, titulo, subtitulo);
 
-        ScrollPane scrollTabla = new ScrollPane(tabla);
-        scrollTabla.setFitToWidth(true);
-        scrollTabla.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollTabla.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollTabla.setPrefHeight(260);
+        Label cantidadProveedores = new Label(tabla.getItems().size() + " proveedores");
+        cantidadProveedores.getStyleClass().add("critico-contador");
 
-        // Mini formulario: agregar proveedor
-        VBox formAgregar = new VBox(8);
-        formAgregar.setAlignment(Pos.TOP_LEFT);
-        formAgregar.setStyle("-fx-padding: 10; -fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 8;");
+        Button btnAnadir = new Button("Añadir proveedor");
+        btnAnadir.getStyleClass().add("boton-exportar");
+        btnAnadir.setOnAction(event -> mostrarDialogoAnadirProveedor());
 
-        Label lblForm = new Label("Agregar proveedor");
-        lblForm.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
+        Button btnEliminar = new Button("Eliminar seleccionado");
+        btnEliminar.getStyleClass().add("boton-eliminar-empleado");
+        btnEliminar.disableProperty().bind(tabla.getSelectionModel().selectedItemProperty().isNull());
+        btnEliminar.setOnAction(event -> eliminarProveedorSeleccionado(tabla));
 
-        TextField tfId = new TextField();
-        tfId.setPromptText("ID proveedor");
-        tfId.setPrefWidth(150);
+        HBox acciones = new HBox(10, btnAnadir, btnEliminar);
+        acciones.setAlignment(Pos.CENTER_RIGHT);
+        Region espacio = new Region();
+        HBox.setHgrow(espacio, Priority.ALWAYS);
+        HBox cabecera = new HBox(12, encabezado, cantidadProveedores, espacio, acciones);
+        cabecera.setAlignment(Pos.CENTER_LEFT);
 
-        TextField tfNombre = new TextField();
-        tfNombre.setPromptText("Nombre proveedor");
-        tfNombre.setPrefWidth(220);
-
-        TextField tfContacto = new TextField();
-        tfContacto.setPromptText("Contacto (telefono)");
-        tfContacto.setPrefWidth(150);
-
-        Button btnAgregar = new Button("Agregar");
-        btnAgregar.setStyle("-fx-padding: 6px 14px; -fx-font-size: 12px;");
-        btnAgregar.setOnAction(event -> {
-            try {
-                Proveedor proveedor = new Proveedor(
-                    tfNombre.getText().trim(),
-                    tfId.getText().trim(),
-                    Integer.parseInt(tfContacto.getText().trim())
-                );
-                boolean ok = gestor.anadirProveedor(proveedor);
-                if (ok) {
-                    mostrarAlerta("Exito", "Proveedor agregado correctamente.");
-                    tfId.clear(); tfNombre.clear(); tfContacto.clear();
-                    mostrarProveedores();
-                } else {
-                    mostrarAlerta("Error", "No se pudo agregar el proveedor. Verifica los datos.");
-                }
-            } catch (NumberFormatException e) {
-                mostrarAlerta("Error", "El contacto debe ser un numero valido.");
-            }
-        });
-
-        HBox filaForm = new HBox(8, tfId, tfNombre, tfContacto, btnAgregar);
-        filaForm.setAlignment(Pos.CENTER_LEFT);
-
-        formAgregar.getChildren().addAll(lblForm, filaForm);
-
-        // Mini formulario: eliminar proveedor
-        VBox formEliminar = new VBox(8);
-        formEliminar.setAlignment(Pos.TOP_LEFT);
-        formEliminar.setStyle("-fx-padding: 10; -fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 8;");
-
-        Label lblElim = new Label("Eliminar proveedor");
-        lblElim.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #fca5a5;");
-
-        TextField tfElimId = new TextField();
-        tfElimId.setPromptText("ID proveedor");
-        tfElimId.setPrefWidth(180);
-
-        Button btnElim = new Button("Eliminar");
-        btnElim.setStyle("-fx-padding: 6px 14px; -fx-font-size: 12px; -fx-background-color: #fca5a5; -fx-text-fill: white;");
-        btnElim.setOnAction(event -> {
-            boolean ok = gestor.eliminarProveedor(tfElimId.getText().trim());
-            if (ok) {
-                mostrarAlerta("Exito", "Proveedor eliminado correctamente.");
-                tfElimId.clear();
-                mostrarProveedores();
-            } else {
-                mostrarAlerta("Error", "No se pudo eliminar el proveedor. Verifica el ID.");
-            }
-        });
-
-        HBox filaElim = new HBox(8, tfElimId, btnElim);
-        filaElim.setAlignment(Pos.CENTER_LEFT);
-
-        formEliminar.getChildren().addAll(lblElim, filaElim);
-
-        seccion.getChildren().addAll(scrollTabla, formAgregar, formEliminar);
-        seccion.setPrefHeight(550);
+        VBox tarjeta = new VBox(12, tabla);
+        tarjeta.getStyleClass().add("ventas-tabla-card");
+        VBox.setVgrow(tabla, Priority.ALWAYS);
+        VBox.setVgrow(tarjeta, Priority.ALWAYS);
+        seccion.getChildren().addAll(cabecera, tarjeta);
+        VBox.setVgrow(seccion, Priority.ALWAYS);
+        seccion.setFillWidth(true);
 
         ScrollPane scroll = new ScrollPane(seccion);
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        VBox.setVgrow(scroll, Priority.ALWAYS);
 
         contenidoCentro.getChildren().add(scroll);
+    }
+
+    private void mostrarDialogoAnadirProveedor() {
+        Dialog<Proveedor> dialogo = new Dialog<>();
+        dialogo.setTitle("Añadir proveedor");
+        dialogo.setHeaderText("Completa los datos del proveedor.");
+        dialogo.initOwner(contenidoCentro.getScene().getWindow());
+        dialogo.getDialogPane().getStylesheets().add(
+            getClass().getResource("/com/overbyte/styles/estilos.css").toExternalForm()
+        );
+        dialogo.getDialogPane().getStyleClass().add("empleado-dialog");
+
+        TextField codigo = new TextField();
+        codigo.setText(gestor.generarIdProveedor());
+        codigo.setEditable(false);
+        codigo.getStyleClass().add("identificador-generado");
+        TextField nombre = new TextField();
+        nombre.setPromptText("Nombre o razón social");
+        TextField contacto = new TextField();
+        contacto.setPromptText("Teléfono de contacto");
+
+        VBox formulario = new VBox(8,
+            campoEnDialogo("ID generado automáticamente", codigo),
+            campoEnDialogo("Nombre", nombre),
+            campoEnDialogo("Teléfono de contacto", contacto)
+        );
+        formulario.getStyleClass().add("empleado-dialog-content");
+        dialogo.getDialogPane().setContent(formulario);
+
+        ButtonType guardar = new ButtonType("Guardar proveedor", ButtonBar.ButtonData.OK_DONE);
+        dialogo.getDialogPane().getButtonTypes().addAll(guardar, ButtonType.CANCEL);
+        Button botonGuardar = (Button) dialogo.getDialogPane().lookupButton(guardar);
+        botonGuardar.getStyleClass().add("boton-mas");
+        botonGuardar.addEventFilter(ActionEvent.ACTION, event -> {
+            if (nombre.getText().isBlank()
+                    || contacto.getText().isBlank()) {
+                event.consume();
+                mostrarAlerta("Datos incompletos", "Completa el nombre y teléfono.");
+                return;
+            }
+            try {
+                int telefono = Integer.parseInt(contacto.getText().trim());
+                if (telefono <= 0) {
+                    throw new NumberFormatException();
+                }
+            } catch (NumberFormatException e) {
+                event.consume();
+                mostrarAlerta(
+                    "Teléfono inválido",
+                    "Ingresa un teléfono numérico positivo dentro del rango permitido."
+                );
+            }
+        });
+        dialogo.setResultConverter(boton -> {
+            if (boton != guardar) {
+                return null;
+            }
+            return new Proveedor(
+                nombre.getText().trim(),
+                codigo.getText().trim(),
+                Integer.parseInt(contacto.getText().trim())
+            );
+        });
+
+        dialogo.showAndWait().ifPresent(proveedor -> {
+            if (gestor.anadirProveedor(proveedor)) {
+                mostrarProveedores();
+                mostrarAlerta("Proveedor añadido", "El proveedor se registró correctamente.");
+            } else {
+                mostrarAlerta(
+                    "No se pudo añadir",
+                    "Verifica los datos e inténtalo nuevamente."
+                );
+            }
+        });
+    }
+
+    private void eliminarProveedorSeleccionado(TableView<String[]> tabla) {
+        String[] seleccionado = tabla.getSelectionModel().getSelectedItem();
+        if (seleccionado == null || seleccionado.length == 0) {
+            return;
+        }
+        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmacion.setTitle("Eliminar proveedor");
+        confirmacion.setHeaderText("¿Eliminar a " + seleccionado[1] + "?");
+        confirmacion.setContentText(
+            "Se quitará este proveedor del directorio. Esta acción no se puede deshacer."
+        );
+        confirmacion.initOwner(contenidoCentro.getScene().getWindow());
+        confirmacion.getDialogPane().getStylesheets().add(
+            getClass().getResource("/com/overbyte/styles/estilos.css").toExternalForm()
+        );
+        confirmacion.showAndWait().ifPresent(resultado -> {
+            if (resultado == ButtonType.OK) {
+                if (gestor.eliminarProveedor(seleccionado[0])) {
+                    mostrarProveedores();
+                } else {
+                    mostrarAlerta("No se pudo eliminar", "El proveedor ya no existe en el directorio.");
+                }
+            }
+        });
     }
 
     /* ===================== CERRAR SESIÓN ===================== */
@@ -801,6 +1180,53 @@ public class AdminController {
     }
 
     /* ===================== UTILIDADES ===================== */
+
+    private void configurarTablaAdmin(TableView<String[]> tabla) {
+        tabla.getStyleClass().add("tabla-admin");
+        tabla.setFixedCellSize(42);
+        tabla.setPlaceholder(new Label("No hay registros para mostrar."));
+    }
+
+    private Button crearSelectorInventario(String titulo, String detalle, String icono) {
+        Label iconoSelector = new Label(icono);
+        iconoSelector.getStyleClass().add("selector-inventario-icono");
+        Label tituloSelector = new Label(titulo);
+        tituloSelector.getStyleClass().add("selector-inventario-titulo");
+        Label detalleSelector = new Label(detalle);
+        detalleSelector.getStyleClass().add("selector-inventario-detalle");
+
+        VBox contenidoSelector = new VBox(4, iconoSelector, tituloSelector, detalleSelector);
+        contenidoSelector.setAlignment(Pos.CENTER_LEFT);
+
+        Button selector = new Button();
+        selector.setGraphic(contenidoSelector);
+        selector.setMaxWidth(Double.MAX_VALUE);
+        selector.setMinHeight(96);
+        selector.getStyleClass().add("selector-inventario");
+        return selector;
+    }
+
+    private void seleccionarApartadoInventario(
+            Button seleccionado, VBox vistaSeleccionada,
+            Button alternativo, VBox vistaAlternativa) {
+        vistaSeleccionada.setVisible(true);
+        vistaSeleccionada.setManaged(true);
+        vistaAlternativa.setVisible(false);
+        vistaAlternativa.setManaged(false);
+        seleccionado.getStyleClass().add("selector-inventario-activo");
+        alternativo.getStyleClass().remove("selector-inventario-activo");
+    }
+
+    private int filasProductosValidas(List<String[]> filas) {
+        int cantidad = 0;
+        for (int i = 1; i < filas.size(); i++) {
+            if (filas.get(i).length >= 8
+                    && !filas.get(i)[0].equalsIgnoreCase("idProducto")) {
+                cantidad++;
+            }
+        }
+        return cantidad;
+    }
 
     private void seleccionarPestana(Button seleccionada) {
         for (Button pestana : List.of(

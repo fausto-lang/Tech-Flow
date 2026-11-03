@@ -227,6 +227,17 @@ class GestorTest {
     }
 
     @Test
+    @DisplayName("Generar ID de proveedor devuelve un código único y persistible")
+    void generarIdProveedorDevuelveCodigoUnicoYPersistible() {
+        Gestor gestor = gestor();
+        String id = gestor.generarIdProveedor();
+
+        assertTrue(id.matches("PROV-[0-9A-F]{8}"));
+        assertTrue(gestor.anadirProveedor(new Proveedor("Proveedor", id, 123)));
+        assertFalse(id.equals(gestor.generarIdProveedor()));
+    }
+
+    @Test
     @DisplayName("Agregar un proveedor duplicado devuelve false")
     void agregarProveedorDuplicadoDevuelveFalse() {
         Gestor gestor = gestor();
@@ -256,6 +267,17 @@ class GestorTest {
     void agregarProductoDevuelveTrue() {
         Gestor gestor = gestor();
         assertTrue(gestor.anadirProducto(producto("P1", 4)));
+    }
+
+    @Test
+    @DisplayName("Generar ID de producto devuelve un código único y persistible")
+    void generarIdProductoDevuelveCodigoUnicoYPersistible() {
+        Gestor gestor = gestor();
+        String id = gestor.generarIdProducto();
+
+        assertTrue(id.matches("PROD-[0-9A-F]{8}"));
+        assertTrue(gestor.anadirProducto(producto(id, 4)));
+        assertFalse(id.equals(gestor.generarIdProducto()));
     }
 
     @Test

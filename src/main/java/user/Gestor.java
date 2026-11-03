@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import models.Producto;
 import models.Proveedor;
@@ -161,6 +162,11 @@ public class Gestor extends Empleado {
         return motorCSV.escribirCSV(ruta(ARCHIVO_PROVEEDORES), filas, false);
     }
 
+    /** Genera un identificador de proveedor que no exista en el CSV. */
+    public String generarIdProveedor() {
+        return generarIdentificador(ARCHIVO_PROVEEDORES, "PROV");
+    }
+
     public boolean eliminarProveedor(String idProveedor) {
         return eliminarPorClave(ARCHIVO_PROVEEDORES, idProveedor);
     }
@@ -178,6 +184,11 @@ public class Gestor extends Empleado {
         }
         filas.add(filaProducto(producto));
         return motorCSV.escribirCSV(ruta(ARCHIVO_INVENTARIO), filas, false);
+    }
+
+    /** Genera un identificador de producto que no exista en el CSV. */
+    public String generarIdProducto() {
+        return generarIdentificador(ARCHIVO_INVENTARIO, "PROD");
     }
 
     public boolean eliminarProducto(String codigo) {
@@ -278,6 +289,16 @@ public class Gestor extends Empleado {
 
     private boolean existeProveedor(String codigo) {
         return existeValor(motorCSV.leerCSV(ruta(ARCHIVO_PROVEEDORES)), 0, codigo);
+    }
+
+    private String generarIdentificador(String archivo, String prefijo) {
+        List<String[]> filas = motorCSV.leerCSV(ruta(archivo));
+        String identificador;
+        do {
+            identificador = prefijo + "-" + UUID.randomUUID()
+                    .toString().substring(0, 8).toUpperCase(java.util.Locale.ROOT);
+        } while (existeValor(filas, 0, identificador));
+        return identificador;
     }
 
     private Producto leerProducto(String codigo) {
