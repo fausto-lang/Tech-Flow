@@ -52,6 +52,7 @@ public class VendedorController {
     @FXML
     private VBox vistaNuevaVenta;
 
+
     @FXML
     private VBox vistaCarrito;
 
@@ -385,13 +386,97 @@ public class VendedorController {
 
         boolean confirmada = vendedor.confirmarVenta(idOrden);
         if (confirmada) {
+            Map<String, Integer> ventaSnapshot = new LinkedHashMap<>(carrito);
+            double totalVenta = totalCarritoDesde(ventaSnapshot);
             mostrarMensajeExito("Venta confirmada: " + idOrden);
             carrito.clear();
             actualizarCarrito();
             actualizarTotalCarrito();
             campoCliente.clear();
+            mostrarCuadroVentaConfirmada(idOrden, nombreCliente, ventaSnapshot, totalVenta);
         } else {
             mostrarMensaje("La venta no se confirmó. La proforma queda pendiente.");
+        }
+    }
+
+    private double totalCarritoDesde(Map<String, Integer> items) {
+        double total = 0;
+        for (Map.Entry<String, Integer> e : items.entrySet()) {
+            Producto p = vendedor.buscarEnInventario(e.getKey());
+            if (p != null) total += p.getPrecioVenta() * e.getValue();
+        }
+        return total;
+    }
+
+    /** Cuadro GUI-only de venta confirmada: Guardar .txt / Cerrar / Esc. */
+    private void mostrarCuadroVentaConfirmada(String idOrden, String nombreCliente,
+                                              Map<String, Integer> items, double total) {
+        VBox lista = new VBox(6);
+        for (Map.Entry<String, Integer> e : items.entrySet()) {
+            Producto p = vendedor.buscarEnInventario(e.getKey());
+            String nombre = p != null ? p.getNombre() : e.getKey();
+            double precio = p != null ? p.getPrecioVenta() : 0;
+            Label linea = new Label(e.getValue() + " x " + nombre + "  —  "
+                    + String.format(Locale.ROOT, "$%.2f", precio * e.getValue()));
+            lista.getChildren().add(linea);
+        }
+        ScrollPane scroll = new ScrollPane(lista);
+        scroll.setFitToWidth(true);
+        scroll.setPrefHeight(180);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        Label totalLabel = new Label("Total: " + String.format(Locale.ROOT, "$%.2f", total));
+        totalLabel.getStyleClass().add("total-grande");
+        Button guardar = new Button("GUARDAR .TXT");
+        guardar.getStyleClass().add("boton-principal");
+        Button cerrar = new Button("Cerrar");
+        cerrar.getStyleClass().add("boton-rol");
+        guardar.setOnAction(e -> guardarVentaConfirmada(idOrden, nombreCliente, items, total));
+        cerrar.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
+        HBox botones = new HBox(10, guardar, cerrar);
+        botones.setAlignment(Pos.CENTER_RIGHT);
+        VBox cuerpo = new VBox(10, scroll, totalLabel, botones);
+        cuerpo.setMaxWidth(Double.MAX_VALUE);
+        com.overbyte.Navegador.mostrarOverlay(
+                com.overbyte.Navegador.tarjeta("Venta confirmada: " + idOrden,
+                        "Cliente: " + nombreCliente, cuerpo));
+    }
+
+    private void guardarVentaConfirmada(String idOrden, String nombreCliente,
+                                        Map<String, Integer> items, double total) {
+        FileChooser selector = new FileChooser();
+        selector.setTitle("Guardar venta");
+        selector.setInitialFileName("venta-" + idOrden + ".txt");
+        selector.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Archivo de texto (*.txt)", "*.txt"));
+        java.io.File archivo = selector.showSaveDialog(com.overbyte.Navegador.ventana());
+        if (archivo == null) {
+            return;
+        }
+        Path ruta = archivo.toPath();
+        if (!ruta.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".txt")) {
+            ruta = ruta.resolveSibling(ruta.getFileName() + ".txt");
+        }
+        StringBuilder contenido = new StringBuilder()
+                .append("TECH-FLOW | VENTA CONFIRMADA\n")
+                .append("Venta: ").append(idOrden).append('\n')
+                .append("Cliente: ").append(nombreCliente).append('\n')
+                .append("Fecha: ").append(LocalDateTime.now().format(
+                        DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))).append("\n\n");
+        for (Map.Entry<String, Integer> e : items.entrySet()) {
+            Producto p = vendedor.buscarEnInventario(e.getKey());
+            String nombre = p != null ? p.getNombre() : e.getKey();
+            double precio = p != null ? p.getPrecioVenta() : 0;
+            contenido.append(e.getValue()).append(" x ").append(nombre)
+                    .append("  —  ").append(String.format(Locale.ROOT, "$%.2f", precio * e.getValue()))
+                    .append('\n');
+        }
+        contenido.append("\nTOTAL: ").append(String.format(Locale.ROOT, "$%.2f", total));
+        try {
+            Files.writeString(ruta, contenido.toString(), StandardCharsets.UTF_8);
+            com.overbyte.Navegador.cerrarOverlay();
+            mostrarMensajeExito("Venta guardada en: " + ruta);
+        } catch (IOException ex) {
+            mostrarMensaje("No se pudo guardar el TXT: " + ex.getMessage());
         }
     }
 
@@ -538,55 +623,33 @@ public class VendedorController {
         String mensajeAlerta = nombreProducto + " no tiene suficientes unidades. "
                 + "Cantidad disponible para vender: " + cantidadDisponible + ".";
         mostrarMensaje(mensajeAlerta);
-
-        Alert alerta = new Alert(Alert.AlertType.WARNING);
-        alerta.setTitle("Stock insuficiente");
-        alerta.setHeaderText("No hay suficientes productos");
-        alerta.setContentText(mensajeAlerta);
-        if (campoBusqueda.getScene() != null && campoBusqueda.getScene().getWindow() != null) {
-            alerta.initOwner(campoBusqueda.getScene().getWindow());
-        }
-        alerta.showAndWait();
+        com.overbyte.Navegador.avisar("Stock insuficiente", mensajeAlerta);
     }
 
     /* ===================== OTRAS FUNCIONES ===================== */
 
     @FXML
     private void eliminarVenta() {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Anular compra o proforma");
-        dialog.setHeaderText("Ingresa el ID de venta u orden que deseas anular:");
-        dialog.setContentText("ID:");
-        dialog.getEditor().setPromptText("Ej. VEN-12345678 u ORD-12345678");
-        if (campoBusqueda.getScene() != null) {
-            dialog.initOwner(campoBusqueda.getScene().getWindow());
-        }
-        dialog.showAndWait().ifPresent(id -> {
+        com.overbyte.Navegador.pedirTexto("Anular compra o proforma",
+            "Ingresa el ID de venta u orden que deseas anular:",
+            "Ej. VEN-12345678 u ORD-12345678", id -> {
             String referencia = id.trim();
             if (referencia.isEmpty()) {
                 mostrarMensaje("Ingresa el ID de la compra o proforma.");
                 return;
             }
-
-            Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-            confirmacion.setTitle("Confirmar anulación");
-            confirmacion.setHeaderText("¿Anular la compra o proforma " + referencia + "?");
-            confirmacion.setContentText(
-                "Las compras confirmadas devolverán sus unidades al inventario. Esta acción no se puede deshacer."
-            );
-            if (campoBusqueda.getScene() != null) {
-                confirmacion.initOwner(campoBusqueda.getScene().getWindow());
-            }
-            confirmacion.showAndWait().filter(respuesta -> respuesta == ButtonType.OK).ifPresent(respuesta -> {
-                if (vendedor.eliminarVenta(referencia)) {
-                    if (!campoBusqueda.getText().isBlank()) {
-                        buscarProducto();
+            com.overbyte.Navegador.confirmar("Confirmar anulación",
+                "¿Anular la compra o proforma " + referencia + "? Las compras confirmadas devolverán sus unidades al inventario. Esta acción no se puede deshacer.",
+                () -> {
+                    if (vendedor.eliminarVenta(referencia)) {
+                        if (!campoBusqueda.getText().isBlank()) {
+                            buscarProducto();
+                        }
+                        mostrarMensajeExito("Compra o proforma anulada: " + referencia);
+                    } else {
+                        mostrarMensaje("No se pudo anular. Verifica el ID o el estado de la compra.");
                     }
-                    mostrarMensajeExito("Compra o proforma anulada: " + referencia);
-                } else {
-                    mostrarMensaje("No se pudo anular. Verifica el ID o el estado de la compra.");
-                }
-            });
+                });
         });
     }
 
@@ -604,61 +667,117 @@ public class VendedorController {
 
     @FXML
     private void consultarGarantia() {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Consultar garantía");
-        dialog.setHeaderText("Ingresa el código de garantía, venta u orden:");
-        dialog.setContentText("Código:");
-        dialog.showAndWait().ifPresent(ref -> {
+        com.overbyte.Navegador.pedirTexto("Consultar garantía",
+            "Ingresa el código de garantía, venta u orden:",
+            "Código:", ref -> {
             List<String> resultado = vendedor.consultarGarantia(ref);
             StringBuilder sb = new StringBuilder();
             for (String linea : resultado) {
                 sb.append(linea).append("\n");
             }
-            Alert alerta = new Alert(Alert.AlertType.INFORMATION);
-            alerta.setTitle("Garantía");
-            alerta.setHeaderText("Resultado de consulta");
-            alerta.setContentText(sb.toString());
-            alerta.showAndWait();
+            com.overbyte.Navegador.avisar("Garantía", sb.toString());
         });
     }
 
     @FXML
     private void importarOrdenDesdeArchivo() {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Importar orden");
-        dialog.setHeaderText("Ingresa la ruta del archivo CSV/TXT:");
-        dialog.setContentText("Ruta:");
-        dialog.showAndWait().ifPresent(ruta -> {
-            boolean ok = vendedor.ingresarOrdenDesdeArchivo(ruta);
+        FileChooser selector = new FileChooser();
+        selector.setTitle("Seleccionar orden CSV/TXT");
+        selector.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Archivos CSV y texto", "*.csv", "*.txt"),
+                new FileChooser.ExtensionFilter("Todos los archivos", "*.*"));
+        java.io.File archivo = selector.showOpenDialog(com.overbyte.Navegador.ventana());
+        if (archivo != null) {
+            mostrarVistaPreviaOrden(archivo);
+        }
+    }
+
+    /** Preview GUI-only: muestra las filas antes de confirmar. No escribe nada. */
+    private void mostrarVistaPreviaOrden(java.io.File archivo) {
+        List<String[]> filas = motorCSV.leerCSV(archivo.getAbsolutePath());
+        if (filas.size() < 2) {
+            mostrarMensaje("El archivo no tiene datos para importar.");
+            return;
+        }
+        String[] encabezado = filas.get(0);
+        int colCliente = indiceColumna(encabezado, "nombreCliente");
+        int colProducto = indiceColumna(encabezado, "idProducto");
+        int colCantidad = indiceColumna(encabezado, "cantidad");
+        TableView<String[]> tabla = new TableView<>();
+        tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        tabla.setPrefHeight(260);
+        int columnas = Math.min(encabezado.length, 6);
+        for (int c = 0; c < columnas; c++) {
+            final int idx = c;
+            TableColumn<String[], String> col = new TableColumn<>(encabezado[c]);
+            col.setCellValueFactory(p -> new javafx.beans.property.SimpleStringProperty(
+                    idx < p.getValue().length ? p.getValue()[idx] : "—"));
+            tabla.getColumns().add(col);
+        }
+        int invalidas = 0;
+        for (int i = 1; i < filas.size(); i++) {
+            String[] fila = filas.get(i);
+            tabla.getItems().add(fila);
+            if (!filaOrdenValida(fila, colCliente, colProducto, colCantidad)) invalidas++;
+        }
+        Label resumen = new Label((filas.size() - 1) + " filas leídas · " + invalidas + " con formato inválido");
+        resumen.getStyleClass().add(invalidas > 0 ? "mensaje" : "mensaje-ok");
+        Button confirmar = new Button("CONFIRMAR IMPORTACIÓN");
+        confirmar.getStyleClass().add("boton-principal");
+        Button cancelar = new Button("Cancelar");
+        cancelar.getStyleClass().add("boton-rol");
+        confirmar.setOnAction(e -> {
+            com.overbyte.Navegador.cerrarOverlay();
+            boolean ok = vendedor.ingresarOrdenDesdeArchivo(archivo.getAbsolutePath());
             if (ok) {
                 mostrarMensajeExito("Órdenes importadas correctamente.");
             } else {
                 mostrarMensaje("No se pudo importar el archivo. Verifica el formato.");
             }
         });
+        cancelar.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
+        HBox botones = new HBox(10, confirmar, cancelar);
+        botones.setAlignment(Pos.CENTER_RIGHT);
+        VBox cuerpo = new VBox(10, resumen, tabla, botones);
+        cuerpo.setMaxWidth(Double.MAX_VALUE);
+        VBox tarjeta = com.overbyte.Navegador.tarjeta("Vista previa de importación",
+                "Archivo: " + archivo.getName() + ". Revisa si está completo y confirma para guardar.", cuerpo);
+        tarjeta.getStyleClass().remove("overlay-tarjeta");
+        tarjeta.getStyleClass().add("overlay-tarjeta--ancha");
+        double anchoVentana = com.overbyte.Navegador.ventana() != null
+                ? com.overbyte.Navegador.ventana().getWidth() : 1100;
+        double ancho = Math.max(880, anchoVentana * 0.92);
+        tarjeta.setMinWidth(ancho);
+        tarjeta.setPrefWidth(ancho);
+        tarjeta.setMaxWidth(ancho);
+        com.overbyte.Navegador.mostrarOverlay(tarjeta);
+    }
+
+    private int indiceColumna(String[] encabezado, String nombre) {
+        for (int i = 0; i < encabezado.length; i++) {
+            if (encabezado[i].trim().equalsIgnoreCase(nombre)) return i;
+        }
+        return -1;
+    }
+
+    private boolean filaOrdenValida(String[] fila, int colCliente, int colProducto, int colCantidad) {
+        if (colCliente < 0 || colProducto < 0 || colCantidad < 0) return false;
+        if (Math.max(colCliente, Math.max(colProducto, colCantidad)) >= fila.length) return false;
+        if (fila[colCliente].isBlank() || fila[colProducto].isBlank()) return false;
+        try {
+            int cantidad = Integer.parseInt(fila[colCantidad].trim());
+            if (cantidad <= 0) return false;
+            Producto producto = vendedor.buscarEnInventario(fila[colProducto].trim());
+            return producto != null && producto.getStock() >= cantidad;
+        } catch (NumberFormatException ex) {
+            return false;
+        }
     }
 
     /* ===================== CERRAR SESIÓN ===================== */
 
     @FXML
     private void cerrarSesion() {
-        try {
-            FXMLLoader cargador = new FXMLLoader(
-                getClass().getResource("/com/overbyte/vista/login.fxml")
-            );
-            Parent vistaLogin = cargador.load();
-            Scene escenaLogin = new Scene(vistaLogin, 800, 650);
-
-            Stage ventana = (Stage) campoBusqueda.getScene().getWindow();
-            ventana.setScene(escenaLogin);
-            ventana.setTitle("Tech-Flow | Iniciar sesión");
-            ventana.setMinWidth(600);
-            ventana.setMinHeight(400);
-            ventana.setWidth(800);
-            ventana.setHeight(650);
-            ventana.centerOnScreen();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        com.overbyte.Navegador.irAlLogin();
     }
 }

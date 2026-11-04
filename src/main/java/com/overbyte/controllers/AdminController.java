@@ -38,6 +38,7 @@ public class AdminController {
     @FXML
     private VBox contenidoCentro;
 
+
     @FXML
     private Label lblTituloSeccion;
 
@@ -114,24 +115,6 @@ public class AdminController {
         boolean abierta = filasCaja.size() > 1
                 && filasCaja.get(1).length > 0
                 && filasCaja.get(1)[0].equalsIgnoreCase("ABIERTA");
-        ButtonType accion = new ButtonType(
-            abierta ? "Cerrar caja" : "Abrir caja",
-            ButtonBar.ButtonData.OK_DONE
-        );
-        ButtonType cancelar = new ButtonType(
-            abierta ? "Volver al panel" : "Ahora no",
-            ButtonBar.ButtonData.CANCEL_CLOSE
-        );
-
-        Dialog<ButtonType> dialogo = new Dialog<>();
-        dialogo.setTitle("Gestión de caja");
-        dialogo.initOwner(contenidoCentro.getScene().getWindow());
-        dialogo.getDialogPane().getButtonTypes().addAll(accion, cancelar);
-        dialogo.getDialogPane().getStylesheets().add(
-            getClass().getResource("/com/overbyte/styles/estilos.css").toExternalForm()
-        );
-        dialogo.getDialogPane().getStyleClass().add("caja-dialog");
-
         VBox contenido = new VBox(12);
         contenido.setAlignment(Pos.CENTER);
         contenido.getStyleClass().add("caja-dialog-content");
@@ -156,21 +139,23 @@ public class AdminController {
         );
 
         contenido.getChildren().addAll(icono, titulo, descripcion, estado);
-        dialogo.getDialogPane().setContent(contenido);
 
-        Button botonAccion = (Button) dialogo.getDialogPane().lookupButton(accion);
+        Button botonAccion = new Button(abierta ? "Cerrar caja" : "Abrir caja");
         botonAccion.getStyleClass().add(abierta ? "boton-peligro" : "boton-mas");
-        Button botonCancelar = (Button) dialogo.getDialogPane().lookupButton(cancelar);
+        Button botonCancelar = new Button(abierta ? "Volver al panel" : "Ahora no");
         botonCancelar.getStyleClass().add("caja-dialog-cancelar");
+        contenido.getChildren().addAll(botonAccion, botonCancelar);
 
-        dialogo.showAndWait().ifPresent(resultado -> {
-            if (resultado == accion) {
-                boolean actualizado = abierta ? gestor.cerrarCaja() : gestor.abrirCaja();
-                if (!actualizado) {
-                    mostrarAlerta("Error", "No se pudo actualizar el estado de la caja.");
-                }
+        botonCancelar.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
+        botonAccion.setOnAction(e -> {
+            com.overbyte.Navegador.cerrarOverlay();
+            boolean actualizado = abierta ? gestor.cerrarCaja() : gestor.abrirCaja();
+            if (!actualizado) {
+                mostrarAlerta("Error", "No se pudo actualizar el estado de la caja.");
             }
         });
+        com.overbyte.Navegador.mostrarOverlay(
+            com.overbyte.Navegador.tarjetaCompacta("Gestión de caja", "", contenido));
     }
 
     /* ----------- INVENTARIO ----------- */
@@ -335,8 +320,9 @@ public class AdminController {
         lblTituloSeccion.setText("Ventas");
         contenidoCentro.getChildren().clear();
 
-        VBox seccion = new VBox(15);
+        VBox seccion = new VBox(10);
         seccion.setAlignment(Pos.TOP_LEFT);
+        seccion.setMaxWidth(Double.MAX_VALUE);
 
         List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("ventas.csv").toString());
 
@@ -349,24 +335,24 @@ public class AdminController {
 
         TableColumn<String[], String> colFolio = new TableColumn<>("Folio");
         colFolio.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()[0]));
-        colFolio.setPrefWidth(145);
+        colFolio.setPrefWidth(110);
 
         TableColumn<String[], String> colCliente = new TableColumn<>("Cliente");
         colCliente.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()[4]));
-        colCliente.setPrefWidth(155);
+        colCliente.setPrefWidth(120);
 
         TableColumn<String[], String> colProducto = new TableColumn<>("Producto");
         colProducto.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()[6]));
-        colProducto.setPrefWidth(220);
+        colProducto.setPrefWidth(160);
 
         TableColumn<String[], String> colFecha = new TableColumn<>("Fecha y hora");
         colFecha.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(
                 formatearFechaVenta(param.getValue()[10])));
-        colFecha.setPrefWidth(155);
+        colFecha.setPrefWidth(125);
 
         TableColumn<String[], String> colCantidad = new TableColumn<>("Unidades");
         colCantidad.setCellValueFactory(param -> new javafx.beans.property.SimpleStringProperty(param.getValue()[7]));
-        colCantidad.setPrefWidth(90);
+        colCantidad.setPrefWidth(75);
 
         TableColumn<String[], String> colTotal = new TableColumn<>("Total");
         colTotal.setCellValueFactory(param -> {
@@ -377,7 +363,7 @@ public class AdminController {
                 return new javafx.beans.property.SimpleStringProperty("—");
             }
         });
-        colTotal.setPrefWidth(110);
+        colTotal.setPrefWidth(85);
 
         tabla.getColumns().addAll(colFolio, colCliente, colProducto, colFecha, colCantidad, colTotal);
 
@@ -426,14 +412,21 @@ public class AdminController {
         HBox.setHgrow(espacio, Priority.ALWAYS);
         encabezadoSeccion.getChildren().addAll(textoEncabezado, espacio, btnExportar);
 
-        VBox contenedorTabla = new VBox(14, resumenVentas, tabla);
+        VBox contenedorTabla = new VBox(10, resumenVentas, tabla);
         contenedorTabla.getStyleClass().add("ventas-tabla-card");
+        contenedorTabla.setMaxWidth(Double.MAX_VALUE);
+        tabla.setMaxWidth(Double.MAX_VALUE);
+        tabla.setPrefHeight(280);
+        tabla.setMinHeight(140);
         VBox.setVgrow(tabla, Priority.ALWAYS);
-        VBox.setVgrow(contenedorTabla, Priority.ALWAYS);
+        VBox.setVgrow(contenedorTabla, Priority.NEVER);
         seccion.getChildren().addAll(encabezadoSeccion, contenedorTabla);
         seccion.setFillWidth(true);
+        seccion.setMaxWidth(Double.MAX_VALUE);
         ScrollPane scroll = new ScrollPane(seccion);
         scroll.setFitToWidth(true);
+        scroll.setFitToHeight(false);
+        scroll.setMaxWidth(Double.MAX_VALUE);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         VBox.setVgrow(scroll, Priority.ALWAYS);
@@ -815,15 +808,6 @@ public class AdminController {
     }
 
     private void mostrarDialogoAnadirEmpleado() {
-        Dialog<Empleado> dialogo = new Dialog<>();
-        dialogo.setTitle("Añadir empleado");
-        dialogo.setHeaderText("Completa los datos del nuevo usuario.");
-        dialogo.initOwner(contenidoCentro.getScene().getWindow());
-        dialogo.getDialogPane().getStylesheets().add(
-            getClass().getResource("/com/overbyte/styles/estilos.css").toExternalForm()
-        );
-        dialogo.getDialogPane().getStyleClass().add("producto-dialog");
-
         TextField ci = new TextField();
         ci.setPromptText("Ej. 12345678");
         TextField nombre = new TextField();
@@ -860,32 +844,22 @@ public class AdminController {
             etiquetaCampo("Contraseña"), contrasena
         );
         formulario.getStyleClass().add("producto-dialog-content");
-        dialogo.getDialogPane().setContent(formulario);
-
-        ButtonType guardar = new ButtonType("Guardar empleado", ButtonBar.ButtonData.OK_DONE);
-        dialogo.getDialogPane().getButtonTypes().addAll(guardar, ButtonType.CANCEL);
-        Button botonGuardar = (Button) dialogo.getDialogPane().lookupButton(guardar);
+        Button botonGuardar = new Button("Guardar empleado");
         botonGuardar.getStyleClass().add("boton-mas");
-        botonGuardar.addEventFilter(ActionEvent.ACTION, event -> {
+        Button botonCancelar = new Button("Cancelar");
+        botonCancelar.getStyleClass().add("boton-rol");
+        HBox botones = new HBox(10, botonGuardar, botonCancelar);
+        botones.setAlignment(Pos.CENTER_RIGHT);
+        formulario.getChildren().add(botones);
+        botonCancelar.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
+        botonGuardar.setOnAction(e -> {
             if (ci.getText().isBlank() || nombre.getText().isBlank()
                     || contrasena.getText().isBlank() || rol.getValue() == null) {
-                event.consume();
                 mostrarAlerta("Datos incompletos", "Completa todos los campos y selecciona un rol.");
+                return;
             }
-        });
-        dialogo.setResultConverter(boton -> {
-            if (boton != guardar) {
-                return null;
-            }
-            return new Empleado(
-                ci.getText().trim(),
-                nombre.getText().trim(),
-                contrasena.getText(),
-                rol.getValue()
-            );
-        });
-
-        dialogo.showAndWait().ifPresent(nuevo -> {
+            Empleado nuevo = new Empleado(ci.getText().trim(), nombre.getText().trim(), contrasena.getText(), rol.getValue());
+            com.overbyte.Navegador.cerrarOverlay();
             if (gestor.anadirEmpleado(nuevo)) {
                 mostrarEmpleados();
                 mostrarAlerta("Empleado añadido", "El empleado se registró correctamente.");
@@ -893,6 +867,8 @@ public class AdminController {
                 mostrarAlerta("No se pudo añadir", "Verifica los datos y que el identificador no exista.");
             }
         });
+        com.overbyte.Navegador.mostrarOverlay(
+            com.overbyte.Navegador.tarjeta("Añadir empleado", "Completa los datos del nuevo usuario.", formulario));
     }
 
     private Label etiquetaCampo(String texto) {
@@ -906,18 +882,9 @@ public class AdminController {
         if (seleccionado == null || seleccionado.length == 0) {
             return;
         }
-        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmacion.setTitle("Eliminar empleado");
-        confirmacion.setHeaderText("¿Eliminar a " + seleccionado[1] + "?");
-        confirmacion.setContentText(
-            "Se quitará el acceso de este empleado al sistema. Esta acción no se puede deshacer."
-        );
-        confirmacion.initOwner(contenidoCentro.getScene().getWindow());
-        confirmacion.getDialogPane().getStylesheets().add(
-            getClass().getResource("/com/overbyte/styles/estilos.css").toExternalForm()
-        );
-        confirmacion.showAndWait().ifPresent(resultado -> {
-            if (resultado == ButtonType.OK) {
+        com.overbyte.Navegador.confirmar("Eliminar empleado",
+            "¿Eliminar a " + seleccionado[1] + "? Se quitará el acceso de este empleado al sistema. Esta acción no se puede deshacer.",
+            () -> {
                 if (gestor.eliminarEmpleado(seleccionado[0])) {
                     mostrarEmpleados();
                 } else {
@@ -926,8 +893,7 @@ public class AdminController {
                         "No se puede eliminar el último administrador o el registro cambió."
                     );
                 }
-            }
-        });
+            });
     }
 
     /* ----------- PRODUCTOS ----------- */
@@ -1034,15 +1000,6 @@ public class AdminController {
     }
 
     private void mostrarDialogoAnadirProducto() {
-        Dialog<Producto> dialogo = new Dialog<>();
-        dialogo.setTitle("Añadir producto");
-        dialogo.setHeaderText("Completa los datos del nuevo producto.");
-        dialogo.initOwner(contenidoCentro.getScene().getWindow());
-        dialogo.getDialogPane().getStylesheets().add(
-            getClass().getResource("/com/overbyte/styles/estilos.css").toExternalForm()
-        );
-        dialogo.getDialogPane().getStyleClass().add("empleado-dialog");
-
         TextField id = new TextField(gestor.generarIdProducto());
         id.setEditable(false);
         id.getStyleClass().add("identificador-generado");
@@ -1077,20 +1034,22 @@ public class AdminController {
             campoEnDialogo("Stock inicial", stock)
         );
         formulario.getStyleClass().add("empleado-dialog-content");
-        dialogo.getDialogPane().setContent(formulario);
-
-        ButtonType guardar = new ButtonType("Guardar producto", ButtonBar.ButtonData.OK_DONE);
-        dialogo.getDialogPane().getButtonTypes().addAll(guardar, ButtonType.CANCEL);
-        Button botonGuardar = (Button) dialogo.getDialogPane().lookupButton(guardar);
+        Button botonGuardar = new Button("Guardar producto");
         botonGuardar.getStyleClass().add("boton-mas");
-        botonGuardar.addEventFilter(ActionEvent.ACTION, event -> {
+        Button botonCancelarP = new Button("Cancelar");
+        botonCancelarP.getStyleClass().add("boton-rol");
+        HBox botonesP = new HBox(10, botonGuardar, botonCancelarP);
+        botonesP.setAlignment(Pos.CENTER_RIGHT);
+        formulario.getChildren().add(botonesP);
+        botonCancelarP.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
+        botonGuardar.setOnAction(e -> {
             if (nombre.getText().isBlank()
                     || precioEntrada.getText().isBlank()
                     || precioVenta.getText().isBlank() || stock.getText().isBlank()) {
-                event.consume();
                 mostrarAlerta("Datos incompletos", "Completa el nombre, precios y stock.");
                 return;
             }
+            Producto producto;
             try {
                 double compra = Double.parseDouble(precioEntrada.getText().trim().replace(',', '.'));
                 double venta = Double.parseDouble(precioVenta.getText().trim().replace(',', '.'));
@@ -1099,31 +1058,14 @@ public class AdminController {
                         || compra < 0 || venta < 0 || unidades < 0) {
                     throw new NumberFormatException();
                 }
-            } catch (NumberFormatException e) {
-                event.consume();
-                mostrarAlerta(
-                    "Datos inválidos",
-                    "Los precios deben ser números válidos y el stock un entero igual o mayor que cero."
-                );
+                producto = new Producto(id.getText().trim(), nombre.getText().trim(), compra, venta,
+                    descripcion.getText().trim(), unidades, marca.getText().trim(), categoria.getText().trim());
+            } catch (NumberFormatException ex) {
+                mostrarAlerta("Datos inválidos",
+                    "Los precios deben ser números válidos y el stock un entero igual o mayor que cero.");
+                return;
             }
-        });
-        dialogo.setResultConverter(boton -> {
-            if (boton != guardar) {
-                return null;
-            }
-            return new Producto(
-                id.getText().trim(),
-                nombre.getText().trim(),
-                Double.parseDouble(precioEntrada.getText().trim().replace(',', '.')),
-                Double.parseDouble(precioVenta.getText().trim().replace(',', '.')),
-                descripcion.getText().trim(),
-                Integer.parseInt(stock.getText().trim()),
-                marca.getText().trim(),
-                categoria.getText().trim()
-            );
-        });
-
-        dialogo.showAndWait().ifPresent(producto -> {
+            com.overbyte.Navegador.cerrarOverlay();
             if (gestor.anadirProducto(producto)) {
                 mostrarProductos();
                 mostrarAlerta("Producto añadido", "El producto se registró correctamente.");
@@ -1131,6 +1073,8 @@ public class AdminController {
                 mostrarAlerta("No se pudo añadir", "Verifica los datos e inténtalo nuevamente.");
             }
         });
+        com.overbyte.Navegador.mostrarOverlay(
+            com.overbyte.Navegador.tarjeta("Añadir producto", "Completa los datos del nuevo producto.", formulario));
     }
 
     private VBox campoEnDialogo(String titulo, TextField campo) {
@@ -1144,25 +1088,15 @@ public class AdminController {
         if (seleccionado == null || seleccionado.length == 0) {
             return;
         }
-        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmacion.setTitle("Eliminar producto");
-        confirmacion.setHeaderText("¿Eliminar " + seleccionado[1] + "?");
-        confirmacion.setContentText(
-            "Se quitará este producto del inventario. Esta acción no se puede deshacer."
-        );
-        confirmacion.initOwner(contenidoCentro.getScene().getWindow());
-        confirmacion.getDialogPane().getStylesheets().add(
-            getClass().getResource("/com/overbyte/styles/estilos.css").toExternalForm()
-        );
-        confirmacion.showAndWait().ifPresent(resultado -> {
-            if (resultado == ButtonType.OK) {
+        com.overbyte.Navegador.confirmar("Eliminar producto",
+            "¿Eliminar " + seleccionado[1] + "? Se quitará este producto del inventario. Esta acción no se puede deshacer.",
+            () -> {
                 if (gestor.eliminarProducto(seleccionado[0])) {
                     mostrarProductos();
                 } else {
                     mostrarAlerta("No se pudo eliminar", "El producto ya no existe en el inventario.");
                 }
-            }
-        });
+            });
     }
 
     /* ----------- PROVEEDORES ----------- */
@@ -1247,15 +1181,6 @@ public class AdminController {
     }
 
     private void mostrarDialogoAnadirProveedor() {
-        Dialog<Proveedor> dialogo = new Dialog<>();
-        dialogo.setTitle("Añadir proveedor");
-        dialogo.setHeaderText("Completa los datos del proveedor.");
-        dialogo.initOwner(contenidoCentro.getScene().getWindow());
-        dialogo.getDialogPane().getStylesheets().add(
-            getClass().getResource("/com/overbyte/styles/estilos.css").toExternalForm()
-        );
-        dialogo.getDialogPane().getStyleClass().add("empleado-dialog");
-
         TextField codigo = new TextField();
         codigo.setText(gestor.generarIdProveedor());
         codigo.setEditable(false);
@@ -1271,54 +1196,39 @@ public class AdminController {
             campoEnDialogo("Teléfono de contacto", contacto)
         );
         formulario.getStyleClass().add("empleado-dialog-content");
-        dialogo.getDialogPane().setContent(formulario);
-
-        ButtonType guardar = new ButtonType("Guardar proveedor", ButtonBar.ButtonData.OK_DONE);
-        dialogo.getDialogPane().getButtonTypes().addAll(guardar, ButtonType.CANCEL);
-        Button botonGuardar = (Button) dialogo.getDialogPane().lookupButton(guardar);
+        Button botonGuardar = new Button("Guardar proveedor");
         botonGuardar.getStyleClass().add("boton-mas");
-        botonGuardar.addEventFilter(ActionEvent.ACTION, event -> {
-            if (nombre.getText().isBlank()
-                    || contacto.getText().isBlank()) {
-                event.consume();
+        Button botonCancelarPr = new Button("Cancelar");
+        botonCancelarPr.getStyleClass().add("boton-rol");
+        HBox botonesPr = new HBox(10, botonGuardar, botonCancelarPr);
+        botonesPr.setAlignment(Pos.CENTER_RIGHT);
+        formulario.getChildren().add(botonesPr);
+        botonCancelarPr.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
+        botonGuardar.setOnAction(e -> {
+            if (nombre.getText().isBlank() || contacto.getText().isBlank()) {
                 mostrarAlerta("Datos incompletos", "Completa el nombre y teléfono.");
                 return;
             }
+            Proveedor proveedor;
             try {
                 int telefono = Integer.parseInt(contacto.getText().trim());
-                if (telefono <= 0) {
-                    throw new NumberFormatException();
-                }
-            } catch (NumberFormatException e) {
-                event.consume();
-                mostrarAlerta(
-                    "Teléfono inválido",
-                    "Ingresa un teléfono numérico positivo dentro del rango permitido."
-                );
+                if (telefono <= 0) throw new NumberFormatException();
+                proveedor = new Proveedor(nombre.getText().trim(), codigo.getText().trim(), telefono);
+            } catch (NumberFormatException ex) {
+                mostrarAlerta("Teléfono inválido",
+                    "Ingresa un teléfono numérico positivo dentro del rango permitido.");
+                return;
             }
-        });
-        dialogo.setResultConverter(boton -> {
-            if (boton != guardar) {
-                return null;
-            }
-            return new Proveedor(
-                nombre.getText().trim(),
-                codigo.getText().trim(),
-                Integer.parseInt(contacto.getText().trim())
-            );
-        });
-
-        dialogo.showAndWait().ifPresent(proveedor -> {
+            com.overbyte.Navegador.cerrarOverlay();
             if (gestor.anadirProveedor(proveedor)) {
                 mostrarProveedores();
                 mostrarAlerta("Proveedor añadido", "El proveedor se registró correctamente.");
             } else {
-                mostrarAlerta(
-                    "No se pudo añadir",
-                    "Verifica los datos e inténtalo nuevamente."
-                );
+                mostrarAlerta("No se pudo añadir", "Verifica los datos e inténtalo nuevamente.");
             }
         });
+        com.overbyte.Navegador.mostrarOverlay(
+            com.overbyte.Navegador.tarjeta("Añadir proveedor", "Completa los datos del proveedor.", formulario));
     }
 
     private void eliminarProveedorSeleccionado(TableView<String[]> tabla) {
@@ -1326,49 +1236,22 @@ public class AdminController {
         if (seleccionado == null || seleccionado.length == 0) {
             return;
         }
-        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmacion.setTitle("Eliminar proveedor");
-        confirmacion.setHeaderText("¿Eliminar a " + seleccionado[1] + "?");
-        confirmacion.setContentText(
-            "Se quitará este proveedor del directorio. Esta acción no se puede deshacer."
-        );
-        confirmacion.initOwner(contenidoCentro.getScene().getWindow());
-        confirmacion.getDialogPane().getStylesheets().add(
-            getClass().getResource("/com/overbyte/styles/estilos.css").toExternalForm()
-        );
-        confirmacion.showAndWait().ifPresent(resultado -> {
-            if (resultado == ButtonType.OK) {
+        com.overbyte.Navegador.confirmar("Eliminar proveedor",
+            "¿Eliminar a " + seleccionado[1] + "? Se quitará este proveedor del directorio. Esta acción no se puede deshacer.",
+            () -> {
                 if (gestor.eliminarProveedor(seleccionado[0])) {
                     mostrarProveedores();
                 } else {
                     mostrarAlerta("No se pudo eliminar", "El proveedor ya no existe en el directorio.");
                 }
-            }
-        });
+            });
     }
 
     /* ===================== CERRAR SESIÓN ===================== */
 
     @FXML
     private void cerrarSesion() {
-        try {
-            FXMLLoader cargador = new FXMLLoader(
-                getClass().getResource("/com/overbyte/vista/login.fxml")
-            );
-            Parent vistaLogin = cargador.load();
-            Scene escenaLogin = new Scene(vistaLogin, 800, 650);
-
-            Stage ventana = (Stage) contenidoCentro.getScene().getWindow();
-            ventana.setScene(escenaLogin);
-            ventana.setTitle("Tech-Flow | Iniciar sesion");
-            ventana.setMinWidth(600);
-            ventana.setMinHeight(400);
-            ventana.setWidth(800);
-            ventana.setHeight(650);
-            ventana.centerOnScreen();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        com.overbyte.Navegador.irAlLogin();
     }
 
     /* ===================== UTILIDADES ===================== */
@@ -1458,10 +1341,6 @@ public class AdminController {
     }
 
     private void mostrarAlerta(String titulo, String mensaje) {
-        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
-        alerta.setTitle(titulo);
-        alerta.setHeaderText(null);
-        alerta.setContentText(mensaje);
-        alerta.showAndWait();
+        com.overbyte.Navegador.avisar(titulo, mensaje);
     }
 }

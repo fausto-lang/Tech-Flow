@@ -71,6 +71,6 @@
             <Label fx:id="lblTituloSeccion" styleClass="header-title" text="Caja"/>
             <Region HBox.hgrow="ALWAYS"/>
         </HBox>
-        <VBox fx:id="contenidoCentro" styleClass="contenido-centro" VBox.vgrow="ALWAYS" prefHeight="550" minHeight="450"/>
+        <VBox fx:id="contenidoCentro" styleClass="contenido-centro" VBox.vgrow="ALWAYS" prefHeight="400" minHeight="0" maxHeight="Infinity"/>
     </VBox>
 </HBox>

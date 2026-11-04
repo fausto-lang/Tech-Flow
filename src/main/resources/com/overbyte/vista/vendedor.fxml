@@ -72,7 +72,7 @@ styleClass="main-window vendedor-window">
                     <Label text="PRODUCTOS DISPONIBLES" styleClass="venta-subtitulo"/>
                     <ScrollPane fx:id="scrollProductos" styleClass="rejilla lista-venta" fitToWidth="true"
                                 hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS"
-                                minHeight="320" prefHeight="520">
+                                minHeight="200" prefHeight="340">
                         <VBox fx:id="tablaProductos" alignment="TOP_LEFT" spacing="5"
                               styleClass="lista-productos-contenido"/>
                     </ScrollPane>
@@ -93,7 +93,7 @@ styleClass="main-window vendedor-window">
                 <Label text="Productos seleccionados" styleClass="venta-subtitulo"/>
                 <ScrollPane fx:id="scrollCarrito" styleClass="rejilla lista-carrito" fitToWidth="true"
                             hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS"
-                            minHeight="240" prefHeight="480">
+                            minHeight="160" prefHeight="280">
                     <VBox fx:id="tablaCarrito" alignment="TOP_LEFT" spacing="5"
                           styleClass="lista-carrito-contenido"/>
                 </ScrollPane>

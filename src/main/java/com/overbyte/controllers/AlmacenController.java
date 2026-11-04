@@ -40,6 +40,7 @@ public class AlmacenController {
     @FXML
     private VBox paginaInventario;
 
+
     @FXML
     private Button navInventario;
 
@@ -207,10 +208,6 @@ public class AlmacenController {
 
     @FXML
     private void mostrarDialogoRegistrarProducto() {
-        Dialog<Producto> dialogo = crearDialogo("Registrar producto",
-                "Completa los datos para agregar un producto al inventario.", 680, 620,
-                "producto-dialog");
-
         TextField id = new TextField(new Gestor(
                 empleado.getCi(), empleado.getNombre(), empleado.getContrasena()
         ).generarIdProducto());
@@ -245,20 +242,22 @@ public class AlmacenController {
                 precios,
                 campoDialogo("Stock inicial", stock));
         formulario.getStyleClass().add("empleado-dialog-content");
-        dialogo.getDialogPane().setContent(formulario);
-
-        ButtonType guardar = new ButtonType("Guardar producto", ButtonBar.ButtonData.OK_DONE);
-        dialogo.getDialogPane().getButtonTypes().addAll(guardar, ButtonType.CANCEL);
-        Button botonGuardar = (Button) dialogo.getDialogPane().lookupButton(guardar);
+        Button botonGuardar = new Button("Guardar producto");
         botonGuardar.getStyleClass().add("boton-mas");
-        botonGuardar.addEventFilter(ActionEvent.ACTION, event -> {
+        Button botonCancelarA = new Button("Cancelar");
+        botonCancelarA.getStyleClass().add("boton-rol");
+        HBox botonesA = new HBox(10, botonGuardar, botonCancelarA);
+        botonesA.setAlignment(Pos.CENTER_RIGHT);
+        formulario.getChildren().add(botonesA);
+        botonCancelarA.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
+        botonGuardar.setOnAction(e -> {
             if (nombre.getText().isBlank()
                     || precioEntrada.getText().isBlank()
                     || precioVenta.getText().isBlank() || stock.getText().isBlank()) {
-                event.consume();
                 mostrarAlerta("Datos incompletos", "Completa el nombre, precios y stock.");
                 return;
             }
+            Producto producto;
             try {
                 double compra = Double.parseDouble(precioEntrada.getText().trim().replace(',', '.'));
                 double venta = Double.parseDouble(precioVenta.getText().trim().replace(',', '.'));
@@ -267,24 +266,14 @@ public class AlmacenController {
                         || compra < 0 || venta < 0 || unidades < 0) {
                     throw new NumberFormatException();
                 }
-            } catch (NumberFormatException e) {
-                event.consume();
+                producto = new Producto(id.getText().trim(), nombre.getText().trim(), compra, venta,
+                    descripcion.getText().trim(), unidades, marca.getText().trim(), categoria.getText().trim());
+            } catch (NumberFormatException ex) {
                 mostrarAlerta("Datos inválidos",
                         "Los precios deben ser números válidos y el stock un entero igual o mayor que cero.");
+                return;
             }
-        });
-        dialogo.setResultConverter(boton -> {
-            if (boton != guardar) {
-                return null;
-            }
-            return new Producto(id.getText().trim(), nombre.getText().trim(),
-                    Double.parseDouble(precioEntrada.getText().trim().replace(',', '.')),
-                    Double.parseDouble(precioVenta.getText().trim().replace(',', '.')),
-                    descripcion.getText().trim(), Integer.parseInt(stock.getText().trim()),
-                    marca.getText().trim(), categoria.getText().trim());
-        });
-
-        dialogo.showAndWait().ifPresent(producto -> {
+            com.overbyte.Navegador.cerrarOverlay();
             if (almacen.ingresarProductoNuevo(producto)) {
                 cargarInventario();
                 mostrarMensaje("El producto se registró correctamente.", true);
@@ -294,17 +283,14 @@ public class AlmacenController {
                 mostrarAlerta("No se pudo añadir", "Verifica los datos e inténtalo nuevamente.");
             }
         });
+        com.overbyte.Navegador.mostrarOverlay(
+            com.overbyte.Navegador.tarjeta("Registrar producto", "Completa los datos para agregar un producto al inventario.", formulario));
     }
 
     /* ===================== ENTRADAS Y STOCK ===================== */
 
     @FXML
     private void mostrarDialogoEntradas() {
-        Dialog<Void> dialogo = crearDialogo("Entradas y stock",
-                "Busca productos por ID, nombre, marca, categoría o descripción y añádelos al carrito.",
-                1040, 650, "entrada-dialog");
-        dialogo.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
-
         TextField busqueda = new TextField();
         busqueda.setPromptText("ID, nombre, marca, categoría o descripción");
         busqueda.getStyleClass().add("campo");
@@ -350,18 +336,25 @@ public class AlmacenController {
         tituloCarrito.getStyleClass().add("venta-subtitulo");
         VBox panelResultados = new VBox(8, tituloResultados, scrollResultados);
         panelResultados.getStyleClass().add("entrada-panel");
+        panelResultados.setMinWidth(0);
+        panelResultados.setMaxWidth(Double.MAX_VALUE);
         VBox panelCarrito = new VBox(8, tituloCarrito, scrollCarrito);
         panelCarrito.getStyleClass().add("entrada-panel");
+        panelCarrito.setMinWidth(0);
+        panelCarrito.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(panelResultados, Priority.ALWAYS);
         HBox.setHgrow(panelCarrito, Priority.ALWAYS);
+        panelResultados.setPrefWidth(Region.USE_PREF_SIZE);
         HBox listas = new HBox(12, panelResultados, panelCarrito);
+        listas.setMaxWidth(Double.MAX_VALUE);
+        listas.setMinWidth(0);
         VBox.setVgrow(listas, Priority.ALWAYS);
-        listas.setMinHeight(390);
+        listas.setMinHeight(300);
 
         Button importar = new Button("IMPORTAR ENTRADAS CSV");
         importar.getStyleClass().add("boton-rol");
         importar.setOnAction(event -> {
-            if (importarEntradasDesdeArchivo(dialogo)) {
+            if (importarEntradasDesdeArchivo()) {
                 buscar.run();
                 actualizarCarritoEntradas(carrito, productos, seleccionados);
             }
@@ -369,7 +362,7 @@ public class AlmacenController {
         Button registrar = new Button("REGISTRAR ENTRADAS");
         registrar.getStyleClass().add("boton-principal");
         registrar.setOnAction(event -> registrarEntradasSeleccionadas(
-                dialogo, productos, seleccionados, carrito, resultados, busqueda.getText()));
+                productos, seleccionados, carrito, resultados, busqueda.getText()));
         HBox acciones = new HBox(10, importar, registrar);
         acciones.setAlignment(Pos.CENTER_RIGHT);
 
@@ -380,12 +373,35 @@ public class AlmacenController {
                 listas,
                 acciones);
         contenido.getStyleClass().add("entrada-dialog-content");
-        dialogo.getDialogPane().setContent(contenido);
-        dialogo.setResizable(true);
+        Button cerrar = new Button("Cerrar");
+        cerrar.getStyleClass().add("boton-rol");
+        cerrar.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
+        acciones.getChildren().add(cerrar);
 
         actualizarCarritoEntradas(carrito, productos, seleccionados);
         buscar.run();
-        dialogo.showAndWait();
+        VBox tarjeta = com.overbyte.Navegador.tarjeta("Entradas y stock",
+            "Busca productos por ID, nombre, marca, categoría o descripción y añádelos al carrito.", contenido);
+        tarjeta.getStyleClass().remove("overlay-tarjeta");
+        tarjeta.getStyleClass().add("overlay-tarjeta--ancha");
+        contenido.setMaxWidth(Double.MAX_VALUE);
+        contenido.setMinWidth(0);
+        double anchoVentana = com.overbyte.Navegador.ventana() != null
+                ? com.overbyte.Navegador.ventana().getWidth() : 1100;
+        double altoVentana = com.overbyte.Navegador.ventana() != null
+                ? com.overbyte.Navegador.ventana().getHeight() : 620;
+        double ancho = Math.max(880, anchoVentana * 0.92);
+        double alto = Math.max(460, altoVentana * 0.86);
+        tarjeta.setMinWidth(ancho);
+        tarjeta.setPrefWidth(ancho);
+        tarjeta.setMaxWidth(ancho);
+        tarjeta.setPrefHeight(alto);
+        tarjeta.setMaxHeight(alto);
+        panelResultados.setPrefWidth(ancho * 0.63);
+        panelCarrito.setPrefWidth(ancho * 0.37);
+        scrollResultados.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollCarrito.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        com.overbyte.Navegador.mostrarOverlay(tarjeta);
     }
 
     private void mostrarResultadosEntradas(VBox contenedor, List<Producto> productos, String termino,
@@ -544,7 +560,7 @@ public class AlmacenController {
         return null;
     }
 
-    private void registrarEntradasSeleccionadas(Dialog<?> dialogo, List<Producto> productos,
+    private void registrarEntradasSeleccionadas(List<Producto> productos,
             Map<String, Integer> seleccionados, VBox carrito, VBox resultados, String termino) {
         if (seleccionados.isEmpty()) {
             mostrarAlerta("Carrito vacío", "Añade al menos un producto antes de registrar entradas.");
@@ -575,42 +591,110 @@ public class AlmacenController {
         mostrarMensaje("Se registraron las entradas correctamente.", true);
         mostrarAlerta("Entradas registradas", "Se actualizaron las existencias de "
                 + registrados + " producto(s).");
-        dialogo.close();
+        com.overbyte.Navegador.cerrarOverlay();
     }
 
-    private boolean importarEntradasDesdeArchivo(Dialog<?> propietario) {
+    private boolean importarEntradasDesdeArchivo() {
         FileChooser selector = new FileChooser();
         selector.setTitle("Seleccionar archivo de entradas");
         selector.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Archivos CSV y texto", "*.csv", "*.txt"),
                 new FileChooser.ExtensionFilter("Todos los archivos", "*.*"));
-        File archivo = selector.showOpenDialog(propietario.getDialogPane().getScene().getWindow());
+        File archivo = selector.showOpenDialog(com.overbyte.Navegador.ventana());
         if (archivo == null) {
             return false;
         }
-        if (almacen.ingresarEntradaDesdeArchivo(archivo.getAbsolutePath())) {
-            cargarInventario();
-            mostrarMensaje("Entradas importadas correctamente.", true);
-            mostrarAlerta("Importación completada", "Las entradas se importaron correctamente.");
-            return true;
-        } else {
-            mostrarAlerta("No se pudo importar",
-                    "Verifica el formato y las columnas del archivo seleccionado.");
-            return false;
-        }
+        mostrarVistaPreviaEntradas(archivo);
+        return true;
     }
 
-    private <T> Dialog<T> crearDialogo(String titulo, String encabezado,
-                                       double ancho, double alto, String clase) {
-        Dialog<T> dialogo = new Dialog<>();
-        dialogo.setTitle(titulo);
-        dialogo.setHeaderText(encabezado);
-        dialogo.initOwner(navInventario.getScene().getWindow());
-        dialogo.getDialogPane().getStylesheets().add(
-                getClass().getResource("/com/overbyte/styles/estilos.css").toExternalForm());
-        dialogo.getDialogPane().getStyleClass().add(clase);
-        dialogo.getDialogPane().setPrefSize(ancho, alto);
-        return dialogo;
+    /** Preview GUI-only: muestra las filas leidas antes de confirmar. No escribe nada. */
+    private void mostrarVistaPreviaEntradas(File archivo) {
+        List<String[]> filas = motorCSV.leerCSV(archivo.getAbsolutePath());
+        if (filas.size() < 2) {
+            mostrarAlerta("Archivo vacío", "El archivo no tiene datos para importar.");
+            return;
+        }
+        String[] encabezado = filas.get(0);
+        int colProveedor = indiceColumna(encabezado, "idProveedor");
+        int colProducto = indiceColumna(encabezado, "idProducto");
+        int colCantidad = indiceColumna(encabezado, "cantidad");
+        java.util.Set<String> proveedores = new java.util.HashSet<>();
+        for (String[] fila : motorCSV.leerCSV(motorCSV.rutaDatos("proveedores.csv").toString())) {
+            if (fila.length > 0) proveedores.add(fila[0].trim().toLowerCase(Locale.ROOT));
+        }
+        TableView<String[]> tabla = new TableView<>();
+        tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        tabla.setPrefHeight(280);
+        int columnas = Math.min(encabezado.length, 7);
+        for (int c = 0; c < columnas; c++) {
+            final int idx = c;
+            TableColumn<String[], String> col = new TableColumn<>(encabezado[c]);
+            col.setCellValueFactory(p -> new javafx.beans.property.SimpleStringProperty(
+                    idx < p.getValue().length ? p.getValue()[idx] : "—"));
+            tabla.getColumns().add(col);
+        }
+        int invalidas = 0;
+        for (int i = 1; i < filas.size(); i++) {
+            String[] fila = filas.get(i);
+            tabla.getItems().add(fila);
+            if (!filaEntradaValida(fila, colProveedor, colProducto, colCantidad, proveedores)) invalidas++;
+        }
+        Label resumen = new Label((filas.size() - 1) + " filas leídas · " + invalidas + " con formato inválido");
+        resumen.getStyleClass().add(invalidas > 0 ? "mensaje" : "mensaje-ok");
+        Button confirmar = new Button("CONFIRMAR IMPORTACIÓN");
+        confirmar.getStyleClass().add("boton-principal");
+        Button cancelar = new Button("Cancelar");
+        cancelar.getStyleClass().add("boton-rol");
+        confirmar.setOnAction(e -> {
+            com.overbyte.Navegador.cerrarOverlay();
+            if (almacen.ingresarEntradaDesdeArchivo(archivo.getAbsolutePath())) {
+                cargarInventario();
+                mostrarMensaje("Entradas importadas correctamente.", true);
+                mostrarAlerta("Importación completada", "Las entradas se importaron correctamente.");
+            } else {
+                mostrarMensaje("No se pudo importar el archivo.", false);
+                mostrarAlerta("No se pudo importar",
+                        "Verifica el formato y las columnas del archivo seleccionado.");
+            }
+        });
+        cancelar.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
+        HBox botones = new HBox(10, confirmar, cancelar);
+        botones.setAlignment(Pos.CENTER_RIGHT);
+        VBox cuerpo = new VBox(10, resumen, tabla, botones);
+        cuerpo.setMaxWidth(Double.MAX_VALUE);
+        VBox tarjeta = com.overbyte.Navegador.tarjeta("Vista previa de importación",
+                "Archivo: " + archivo.getName() + ". Revisa si está completo y confirma para guardar.", cuerpo);
+        tarjeta.getStyleClass().remove("overlay-tarjeta");
+        tarjeta.getStyleClass().add("overlay-tarjeta--ancha");
+        double anchoVentana = com.overbyte.Navegador.ventana() != null
+                ? com.overbyte.Navegador.ventana().getWidth() : 1100;
+        double ancho = Math.max(880, anchoVentana * 0.92);
+        tarjeta.setMinWidth(ancho);
+        tarjeta.setPrefWidth(ancho);
+        tarjeta.setMaxWidth(ancho);
+        com.overbyte.Navegador.mostrarOverlay(tarjeta);
+    }
+
+    private int indiceColumna(String[] encabezado, String nombre) {
+        for (int i = 0; i < encabezado.length; i++) {
+            if (encabezado[i].trim().equalsIgnoreCase(nombre)) return i;
+        }
+        return -1;
+    }
+
+    private boolean filaEntradaValida(String[] fila, int colProveedor, int colProducto,
+                                       int colCantidad, java.util.Set<String> proveedores) {
+        if (colProducto < 0 || colCantidad < 0 || colProducto >= fila.length || colCantidad >= fila.length) return false;
+        if (fila[colProducto].isBlank()) return false;
+        try {
+            if (Integer.parseInt(fila[colCantidad].trim()) <= 0) return false;
+        } catch (NumberFormatException ex) {
+            return false;
+        }
+        if (colProveedor >= 0 && colProveedor < fila.length && !fila[colProveedor].isBlank()
+                && !proveedores.contains(fila[colProveedor].trim().toLowerCase(Locale.ROOT))) return false;
+        return true;
     }
 
     private VBox campoDialogo(String titulo, TextInputControl control) {
@@ -622,12 +706,7 @@ public class AlmacenController {
     }
 
     private void mostrarAlerta(String titulo, String contenido) {
-        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
-        alerta.setTitle(titulo);
-        alerta.setHeaderText(null);
-        alerta.setContentText(contenido);
-        alerta.initOwner(navInventario.getScene().getWindow());
-        alerta.showAndWait();
+        com.overbyte.Navegador.avisar(titulo, contenido);
     }
 
     private void mostrarMensaje(String texto, boolean correcto) {
@@ -642,24 +721,7 @@ public class AlmacenController {
 
     @FXML
     private void cerrarSesion() {
-        try {
-            FXMLLoader cargador = new FXMLLoader(
-                getClass().getResource("/com/overbyte/vista/login.fxml")
-            );
-            Parent vistaLogin = cargador.load();
-            Scene escenaLogin = new Scene(vistaLogin, 800, 650);
-
-            Stage ventana = (Stage) navCerrarSesion.getScene().getWindow();
-            ventana.setScene(escenaLogin);
-            ventana.setTitle("Tech-Flow | Iniciar sesión");
-            ventana.setMinWidth(600);
-            ventana.setMinHeight(400);
-            ventana.setWidth(800);
-            ventana.setHeight(650);
-            ventana.centerOnScreen();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        com.overbyte.Navegador.irAlLogin();
     }
 
 }

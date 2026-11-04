@@ -4,15 +4,15 @@ import javafx.animation.ScaleTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 import javafx.util.Duration;
+
+import com.overbyte.Navegador;
 import services.Verificador;
 import user.Empleado;
 import user.Rol;
@@ -43,6 +43,9 @@ public class LoginController {
     @FXML
     private Button btnIniciarSesion;
 
+    @FXML
+    private Button btnTema;
+
     private Rol rolSeleccionado;
 
     private final Verificador verificador = new Verificador();
@@ -51,6 +54,7 @@ public class LoginController {
     private void initialize() {
         rolSeleccionado = null;
         mensaje.setText("");
+        sincronizarBotonTema();
 
         campoNombre.setOnAction(event -> btnAdministrador.requestFocus());
         campoContrasena.setOnAction(event -> iniciarSesion());
@@ -62,6 +66,18 @@ public class LoginController {
         configurarAnimacionHover(btnCajero);
         configurarAnimacionHover(btnAlmacen);
         configurarAnimacionHover(btnIniciarSesion);
+    }
+
+    @FXML
+    private void alternarTema() {
+        Navegador.alternarTema();
+        sincronizarBotonTema();
+    }
+
+    private void sincronizarBotonTema() {
+        if (btnTema != null) {
+            btnTema.setText(Navegador.esTemaOscuro() ? "☀" : "🌙");
+        }
     }
 
     @FXML
@@ -162,99 +178,38 @@ public class LoginController {
 
     private void abrirVistaSegunRol(Empleado empleado) {
         try {
-            Stage ventana = (Stage) campoNombre
-                .getScene()
-                .getWindow();
-
+            String fxml;
+            String titulo;
             Rol rol = empleado.getRol();
 
             if (rol == Rol.ADMINISTRADOR) {
-
-                FXMLLoader cargador = new FXMLLoader(
-                    getClass().getResource(
-                        "/com/overbyte/vista/admin.fxml"
-                    )
-                );
-
-                Parent vistaAdmin = cargador.load();
-
-                AdminController controlador = cargador.getController();
-                controlador.setEmpleado(empleado);
-
-                Scene escenaAdmin = new Scene(vistaAdmin, 1200, 800);
-
-                ventana.setScene(escenaAdmin);
-                ventana.setTitle("Tech-Flow | Administrador");
-                ventana.setMinWidth(1000);
-                ventana.setMinHeight(700);
-                ventana.setWidth(1200);
-                ventana.setHeight(800);
-                ventana.centerOnScreen();
-
+                fxml = "/com/overbyte/vista/admin.fxml";
+                titulo = "Administrador";
             } else if (rol == Rol.CAJERO) {
-
-                FXMLLoader cargador = new FXMLLoader(
-                    getClass().getResource(
-                        "/com/overbyte/vista/vendedor.fxml"
-                    )
-                );
-
-                Parent vistaVendedor = cargador.load();
-
-                VendedorController controlador = cargador.getController();
-                controlador.setEmpleado(empleado);
-
-                Scene escenaVendedor = new Scene(vistaVendedor, 1100, 750);
-
-                ventana.setScene(escenaVendedor);
-                ventana.setTitle("Tech-Flow | Punto de Venta");
-                ventana.setMinWidth(900);
-                ventana.setMinHeight(600);
-                ventana.setWidth(1100);
-                ventana.setHeight(750);
-                ventana.centerOnScreen();
-
+                fxml = "/com/overbyte/vista/vendedor.fxml";
+                titulo = "Punto de Venta";
             } else if (rol == Rol.ALMACENERO) {
-
-                FXMLLoader cargador = new FXMLLoader(
-                    getClass().getResource(
-                        "/com/overbyte/vista/almacen.fxml"
-                    )
-                );
-
-                Parent vistaAlmacen = cargador.load();
-
-                AlmacenController controlador = cargador.getController();
-                controlador.setEmpleado(empleado);
-
-                Scene escenaAlmacen = new Scene(vistaAlmacen, 1100, 750);
-
-                ventana.setScene(escenaAlmacen);
-                ventana.setTitle("Tech-Flow | Almacén");
-                ventana.setMinWidth(900);
-                ventana.setMinHeight(600);
-                ventana.setWidth(1100);
-                ventana.setHeight(750);
-                ventana.centerOnScreen();
-
+                fxml = "/com/overbyte/vista/almacen.fxml";
+                titulo = "Almacén";
             } else {
-                MenuController menu = new MenuController();
-                menu.mostrarMenu(ventana, empleado);
+                Navegador.avisar("Rol no soportado", "No se pudo abrir el panel: " + rol);
+                return;
             }
+
+            FXMLLoader cargador = new FXMLLoader(getClass().getResource(fxml));
+            Parent vista = cargador.load();
+            Object controlador = cargador.getController();
+            if (controlador instanceof AdminController admin) admin.setEmpleado(empleado);
+            else if (controlador instanceof VendedorController vendedor) vendedor.setEmpleado(empleado);
+            else if (controlador instanceof AlmacenController almacen) almacen.setEmpleado(empleado);
+
+            Navegador.cerrarOverlay();
+            Navegador.mostrar(vista, titulo);
 
         } catch (Exception e) {
             e.printStackTrace();
-
-            javafx.scene.control.Alert alerta =
-                 new javafx.scene.control.Alert(
-                       javafx.scene.control.Alert.AlertType.ERROR);
-
-            alerta.setTitle("Error al abrir la pantalla");
-            alerta.setHeaderText("No se pudo cargar el panel administrativo");
-            alerta.setContentText(e.getClass().getSimpleName()
-                    + ": " + e.getMessage());
-
-            alerta.showAndWait();
+            Navegador.avisar("Error al abrir la pantalla",
+                    e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
 }

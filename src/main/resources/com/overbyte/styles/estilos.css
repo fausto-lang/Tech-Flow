@@ -917,3 +917,134 @@
     -fx-background-color: -fx-panel;
     -fx-border-color: -fx-primario;
 }
+
+/* ---------- Overlay interno: ventana unica (bspwm: un solo tile) ---------- */
+.overlay-fondo {
+    -fx-background-color: rgba(43, 34, 51, 0.45);
+    -fx-padding: 16px;
+}
+.overlay-tarjeta {
+    -fx-min-width: 440px;
+    -fx-pref-width: 520px;
+    -fx-max-width: 520px;
+    -fx-max-height: 560px;
+}
+.overlay-tarjeta--compacta {
+    -fx-min-width: 340px;
+    -fx-pref-width: 380px;
+    -fx-max-width: 380px;
+    -fx-max-height: 360px;
+    -fx-padding: 18px;
+}
+.overlay-tarjeta--ancha {
+    -fx-min-width: 880px;
+    -fx-pref-width: 1100px;
+    -fx-max-width: 1600px;
+    -fx-max-height: 560px;
+}
+
+/* ---------- Boton de tema ---------- */
+.boton-tema {
+    -fx-font-size: 18px;
+    -fx-padding: 6px 14px;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+}
+
+/* ---------- Tema oscuro (se elige en el login, persiste en la sesion) ----------
+   Contraste: fondo #1B1725 / tarjeta #2A2438 / texto #F2EFFA / suave #CFC6E6 */
+.tema-oscuro {
+    -fx-texto: #F2EFFA;
+    -fx-texto-suave: #CFC6E6;
+    -fx-panel: #2A2438;
+    -fx-rejilla: #574A7A;
+    -fx-primario-claro: #3A2E52;
+    -fx-fondo-oscuro: #1B1725;
+    -fx-tarjeta-oscura: #2A2438;
+    -fx-borde-oscuro: #574A7A;
+}
+.tema-oscuro .main-window,
+.tema-oscuro .main-content,
+.tema-oscuro .contenido-centro,
+.tema-oscuro .role-content,
+.tema-oscuro .fondo-login { -fx-background-color: #1B1725; }
+.tema-oscuro .tarjeta-login,
+.tema-oscuro .venta-card,
+.tema-oscuro .carrito-card,
+.tema-oscuro .overlay-tarjeta,
+.tema-oscuro .entrada-panel,
+.tema-oscuro .entrada-dialog-content,
+.tema-oscuro .entrada-dialog,
+.tema-oscuro .ventas-resumen,
+.tema-oscuro .ventas-tabla-card,
+.tema-oscuro .inventario-apartado,
+.tema-oscuro .critico-producto,
+.tema-oscuro .selector-inventario,
+.tema-oscuro .comprador-panel,
+.tema-oscuro .almacen-accion,
+.tema-oscuro .dialog-pane { -fx-background-color: #2A2438; -fx-border-color: #574A7A; }
+.tema-oscuro .fila-datos,
+.tema-oscuro .venta-producto-fila,
+.tema-oscuro .carrito-producto-fila,
+.tema-oscuro .almacen-producto-fila,
+.tema-oscuro .entrada-producto-fila,
+.tema-oscuro .entrada-carrito-fila,
+.tema-oscuro .lista-productos-contenido,
+.tema-oscuro .lista-carrito-contenido,
+.tema-oscuro .almacen-lista-contenido,
+.tema-oscuro .rejilla { -fx-background-color: #2A2438; -fx-border-color: #574A7A; }
+.tema-oscuro .fila-cabecera { -fx-background-color: #3A2E52; }
+.tema-oscuro .fila-cabecera .label { -fx-text-fill: #F2EFFA; }
+.tema-oscuro .sidebar { -fx-background-color: #211C2E; }
+.tema-oscuro .nav-button { -fx-text-fill: #F2EFFA; }
+.tema-oscuro .nav-button:hover { -fx-background-color: #3A2E52; -fx-text-fill: #F2EFFA; }
+.tema-oscuro .nav-button-activo,
+.tema-oscuro .nav-button-activo:hover { -fx-background-color: #4A3570; -fx-text-fill: #FFFFFF; }
+.tema-oscuro .nav-button-activo .nav-icon { -fx-text-fill: #FFFFFF; }
+.tema-oscuro .nav-logout { -fx-text-fill: #CFC6E6; }
+.tema-oscuro .button { -fx-background-color: #2A2438; -fx-border-color: #574A7A; -fx-text-fill: #F2EFFA; }
+.tema-oscuro .button:hover { -fx-background-color: #3A2E52; -fx-border-color: #8E4FC9; }
+.tema-oscuro .text-field,
+.tema-oscuro .password-field,
+.tema-oscuro .combo-box { -fx-background-color: #241E33; -fx-border-color: #574A7A; -fx-text-fill: #F2EFFA; -fx-prompt-text-fill: #9B8FB8; }
+.tema-oscuro .text-field:focused,
+.tema-oscuro .password-field:focused,
+.tema-oscuro .combo-box:focused { -fx-border-color: #B388E6; }
+.tema-oscuro .boton-principal,
+.tema-oscuro .boton-mas { -fx-background-color: #8E4FC9; -fx-border-color: #8E4FC9; -fx-text-fill: #FFFFFF; }
+.tema-oscuro .boton-rol { -fx-background-color: #3A2E52; -fx-border-color: #574A7A; -fx-text-fill: #F2EFFA; }
+.tema-oscuro .boton-rol-activo { -fx-background-color: #8E4FC9; -fx-text-fill: #FFFFFF; }
+.tema-oscuro .boton-peligro { -fx-text-fill: #FFFFFF; }
+.tema-oscuro .label { -fx-text-fill: #F2EFFA; }
+.tema-oscuro .header-title { -fx-text-fill: #FFFFFF; }
+.tema-oscuro .header-subtitle { -fx-text-fill: rgba(255, 255, 255, 0.92); }
+.tema-oscuro .logo-text { -fx-text-fill: #FFFFFF; }
+.tema-oscuro .titulo,
+.tema-oscuro .titulo-formulario,
+.tema-oscuro .titulo-formulario .label { -fx-text-fill: #D9C6F5; }
+.tema-oscuro .texto-secundario,
+.tema-oscuro .subtitulo,
+.tema-oscuro .nav-caption,
+.tema-oscuro .pie-tarjeta,
+.tema-oscuro .venta-ayuda,
+.tema-oscuro .inventario-descripcion,
+.tema-oscuro .ventas-subtitulo { -fx-text-fill: #CFC6E6; }
+.tema-oscuro .etiqueta { -fx-text-fill: #F2EFFA; }
+.tema-oscuro .mensaje { -fx-text-fill: #FF8FAB; }
+.tema-oscuro .mensaje-ok { -fx-text-fill: #5FE3A8; }
+.tema-oscuro .table-view { -fx-background-color: #2A2438; -fx-border-color: #574A7A; }
+.tema-oscuro .table-view .column-header { -fx-background-color: #3A2E52; }
+.tema-oscuro .table-view .column-header .label { -fx-text-fill: #F2EFFA; }
+.tema-oscuro .table-view .table-cell { -fx-background-color: #2A2438; -fx-text-fill: #F2EFFA; -fx-border-color: #3A2E52; }
+.tema-oscuro .table-view .table-row-cell:filled:selected { -fx-background-color: #4A3570; }
+.tema-oscuro .table-view .placeholder .label { -fx-text-fill: #CFC6E6; }
+.tema-oscuro .combo-box-popup .list-view { -fx-background-color: #2A2438; -fx-border-color: #574A7A; }
+.tema-oscuro .combo-box-popup .list-cell { -fx-text-fill: #F2EFFA; }
+.tema-oscuro .scroll-pane { -fx-background-color: #1B1725; }
+.tema-oscuro .scroll-pane > .viewport { -fx-background-color: #1B1725; }
+.tema-oscuro .separator { -fx-background-color: #574A7A; }
+.tema-oscuro .almacen-stock-normal,
+.tema-oscuro .venta-stock-disponible { -fx-text-fill: #5FE3A8; }
+.tema-oscuro .almacen-stock-bajo { -fx-text-fill: #FFB86B; }
+.tema-oscuro .critico-contador { -fx-text-fill: #FF8FAB; }
+.tema-oscuro .overlay-fondo { -fx-background-color: rgba(10, 8, 18, 0.72); }

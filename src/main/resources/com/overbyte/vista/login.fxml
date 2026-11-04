@@ -17,6 +17,10 @@
 
     <padding><Insets top="30" right="30" bottom="30" left="30"/></padding>
 
+    <HBox alignment="CENTER_RIGHT" maxWidth="Infinity">
+        <Button fx:id="btnTema" text="🌙" styleClass="boton-tema" onAction="#alternarTema" accessibleText="Cambiar entre tono claro y oscuro"/>
+    </HBox>
+
     <!-- Encabezado -->
     <VBox alignment="CENTER" spacing="8" styleClass="encabezado">
         <Label text="&#9672;" styleClass="icono-logo"/>

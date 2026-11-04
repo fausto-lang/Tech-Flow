@@ -68,7 +68,7 @@
                 </VBox>
                 <ScrollPane fx:id="scrollInventario" styleClass="rejilla almacen-lista" fitToWidth="true"
                             hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS"
-                            minHeight="320" prefHeight="520">
+                            minHeight="200" prefHeight="340">
                     <VBox fx:id="tablaInventario" alignment="TOP_LEFT" spacing="5"
                           styleClass="almacen-lista-contenido"/>
                 </ScrollPane>
