@@ -6,11 +6,110 @@ Prod-04,Parlante Bluetooth BassGo,JBL,Audio,"Resistente al agua IPX7, 12 horas d
 Prod-05,Disco Duro Externo 1TB SSD,Kingston,Almacenamiento,Unidad de estado sólido portátil USB-C de alta velocidad y 1TB,99.99,129.99,15
 Prod-06,Barra de Sonido Dolby,Sony,Audio,Sistema de sonido envolvente con subwoofer inalámbrico y conectividad HDMI ARC,399.99,519.99,13
 Prod-07,Smartphone Nova 11,Huawei,Celulares,"Diseño elegante, pantalla OLED de alta tasa de refresco y carga rápida",649.00,843.70,10
-Prod-08,Laptop ZenBook 15,Asus,Computación,"Pantalla NanoEdge de 15.6 pulgadas, procesador potente y gran autonomía",1499.00,1948.70,1
 Prod-09,Smartwatch Watch GT 3,Huawei,Wearables,"Monitoreo avanzado de salud, GPS integrado y batería de larga duración",199.99,259.99,22
 Prod-10,Monitor 24 Full HD,Dell,Monitores,Panel IPS con resolución Full HD y tecnología antirreflejo,179.99,233.99,9
 Prod-11,Audífonos Gamer Kraken,Razer,Audio,"Sonido envolvente 7.1, almohadillas cómodas y micrófono retráctil",89.99,116.99,22
 Prod-12,Cámara Mirrorless Alpha,Sony,Fotografía,"Sensor de alta resolución, enfoque automático rápido y diseño compacto",899.99,1169.99,10
 Prod-13,Impresora Multifuncional EcoTank,Epson,Impresión,Sistema de tanque de tinta de alta capacidad y bajo costo por impresión,299.99,389.99,11
 Prod-14,Router Wi-Fi 6 Mesh,TP-Link,Redes,Cobertura total para todo el hogar con tecnología Wi-Fi 6 de alta velocidad,159.99,207.99,16
-Prod-15,Tarjeta Gráfica RTX 4060,Nvidia,Componentes,Arquitectura avanzada para gaming en 1080p y trazado de rayos,429.99,558.99,8
+Prod-15,Tarjeta Gráfica RTX 4060,Nvidia,Componentes,Arquitectura avanzada para gaming en 1080p y trazado de rayos,429.99,558.99,13
+UNI-000001,Teclado USB K120 (Unidad 0001),Logitech,Periféricos,,1.03,1.3390000000000002,24
+UNI-000002,Mouse Óptico DeathAdder (Unidad 0002),Razer,Periféricos,,1.56,2.028,10
+UNI-000003,Teclado Mecánico K70 (Unidad 0003),Corsair,Periféricos,,2.09,2.717,6
+UNI-000004,Mouse Inalámbrico Slim (Unidad 0004),Genius,Periféricos,,2.62,3.406,24
+UNI-000005,SSD SATA 480GB (Unidad 0005),Kingston,Almacenamiento,,3.15,4.095,6
+UNI-000006,SSD NVMe 1TB (Unidad 0006),Samsung,Almacenamiento,,3.68,4.784000000000001,30
+UNI-000007,Disco Duro 2TB (Unidad 0007),Seagate,Almacenamiento,,4.21,5.473,38
+UNI-000008,Memoria MicroSD 128GB (Unidad 0008),SanDisk,Almacenamiento,,4.74,6.162000000000001,24
+UNI-000009,Audífonos Inalámbricos WH-CH520 (Unidad 0009),Sony,Audio,,5.27,6.851,20
+UNI-000010,Parlante Go 4 (Unidad 0010),JBL,Audio,,5.8,7.54,28
+UNI-000011,Audífonos Gamer Cloud II (Unidad 0011),HyperX,Audio,,6.33,8.229000000000001,16
+UNI-000012,Micrófono Yeti Nano (Unidad 0012),Blue,Audio,,6.86,8.918000000000001,34
+UNI-000013,Monitor 24 Full HD (Unidad 0013),Dell,Monitores,,7.39,9.607,24
+UNI-000014,Monitor 27 QHD (Unidad 0014),LG,Monitores,,7.92,10.296,40
+UNI-000015,Monitor Gamer 165Hz (Unidad 0015),Asus,Monitores,,8.45,10.985,4
+UNI-000016,Router Wi-Fi 6 (Unidad 0016),TP-Link,Redes,,8.98,11.674000000000001,10
+UNI-000017,Switch Gigabit 8 Puertos (Unidad 0017),Netgear,Redes,,9.51,12.363,24
+UNI-000018,Access Point UniFi (Unidad 0018),Ubiquiti,Redes,,10.04,13.052,10
+UNI-000019,Tarjeta Gráfica RTX 4060 (Unidad 0019),Nvidia,Componentes,,10.57,13.741000000000001,18
+UNI-000020,Procesador Ryzen 5 (Unidad 0020),AMD,Componentes,,11.1,14.43,10
+UNI-000021,Procesador Core i5 (Unidad 0021),Intel,Componentes,,11.63,15.119000000000002,30
+UNI-000022,Memoria RAM DDR4 16GB (Unidad 0022),Kingston,Componentes,,12.16,15.808000000000002,30
+UNI-000023,Placa Madre Prime B550 (Unidad 0023),Asus,Componentes,,12.69,16.497,18
+UNI-000024,UPS 650VA (Unidad 0024),APC,Energía,,13.22,17.186,10
+UNI-000025,Fuente 650W 80 Plus (Unidad 0025),Forza,Energía,,13.75,17.875,18
+UNI-000026,Regulador 1000VA (Unidad 0026),Eaton,Energía,,14.28,18.564,40
+UNI-000027,Hub USB-C 7 en 1 (Unidad 0027),Anker,Accesorios,,14.81,19.253,8
+UNI-000028,Cable HDMI 2.1 (Unidad 0028),Belkin,Accesorios,,15.34,19.942,8
+UNI-000029,Adaptador USB-C a Ethernet (Unidad 0029),Ugreen,Accesorios,,15.87,20.631,4
+UNI-000030,Cargador GaN 65W (Unidad 0030),Baseus,Accesorios,,16.4,21.32,24
+UNI-000031,Soporte Monitor Ajustable (Unidad 0031),TechFlow,Mobiliario,,16.93,22.009,10
+UNI-000032,Reposapiés Ergonómico (Unidad 0032),TechFlow,Mobiliario,,17.46,22.698,40
+UNI-000033,Brazo Monitor Dual (Unidad 0033),ErgoLine,Mobiliario,,17.99,23.387,8
+UNI-000034,Tinta EcoTank Negra (Unidad 0034),Epson,Impresión,,18.52,24.076,10
+UNI-000035,Tóner LaserJet 85A (Unidad 0035),HP,Impresión,,19.05,24.765,10
+UNI-000036,Papel Fotográfico A4 (Unidad 0036),Brother,Impresión,,19.58,25.453999999999997,20
+UNI-000037,Smart Band 8 (Unidad 0037),Xiaomi,Wearables,,20.11,26.143,34
+UNI-000038,Smartwatch Watch Fit (Unidad 0038),Huawei,Wearables,,20.64,26.832,36
+UNI-000039,Cámara Mirrorless R50 (Unidad 0039),Canon,Cámaras,,21.17,27.521000000000004,30
+UNI-000040,Webcam C920 Full HD (Unidad 0040),Logitech,Cámaras,,21.7,28.21,6
+UNI-000041,Teclado USB K120 (Unidad 0041),Logitech,Periféricos,,22.23,28.899,12
+UNI-000042,Mouse Óptico DeathAdder (Unidad 0042),Razer,Periféricos,,22.76,29.588000000000005,24
+UNI-000043,Teclado Mecánico K70 (Unidad 0043),Corsair,Periféricos,,23.29,30.277,38
+UNI-000044,Mouse Inalámbrico Slim (Unidad 0044),Genius,Periféricos,,23.82,30.966,24
+UNI-000045,SSD SATA 480GB (Unidad 0045),Kingston,Almacenamiento,,24.35,31.655000000000005,24
+UNI-000046,SSD NVMe 1TB (Unidad 0046),Samsung,Almacenamiento,,24.88,32.344,38
+UNI-000047,Disco Duro 2TB (Unidad 0047),Seagate,Almacenamiento,,25.41,33.033,36
+UNI-000048,Memoria MicroSD 128GB (Unidad 0048),SanDisk,Almacenamiento,,25.94,33.722,10
+UNI-000049,Audífonos Inalámbricos WH-CH520 (Unidad 0049),Sony,Audio,,26.47,34.411,28
+UNI-000050,Parlante Go 4 (Unidad 0050),JBL,Audio,,27.0,35.1,8
+UNI-000201,Teclado USB K120 (Unidad 0201),Logitech,Periféricos,,107.03,139.139,3
+UNI-000202,Mouse Óptico DeathAdder (Unidad 0202),Razer,Periféricos,,107.56,139.828,18
+UNI-000203,Teclado Mecánico K70 (Unidad 0203),Corsair,Periféricos,,108.09,140.517,3
+UNI-000204,Mouse Inalámbrico Slim (Unidad 0204),Genius,Periféricos,,108.62,141.20600000000002,8
+UNI-000205,SSD SATA 480GB (Unidad 0205),Kingston,Almacenamiento,,109.15,141.895,19
+UNI-000206,SSD NVMe 1TB (Unidad 0206),Samsung,Almacenamiento,,109.68,142.584,12
+UNI-000207,Disco Duro 2TB (Unidad 0207),Seagate,Almacenamiento,,110.21,143.273,14
+UNI-000208,Memoria MicroSD 128GB (Unidad 0208),SanDisk,Almacenamiento,,110.74,143.962,10
+UNI-000209,Audífonos Inalámbricos WH-CH520 (Unidad 0209),Sony,Audio,,111.27,144.651,7
+UNI-000210,Parlante Go 4 (Unidad 0210),JBL,Audio,,111.8,145.34,19
+UNI-000211,Audífonos Gamer Cloud II (Unidad 0211),HyperX,Audio,,112.33,146.029,2
+UNI-000212,Micrófono Yeti Nano (Unidad 0212),Blue,Audio,,112.86,146.71800000000002,4
+UNI-000213,Monitor 24 Full HD (Unidad 0213),Dell,Monitores,,113.39,147.407,14
+UNI-000214,Monitor 27 QHD (Unidad 0214),LG,Monitores,,113.92,148.096,2
+UNI-000215,Monitor Gamer 165Hz (Unidad 0215),Asus,Monitores,,114.45,148.785,12
+UNI-000216,Router Wi-Fi 6 (Unidad 0216),TP-Link,Redes,,114.98,149.47400000000002,4
+UNI-000217,Switch Gigabit 8 Puertos (Unidad 0217),Netgear,Redes,,115.51,150.163,14
+UNI-000218,Access Point UniFi (Unidad 0218),Ubiquiti,Redes,,116.04,150.852,20
+UNI-000219,Tarjeta Gráfica RTX 4060 (Unidad 0219),Nvidia,Componentes,,116.57,151.541,4
+UNI-000220,Procesador Ryzen 5 (Unidad 0220),AMD,Componentes,,117.1,152.23,14
+UNI-000221,Procesador Core i5 (Unidad 0221),Intel,Componentes,,117.63,152.919,12
+UNI-000222,Memoria RAM DDR4 16GB (Unidad 0222),Kingston,Componentes,,118.16,153.608,7
+UNI-000223,Placa Madre Prime B550 (Unidad 0223),Asus,Componentes,,118.69,154.297,12
+UNI-000224,UPS 650VA (Unidad 0224),APC,Energía,,119.22,154.986,8
+UNI-000225,Fuente 650W 80 Plus (Unidad 0225),Forza,Energía,,119.75,155.675,13
+UNI-000226,Regulador 1000VA (Unidad 0226),Eaton,Energía,,120.28,156.364,19
+UNI-000227,Hub USB-C 7 en 1 (Unidad 0227),Anker,Accesorios,,120.81,157.053,11
+UNI-000228,Cable HDMI 2.1 (Unidad 0228),Belkin,Accesorios,,121.34,157.74200000000002,18
+UNI-000229,Adaptador USB-C a Ethernet (Unidad 0229),Ugreen,Accesorios,,121.87,158.431,11
+UNI-000230,Cargador GaN 65W (Unidad 0230),Baseus,Accesorios,,122.4,159.12,5
+UNI-000231,Soporte Monitor Ajustable (Unidad 0231),TechFlow,Mobiliario,,122.93,159.80900000000003,15
+UNI-000232,Reposapiés Ergonómico (Unidad 0232),TechFlow,Mobiliario,,123.46,160.498,15
+UNI-000233,Brazo Monitor Dual (Unidad 0233),ErgoLine,Mobiliario,,123.99,161.187,15
+UNI-000234,Tinta EcoTank Negra (Unidad 0234),Epson,Impresión,,124.52,161.876,5
+UNI-000235,Tóner LaserJet 85A (Unidad 0235),HP,Impresión,,125.05,162.565,16
+UNI-000236,Papel Fotográfico A4 (Unidad 0236),Brother,Impresión,,125.58,163.254,20
+UNI-000237,Smart Band 8 (Unidad 0237),Xiaomi,Wearables,,126.11,163.943,16
+UNI-000238,Smartwatch Watch Fit (Unidad 0238),Huawei,Wearables,,126.64,164.632,13
+UNI-000239,Cámara Mirrorless R50 (Unidad 0239),Canon,Cámaras,,127.17,165.321,7
+UNI-000240,Webcam C920 Full HD (Unidad 0240),Logitech,Cámaras,,127.7,166.01000000000002,3
+UNI-000241,Teclado USB K120 (Unidad 0241),Logitech,Periféricos,,128.23,166.69899999999998,9
+UNI-000242,Mouse Óptico DeathAdder (Unidad 0242),Razer,Periféricos,,128.76,167.388,2
+UNI-000243,Teclado Mecánico K70 (Unidad 0243),Corsair,Periféricos,,129.29,168.077,15
+UNI-000244,Mouse Inalámbrico Slim (Unidad 0244),Genius,Periféricos,,129.82,168.766,4
+UNI-000245,SSD SATA 480GB (Unidad 0245),Kingston,Almacenamiento,,130.35,169.455,4
+UNI-000246,SSD NVMe 1TB (Unidad 0246),Samsung,Almacenamiento,,130.88,170.144,7
+UNI-000247,Disco Duro 2TB (Unidad 0247),Seagate,Almacenamiento,,131.41,170.833,13
+UNI-000248,Memoria MicroSD 128GB (Unidad 0248),SanDisk,Almacenamiento,,131.94,171.522,6
+UNI-000249,Audífonos Inalámbricos WH-CH520 (Unidad 0249),Sony,Audio,,132.47,172.211,3
+UNI-000250,Parlante Go 4 (Unidad 0250),JBL,Audio,,133.0,172.9,2

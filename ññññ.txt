@@ -1,0 +1,15 @@
+TECH-FLOW | PROFORMA DE VENTA
+Proforma: ORD-D71002CF
+Comprador: dsdsd
+Fecha: 03/11/2026 21:39
+
++--------------+-----------------------------------------------+----------+----------------+----------------+
+| ID           | PRODUCTO                                      | CANT.    | PRECIO UNIT.   | SUBTOTAL       |
++--------------+-----------------------------------------------+----------+----------------+----------------+
+| UNI-000129   | Audífonos Inalámbricos WH-CH520 (Unidad 0129) | 1        | $78.82         | $78.82         |
+| UNI-000049   | Audífonos Inalámbricos WH-CH520 (Unidad 0049) | 1        | $30.91         | $30.91         |
+| UNI-000489   | Audífonos Inalámbricos WH-CH520 (Unidad 0489) | 1        | $294.43        | $294.43        |
++--------------+-----------------------------------------------+----------+----------------+----------------+
+                                                                                                    TOTAL: $404.16
+
+Esta proforma es una cotización y no confirma una venta.
