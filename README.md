@@ -14,9 +14,6 @@
 - Al importar un CSV ahora sale una vista previa con todo lo que trae, podés ver si está completo y confirmar a propósito.
 - Al terminar una venta sale un cuadro con el resumen, para guardar el archivo o cerrar, ya no se imprime en la terminal.
 - En el login hay un botón para cambiar entre tono claro y oscuro, y el tono que elegís queda para toda la sesión.
-
-Eso es todo. Nos vemos el martes.
-
 ---
 
 > PS: fausto vende humo
