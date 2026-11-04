@@ -1,6 +1,5 @@
 # ME voy de vacaciones esto es todas las mejoras antes de irme , regrso el martes
 
-Hola, esto es lo que cambié antes de irme:
 
 - Ahora es una sola ventana moderna, ya no se abre una ventana encima de la otra.
 - La ventana anterior peleaba con bspwm y se trababa, ahora se acomoda bien como un solo recuadro.
