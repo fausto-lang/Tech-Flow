@@ -19,6 +19,11 @@ import services.MotorCSV;
 @DisplayName("Gestor")
 class GestorTest {
 
+    private static final String NOMBRE_INVALIDO = "@@@";
+    private static final String CI_INVALIDA = "@@@";
+    private static final String CONTRASENA_CORTA = "123";
+    private static final String NOMBRE_CON_ACENTOS = "José Núñez";
+
     @TempDir
     Path directorio;
 
@@ -421,5 +426,133 @@ class GestorTest {
         gestor.generarPedidoProveedor("PROV-INEXISTENTE", List.of(producto("P1", 3)));
 
         assertFalse(csv().existeArchivo(csv().rutaDatos("pedidos.csv").toString()));
+    }
+
+    @Test
+    @DisplayName("Rechaza un empleado con nombre simbolico")
+    public void rechazaEmpleadoConNombreSimbolico() {
+        Gestor gestor = gestor();
+        Empleado empleado = new Empleado("12345678", NOMBRE_INVALIDO, "pw1234", Rol.CAJERO);
+        assertFalse(gestor.anadirEmpleado(empleado));
+    }
+
+    @Test
+    @DisplayName("Rechaza un empleado con ci simbolica")
+    public void rechazaEmpleadoConCiSimbolica() {
+        Gestor gestor = gestor();
+        Empleado empleado = new Empleado(CI_INVALIDA, "Beatriz", "pw1234", Rol.CAJERO);
+        assertFalse(gestor.anadirEmpleado(empleado));
+    }
+
+    @Test
+    @DisplayName("Rechaza un empleado con contrasena menor a seis caracteres")
+    public void rechazaEmpleadoConContrasenaCorta() {
+        Gestor gestor = gestor();
+        Empleado empleado = new Empleado("12345678", "Beatriz", CONTRASENA_CORTA, Rol.CAJERO);
+        assertFalse(gestor.anadirEmpleado(empleado));
+    }
+
+    @Test
+    @DisplayName("Rechaza un empleado con nombre duplicado aunque la ci sea distinta")
+    public void rechazaEmpleadoConNombreDuplicado() {
+        Gestor gestor = gestor();
+        gestor.anadirEmpleado(new Empleado("12345678", "Beatriz", "pw1234", Rol.CAJERO));
+        Empleado duplicado = new Empleado("87654321", "Beatriz", "pw1234", Rol.CAJERO);
+        assertFalse(gestor.anadirEmpleado(duplicado));
+    }
+
+    @Test
+    @DisplayName("Acepta un empleado con nombre acentuado")
+    public void aceptaEmpleadoConNombreAcentuado() {
+        Gestor gestor = gestor();
+        Empleado empleado = new Empleado("12345678", NOMBRE_CON_ACENTOS, "pw1234", Rol.CAJERO);
+        assertTrue(gestor.anadirEmpleado(empleado));
+    }
+
+    @Test
+    @DisplayName("Rechaza un proveedor con nombre simbolico")
+    public void rechazaProveedorConNombreSimbolico() {
+        Gestor gestor = gestor();
+        Proveedor proveedor = new Proveedor(NOMBRE_INVALIDO, "PROV-X", 70123456);
+        assertFalse(gestor.anadirProveedor(proveedor));
+    }
+
+    @Test
+    @DisplayName("Rechaza un proveedor con telefono de menos de siete digitos")
+    public void rechazaProveedorConTelefonoCorto() {
+        Gestor gestor = gestor();
+        Proveedor proveedor = new Proveedor("Proveedor Válido", "PROV-X", 123);
+        assertFalse(gestor.anadirProveedor(proveedor));
+    }
+
+    @Test
+    @DisplayName("Acepta un proveedor con telefono de siete digitos")
+    public void aceptaProveedorConTelefonoValido() {
+        Gestor gestor = gestor();
+        Proveedor proveedor = new Proveedor("Proveedor Válido", "PROV-X", 70123456);
+        assertTrue(gestor.anadirProveedor(proveedor));
+    }
+
+    @Test
+    @DisplayName("Rechaza un producto con nombre simbolico")
+    public void rechazaProductoConNombreSimbolico() {
+        Gestor gestor = gestor();
+        Producto producto = new Producto("P-X", NOMBRE_INVALIDO, 10.0, 15.0,
+                "desc", 1, "Marca", "Cat");
+        assertFalse(gestor.anadirProducto(producto));
+    }
+
+    @Test
+    @DisplayName("Rechaza un producto con marca vacia")
+    public void rechazaProductoConMarcaVacia() {
+        Gestor gestor = gestor();
+        Producto producto = new Producto("P-X", "Producto Válido", 10.0, 15.0,
+                "desc", 1, "", "Cat");
+        assertFalse(gestor.anadirProducto(producto));
+    }
+
+    @Test
+    @DisplayName("Rechaza un producto con categoria vacia")
+    public void rechazaProductoConCategoriaVacia() {
+        Gestor gestor = gestor();
+        Producto producto = new Producto("P-X", "Producto Válido", 10.0, 15.0,
+                "desc", 1, "Marca", "");
+        assertFalse(gestor.anadirProducto(producto));
+    }
+
+    @Test
+    @DisplayName("Rechaza un producto con precio de venta menor al de compra")
+    public void rechazaProductoConPrecioVentaMenorAlCosto() {
+        Gestor gestor = gestor();
+        Producto producto = new Producto("P-X", "Producto Válido", 100.0, 90.0,
+                "desc", 1, "Marca", "Cat");
+        assertFalse(gestor.anadirProducto(producto));
+    }
+
+    @Test
+    @DisplayName("Rechaza un producto con precio de compra cero")
+    public void rechazaProductoConPrecioCompraCero() {
+        Gestor gestor = gestor();
+        Producto producto = new Producto("P-X", "Producto Válido", 0.0, 15.0,
+                "desc", 1, "Marca", "Cat");
+        assertFalse(gestor.anadirProducto(producto));
+    }
+
+    @Test
+    @DisplayName("Rechaza un producto con precio de venta cero")
+    public void rechazaProductoConPrecioVentaCero() {
+        Gestor gestor = gestor();
+        Producto producto = new Producto("P-X", "Producto Válido", 10.0, 0.0,
+                "desc", 1, "Marca", "Cat");
+        assertFalse(gestor.anadirProducto(producto));
+    }
+
+    @Test
+    @DisplayName("Rechaza un producto con precio de venta igual al de compra")
+    public void rechazaProductoConPrecioVentaIgualAlCosto() {
+        Gestor gestor = gestor();
+        Producto producto = new Producto("P-X", "Producto Válido", 10.0, 10.0,
+                "desc", 1, "Marca", "Cat");
+        assertFalse(gestor.anadirProducto(producto));
     }
 }

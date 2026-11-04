@@ -2,6 +2,7 @@ package user;
 
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +22,15 @@ import services.MotorCSV;
 
 @DisplayName("Vendedor")
 class VendedorTest {
+
+    private static final String NOMBRE_INVALIDO = "@@@";
+    private static final String NOMBRE_NUMERICO = "123";
+    private static final String CI_INVALIDA = "@@@";
+    private static final String TELEFONO_INVALIDO = "abc123";
+    private static final String CI_VALIDA = "12345678";
+    private static final String TELEFONO_VALIDO = "70123456";
+    private static final String NOMBRE_CON_ACENTOS = "José Núñez";
+    private static final String TELEFONO_CON_PREFIJO = "+591 70123456";
 
     @TempDir
     Path directorio;
@@ -1037,5 +1047,136 @@ class VendedorTest {
     public void generarOrdenDeVentaConProductosVaciosDevuelveNulo() {
         Vendedor vendedor = vendedor();
         assertNull(vendedor.generarOrdenDeVenta("Cliente", Map.of()));
+    }
+
+    @Test
+    @DisplayName("Rechaza una venta con nombre de cliente simbolico")
+    public void rechazaVentaConNombreSimbolico() {
+        Vendedor vendedor = vendedor();
+        assertNull(vendedor.generarOrdenDeVenta(
+                NOMBRE_INVALIDO, CI_VALIDA, TELEFONO_VALIDO, Map.of("P1", 1)));
+    }
+
+    @Test
+    @DisplayName("Rechaza una venta con nombre de cliente numerico")
+    public void rechazaVentaConNombreNumerico() {
+        Vendedor vendedor = vendedor();
+        assertNull(vendedor.generarOrdenDeVenta(
+                NOMBRE_NUMERICO, CI_VALIDA, TELEFONO_VALIDO, Map.of("P1", 1)));
+    }
+
+    @Test
+    @DisplayName("Rechaza una venta con ci simbolica")
+    public void rechazaVentaConCiSimbolica() {
+        Vendedor vendedor = vendedor();
+        assertNull(vendedor.generarOrdenDeVenta(
+                "Ana Cliente", CI_INVALIDA, TELEFONO_VALIDO, Map.of("P1", 1)));
+    }
+
+    @Test
+    @DisplayName("Rechaza una venta con telefono con letras")
+    public void rechazaVentaConTelefonoConLetras() {
+        Vendedor vendedor = vendedor();
+        assertNull(vendedor.generarOrdenDeVenta(
+                "Ana Cliente", CI_VALIDA, TELEFONO_INVALIDO, Map.of("P1", 1)));
+    }
+
+    @Test
+    @DisplayName("Rechaza una venta sin ci")
+    public void rechazaVentaSinCi() {
+        Vendedor vendedor = vendedor();
+        assertNull(vendedor.generarOrdenDeVenta(
+                "Ana Cliente", "", TELEFONO_VALIDO, Map.of("P1", 1)));
+    }
+
+    @Test
+    @DisplayName("Rechaza una venta sin telefono")
+    public void rechazaVentaSinTelefono() {
+        Vendedor vendedor = vendedor();
+        assertNull(vendedor.generarOrdenDeVenta(
+                "Ana Cliente", CI_VALIDA, "", Map.of("P1", 1)));
+    }
+
+    @Test
+    @DisplayName("Una venta confirmada desde el flujo simple no tiene columnas vacias")
+    public void ventaConfirmadaDesdeFlujoSimpleNoTieneColumnasVacias() {
+        Vendedor vendedor = vendedor();
+        vendedor.venderProducto("P1", "Cliente", 1);
+        MotorCSV csv = new MotorCSV(directorio);
+        List<String[]> ventas = csv.leerCSV(csv.rutaDatos("ventas.csv").toString());
+        assertFalse(Arrays.stream(ventas.get(1)).anyMatch(String::isBlank));
+    }
+
+    @Test
+    @DisplayName("Una proforma no tiene columnas vacias")
+    public void proformaNoTieneColumnasVacias() {
+        Vendedor vendedor = vendedor();
+        vendedor.generarOrdenDeVenta(
+                "Ana Cliente", CI_VALIDA, TELEFONO_VALIDO, Map.of("P1", 1));
+        MotorCSV csv = new MotorCSV(directorio);
+        List<String[]> ventas = csv.leerCSV(csv.rutaDatos("ventas.csv").toString());
+        assertFalse(Arrays.stream(ventas.get(1)).anyMatch(String::isBlank));
+    }
+
+    @Test
+    @DisplayName("Un cliente registrado desde el flujo simple no tiene columnas vacias")
+    public void clienteRegistradoDesdeFlujoSimpleNoTieneColumnasVacias() {
+        Vendedor vendedor = vendedor();
+        vendedor.venderProducto("P1", "Cliente", 1);
+        MotorCSV csv = new MotorCSV(directorio);
+        List<String[]> clientes = csv.leerCSV(csv.rutaDatos("clientes.csv").toString());
+        assertFalse(Arrays.stream(clientes.get(1)).anyMatch(String::isBlank));
+    }
+
+    @Test
+    @DisplayName("Una garantia no tiene columnas vacias")
+    public void garantiaNoTieneColumnasVacias() {
+        Vendedor vendedor = vendedor();
+        String orden = vendedor.generarOrdenDeVenta(
+                "Ana Cliente", CI_VALIDA, TELEFONO_VALIDO, Map.of("P1", 1));
+        vendedor.confirmarVenta(orden);
+        MotorCSV csv = new MotorCSV(directorio);
+        List<String[]> garantias = csv.leerCSV(csv.rutaDatos("garantias.csv").toString());
+        assertFalse(Arrays.stream(garantias.get(1)).anyMatch(String::isBlank));
+    }
+
+    @Test
+    @DisplayName("Rechaza importar una orden con nombre de cliente simbolico")
+    public void rechazaImportacionDeOrdenConNombreSimbolico() {
+        Vendedor vendedor = vendedor();
+        MotorCSV csv = new MotorCSV(directorio);
+        String ruta = directorio.resolve("orden-simbolica.csv").toString();
+        csv.escribirCSV(ruta, List.of(
+                new String[]{"idOrden", "nombreCliente", "idProducto", "cantidad"},
+                new String[]{"EXT-1", NOMBRE_INVALIDO, "P1", "1"}));
+        assertFalse(vendedor.ingresarOrdenDesdeArchivo(ruta));
+    }
+
+    @Test
+    @DisplayName("Rechaza importar una orden sin ci ni telefono")
+    public void rechazaImportacionDeOrdenSinCiNiTelefono() {
+        Vendedor vendedor = vendedor();
+        MotorCSV csv = new MotorCSV(directorio);
+        String ruta = directorio.resolve("orden-sin-datos-cliente.csv").toString();
+        csv.escribirCSV(ruta, List.of(
+                new String[]{"idOrden", "nombreCliente", "idProducto", "cantidad"},
+                new String[]{"EXT-1", "Ana Cliente", "P1", "1"}));
+        assertFalse(vendedor.ingresarOrdenDesdeArchivo(ruta));
+    }
+
+    @Test
+    @DisplayName("Acepta una venta con nombre acentuado")
+    public void aceptaVentaConNombreAcentuado() {
+        Vendedor vendedor = vendedor();
+        assertNotNull(vendedor.generarOrdenDeVenta(
+                NOMBRE_CON_ACENTOS, CI_VALIDA, TELEFONO_VALIDO, Map.of("P1", 1)));
+    }
+
+    @Test
+    @DisplayName("Acepta una venta con telefono con prefijo internacional")
+    public void aceptaVentaConTelefonoConPrefijo() {
+        Vendedor vendedor = vendedor();
+        assertNotNull(vendedor.generarOrdenDeVenta(
+                "Ana Cliente", CI_VALIDA, TELEFONO_CON_PREFIJO, Map.of("P1", 1)));
     }
 }

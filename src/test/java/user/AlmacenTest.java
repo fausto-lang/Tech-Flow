@@ -16,6 +16,14 @@ import services.MotorCSV;
 @DisplayName("Almacen")
 class AlmacenTest {
 
+    private static final String NOMBRE_INVALIDO = "@@@";
+    private static final String PRECIO_CON_DOBLE_SIGNO = "10--20";
+    private static final String PRECIO_NO_NUMERICO = "abc";
+    private static final String PRECIO_NAN = "NaN";
+    private static final String PRECIO_INFINITO = "Infinity";
+    private static final String CANTIDAD_CON_LETRAS = "abc";
+    private static final int STOCK_MAXIMO = Integer.MAX_VALUE;
+
     @TempDir
     Path directorio;
 
@@ -32,6 +40,24 @@ class AlmacenTest {
 
     private Producto producto(String id) {
         return new Producto(id, "Producto nuevo", 10.0, 15.0, "desc", 5, "Marca", "Cat");
+    }
+
+    private String archivoImportacion(String precio, String cantidad) {
+        MotorCSV csv = new MotorCSV(directorio);
+        String ruta = directorio.resolve("importacion-" + System.nanoTime() + ".csv").toString();
+        csv.escribirCSV(ruta, List.of(
+                new String[]{"idProveedor", "idProducto", "nombreProducto", "marca", "categoria", "precio", "cantidad"},
+                new String[]{"PROV-01", "P1", "Producto", "Marca", "Cat", precio, cantidad}));
+        return ruta;
+    }
+
+    private String archivoImportacionProductoNuevo(String nombre, String marca, String categoria) {
+        MotorCSV csv = new MotorCSV(directorio);
+        String ruta = directorio.resolve("importacion-nuevo-" + System.nanoTime() + ".csv").toString();
+        csv.escribirCSV(ruta, List.of(
+                new String[]{"idProveedor", "idProducto", "nombreProducto", "marca", "categoria", "precio", "cantidad"},
+                new String[]{"PROV-01", "P2", nombre, marca, categoria, "10", "2"}));
+        return ruta;
     }
 
     @Test
@@ -397,5 +423,192 @@ class AlmacenTest {
     public void ingresarProductoNuevoConPrecioVentaNegativoDevuelveFalse() {
         Almacen almacen = almacen();
         assertFalse(almacen.ingresarProductoNuevo(new Producto("P3", "Producto", 10, -15, "desc", 1, "Marca", "Cat")));
+    }
+
+    @Test
+    @DisplayName("Rechaza un producto nuevo con nombre simbolico")
+    public void rechazaProductoNuevoConNombreSimbolico() {
+        Almacen almacen = almacen();
+        Producto producto = new Producto("P3", NOMBRE_INVALIDO, 10, 15, "desc", 5, "Marca", "Cat");
+        assertFalse(almacen.ingresarProductoNuevo(producto));
+    }
+
+    @Test
+    @DisplayName("Rechaza un producto nuevo con marca vacia")
+    public void rechazaProductoNuevoConMarcaVacia() {
+        Almacen almacen = almacen();
+        Producto producto = new Producto("P3", "Producto Válido", 10, 15, "desc", 5, "", "Cat");
+        assertFalse(almacen.ingresarProductoNuevo(producto));
+    }
+
+    @Test
+    @DisplayName("Rechaza un producto nuevo con categoria vacia")
+    public void rechazaProductoNuevoConCategoriaVacia() {
+        Almacen almacen = almacen();
+        Producto producto = new Producto("P3", "Producto Válido", 10, 15, "desc", 5, "Marca", "");
+        assertFalse(almacen.ingresarProductoNuevo(producto));
+    }
+
+    @Test
+    @DisplayName("Rechaza un producto nuevo con descripcion vacia")
+    public void rechazaProductoNuevoConDescripcionVacia() {
+        Almacen almacen = almacen();
+        Producto producto = new Producto("P3", "Producto Válido", 10, 15, "", 5, "Marca", "Cat");
+        assertFalse(almacen.ingresarProductoNuevo(producto));
+    }
+
+    @Test
+    @DisplayName("Rechaza un producto nuevo con precio de venta menor al de compra")
+    public void rechazaProductoNuevoConPrecioVentaMenorAlCosto() {
+        Almacen almacen = almacen();
+        Producto producto = new Producto("P3", "Producto Válido", 100, 90, "desc", 5, "Marca", "Cat");
+        assertFalse(almacen.ingresarProductoNuevo(producto));
+    }
+
+    @Test
+    @DisplayName("Rechaza una entrada que desborda el stock maximo")
+    public void rechazaEntradaQueDesbordaElStock() {
+        Almacen almacen = almacen();
+        MotorCSV csv = new MotorCSV(directorio);
+        csv.escribirCSV(csv.rutaDatos("inventario.csv").toString(), List.of(
+                new String[]{"idProducto", "nombre", "marca", "categoria", "descripcion", "precioEntrada", "precioVenta", "stock"},
+                new String[]{"P1", "Producto", "Marca", "Cat", "desc", "10", "15", String.valueOf(STOCK_MAXIMO)}));
+        assertFalse(almacen.ingresarProductoExistente("P1", 1));
+    }
+
+    @Test
+    @DisplayName("Rechaza una importacion con precio de doble signo")
+    public void rechazaImportacionConPrecioDobleSigno() {
+        Almacen almacen = almacen();
+        assertFalse(almacen.ingresarEntradaDesdeArchivo(archivoImportacion(PRECIO_CON_DOBLE_SIGNO, "1")));
+    }
+
+    @Test
+    @DisplayName("Rechaza una importacion con precio no numerico")
+    public void rechazaImportacionConPrecioNoNumerico() {
+        Almacen almacen = almacen();
+        assertFalse(almacen.ingresarEntradaDesdeArchivo(archivoImportacion(PRECIO_NO_NUMERICO, "1")));
+    }
+
+    @Test
+    @DisplayName("Rechaza una importacion con precio NaN")
+    public void rechazaImportacionConPrecioNaN() {
+        Almacen almacen = almacen();
+        assertFalse(almacen.ingresarEntradaDesdeArchivo(archivoImportacion(PRECIO_NAN, "1")));
+    }
+
+    @Test
+    @DisplayName("Rechaza una importacion con precio infinito")
+    public void rechazaImportacionConPrecioInfinito() {
+        Almacen almacen = almacen();
+        assertFalse(almacen.ingresarEntradaDesdeArchivo(archivoImportacion(PRECIO_INFINITO, "1")));
+    }
+
+    @Test
+    @DisplayName("Rechaza una importacion con cantidad con letras")
+    public void rechazaImportacionConCantidadConLetras() {
+        Almacen almacen = almacen();
+        assertFalse(almacen.ingresarEntradaDesdeArchivo(archivoImportacion("11", CANTIDAD_CON_LETRAS)));
+    }
+
+    @Test
+    @DisplayName("Rechaza una importacion con nombre de producto vacio")
+    public void rechazaImportacionConNombreProductoVacio() {
+        Almacen almacen = almacen();
+        assertFalse(almacen.ingresarEntradaDesdeArchivo(
+                archivoImportacionProductoNuevo("", "Marca", "Cat")));
+    }
+
+    @Test
+    @DisplayName("Rechaza una importacion con marca vacia")
+    public void rechazaImportacionConMarcaVacia() {
+        Almacen almacen = almacen();
+        assertFalse(almacen.ingresarEntradaDesdeArchivo(
+                archivoImportacionProductoNuevo("Producto Nuevo", "", "Cat")));
+    }
+
+    @Test
+    @DisplayName("Rechaza una importacion con categoria vacia")
+    public void rechazaImportacionConCategoriaVacia() {
+        Almacen almacen = almacen();
+        assertFalse(almacen.ingresarEntradaDesdeArchivo(
+                archivoImportacionProductoNuevo("Producto Nuevo", "Marca", "")));
+    }
+
+    @Test
+    @DisplayName("Registra la entrada de un producto existente con proveedor no vacio")
+    public void registraEntradaConProveedorNoVacio() {
+        Almacen almacen = almacen();
+        almacen.ingresarProductoExistente("P1", 4);
+        MotorCSV csv = new MotorCSV(directorio);
+        List<String[]> entradas = csv.leerCSV(csv.rutaDatos("entradas.csv").toString());
+        assertFalse(entradas.get(1)[1].isBlank());
+    }
+
+    @Test
+    @DisplayName("Registra la entrada de un producto nuevo con proveedor no vacio")
+    public void registraEntradaDeProductoNuevoConProveedorNoVacio() {
+        Almacen almacen = almacen();
+        almacen.ingresarProductoNuevo(producto("P3"));
+        MotorCSV csv = new MotorCSV(directorio);
+        List<String[]> entradas = csv.leerCSV(csv.rutaDatos("entradas.csv").toString());
+        assertFalse(entradas.get(1)[1].isBlank());
+    }
+
+    @Test
+    @DisplayName("Un producto nuevo importado tiene descripcion no vacia")
+    public void productoNuevoImportadoTieneDescripcionNoVacia() {
+        Almacen almacen = almacen();
+        almacen.ingresarEntradaDesdeArchivo(
+                archivoImportacionProductoNuevo("Producto Nuevo", "Marca", "Cat"));
+        MotorCSV csv = new MotorCSV(directorio);
+        List<String[]> inventario = csv.leerCSV(csv.rutaDatos("inventario.csv").toString());
+        String[] producto = inventario.stream()
+                .filter(fila -> fila[0].equals("P2")).findFirst().orElseThrow();
+        assertFalse(producto[4].isBlank());
+    }
+
+    @Test
+    @DisplayName("Un producto nuevo importado tiene precio de venta con dos decimales")
+    public void productoNuevoImportadoTienePrecioVentaConDosDecimales() {
+        Almacen almacen = almacen();
+        almacen.ingresarEntradaDesdeArchivo(
+                archivoImportacionProductoNuevo("Producto Nuevo", "Marca", "Cat"));
+        MotorCSV csv = new MotorCSV(directorio);
+        List<String[]> inventario = csv.leerCSV(csv.rutaDatos("inventario.csv").toString());
+        String[] producto = inventario.stream()
+                .filter(fila -> fila[0].equals("P2")).findFirst().orElseThrow();
+        assertEquals("13.00", producto[6]);
+    }
+
+    @Test
+    @DisplayName("Rechaza un producto nuevo con precio de compra cero")
+    public void rechazaProductoNuevoConPrecioCompraCero() {
+        Almacen almacen = almacen();
+        Producto producto = new Producto("P3", "Producto Válido", 0, 15, "desc", 5, "Marca", "Cat");
+        assertFalse(almacen.ingresarProductoNuevo(producto));
+    }
+
+    @Test
+    @DisplayName("Rechaza un producto nuevo con precio de venta cero")
+    public void rechazaProductoNuevoConPrecioVentaCero() {
+        Almacen almacen = almacen();
+        Producto producto = new Producto("P3", "Producto Válido", 10, 0, "desc", 5, "Marca", "Cat");
+        assertFalse(almacen.ingresarProductoNuevo(producto));
+    }
+
+    @Test
+    @DisplayName("Rechaza una importacion con precio cero")
+    public void rechazaImportacionConPrecioCero() {
+        Almacen almacen = almacen();
+        assertFalse(almacen.ingresarEntradaDesdeArchivo(archivoImportacion("0", "1")));
+    }
+
+    @Test
+    @DisplayName("Rechaza un producto nuevo con precio de venta igual al de compra")
+    public void rechazaProductoNuevoConPrecioVentaIgualAlCosto() {
+        Almacen almacen = almacen();
+        Producto producto = new Producto("P3", "Producto Válido", 10, 10, "desc", 5, "Marca", "Cat");
+        assertFalse(almacen.ingresarProductoNuevo(producto));
     }
 }
