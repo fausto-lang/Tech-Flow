@@ -1,4 +1,5 @@
-# ME voy de vacaciones esto es todas las mejoras antes de irme , regrso el martes //Fausto vende humo  deodne estan mis arrglos  
+# Fausto vende humo  deodne estan los  arreglos  ---------------------------><--------------------
+
 
 
 - Ahora es una sola ventana moderna, ya no se abre una ventana encima de la otra.
