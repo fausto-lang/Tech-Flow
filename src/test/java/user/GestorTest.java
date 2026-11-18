@@ -187,7 +187,7 @@ class GestorTest {
     @DisplayName("Agregar un empleado devuelve true")
     void agregarEmpleadoDevuelveTrue() {
         Gestor gestor = gestor();
-        Empleado empleado = new Empleado("CI-2", "Bea", "pw", Rol.CAJERO);
+        Empleado empleado = new Empleado("CI-2", "Bea", "pw1234", Rol.CAJERO);
         assertTrue(gestor.anadirEmpleado(empleado));
     }
 
@@ -195,7 +195,7 @@ class GestorTest {
     @DisplayName("Agregar un empleado duplicado devuelve false")
     void agregarEmpleadoDuplicadoDevuelveFalse() {
         Gestor gestor = gestor();
-        Empleado empleado = new Empleado("CI-2", "Bea", "pw", Rol.CAJERO);
+        Empleado empleado = new Empleado("CI-2", "Bea", "pw1234", Rol.CAJERO);
         gestor.anadirEmpleado(empleado);
         assertFalse(gestor.anadirEmpleado(empleado));
     }
@@ -204,7 +204,7 @@ class GestorTest {
     @DisplayName("Eliminar un empleado existente devuelve true")
     void eliminarEmpleadoExistenteDevuelveTrue() {
         Gestor gestor = gestor();
-        Empleado empleado = new Empleado("CI-2", "Bea", "pw", Rol.CAJERO);
+        Empleado empleado = new Empleado("CI-2", "Bea", "pw1234", Rol.CAJERO);
         gestor.anadirEmpleado(empleado);
         assertTrue(gestor.eliminarEmpleado("CI-2"));
     }
@@ -227,7 +227,7 @@ class GestorTest {
     @DisplayName("Agregar un proveedor devuelve true")
     void agregarProveedorDevuelveTrue() {
         Gestor gestor = gestor();
-        Proveedor proveedor = new Proveedor("Proveedor", "PROV-01", 123);
+        Proveedor proveedor = new Proveedor("Proveedor", "PROV-01", 70123456);
         assertTrue(gestor.anadirProveedor(proveedor));
     }
 
@@ -238,7 +238,7 @@ class GestorTest {
         String id = gestor.generarIdProveedor();
 
         assertTrue(id.matches("PROV-[0-9A-F]{8}"));
-        assertTrue(gestor.anadirProveedor(new Proveedor("Proveedor", id, 123)));
+        assertTrue(gestor.anadirProveedor(new Proveedor("Proveedor", id, 70123456)));
         assertFalse(id.equals(gestor.generarIdProveedor()));
     }
 
@@ -246,7 +246,7 @@ class GestorTest {
     @DisplayName("Agregar un proveedor duplicado devuelve false")
     void agregarProveedorDuplicadoDevuelveFalse() {
         Gestor gestor = gestor();
-        Proveedor proveedor = new Proveedor("Proveedor", "PROV-01", 123);
+        Proveedor proveedor = new Proveedor("Proveedor", "PROV-01", 70123456);
         gestor.anadirProveedor(proveedor);
         assertFalse(gestor.anadirProveedor(proveedor));
     }
@@ -255,7 +255,7 @@ class GestorTest {
     @DisplayName("Eliminar un proveedor existente devuelve true")
     void eliminarProveedorExistenteDevuelveTrue() {
         Gestor gestor = gestor();
-        Proveedor proveedor = new Proveedor("Proveedor", "PROV-01", 123);
+        Proveedor proveedor = new Proveedor("Proveedor", "PROV-01", 70123456);
         gestor.anadirProveedor(proveedor);
         assertTrue(gestor.eliminarProveedor("PROV-01"));
     }

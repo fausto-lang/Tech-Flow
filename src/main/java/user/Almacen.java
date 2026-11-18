@@ -8,6 +8,8 @@ import java.util.List;
 
 import models.Producto;
 import services.MotorCSV;
+import services.ValidadorDatos;
+import java.util.Locale;
 
 /** Operador responsable de productos, existencias y registro de entradas. */
 public class Almacen extends Empleado {
@@ -61,13 +63,14 @@ public class Almacen extends Empleado {
         if (producto == null) {
             return false;
         }
-        int nuevoStock;
+        long nuevoStock;
         try {
-            nuevoStock = Integer.parseInt(producto[7]) + cantidad;
+            nuevoStock = (long) Integer.parseInt(producto[7]) + (long) cantidad;
+            if (nuevoStock < 0 || nuevoStock > Integer.MAX_VALUE) return false;
         } catch (NumberFormatException e) {
             return false;
         }
-        producto[7] = String.valueOf(nuevoStock);
+        producto[7] = String.valueOf((int) nuevoStock);
         if (!motorCSV.escribirCSV(ruta(ARCHIVO_INVENTARIO), inventario, false)) {
             return false;
         }
@@ -91,7 +94,8 @@ public class Almacen extends Empleado {
         int categoria = columna(encabezado, "categoria");
         int precio = columna(encabezado, "precio");
         int cantidad = columna(encabezado, "cantidad");
-        if (idProveedor < 0 || idProducto < 0 || cantidad < 0) {
+        if (idProveedor < 0 || idProducto < 0 || nombreProducto < 0 || marca < 0
+                || categoria < 0 || precio < 0 || cantidad < 0) {
             return false;
         }
 
@@ -111,17 +115,22 @@ public class Almacen extends Empleado {
                 if (id.isEmpty() || unidades <= 0) {
                     return false;
                 }
+                if (fila[idProveedor].isBlank() || fila[nombreProducto].isBlank()
+                        || fila[marca].isBlank() || fila[categoria].isBlank()
+                        || !ValidadorDatos.textoValido(fila[nombreProducto])
+                        || !ValidadorDatos.textoValido(fila[marca])
+                        || !ValidadorDatos.textoValido(fila[categoria])) {
+                    return false;
+                }
                 String[] producto = buscarFila(inventario, id);
                 double precioEntrada = producto == null ? 0 : Double.parseDouble(producto[5]);
-                if (precio >= 0) {
-                    if (fila.length <= precio) {
-                        return false;
-                    }
-                    precioEntrada = Double.parseDouble(fila[precio]);
-                    if (precioEntrada < 0) {
-                        return false;
-                    }
+                if (fila.length <= precio) {
+                    return false;
                 }
+                    precioEntrada = Double.parseDouble(fila[precio]);
+                    if (!Double.isFinite(precioEntrada) || precioEntrada <= 0) {
+                        return false;
+                    }
                 if (fila.length <= idProveedor) {
                     return false;
                 }
@@ -134,11 +143,14 @@ public class Almacen extends Empleado {
                             || Math.max(nombreProducto, Math.max(marca, categoria)) >= fila.length) {
                         return false;
                     }
-                    producto = new String[]{id, fila[nombreProducto], fila[marca], fila[categoria], "",
-                            String.valueOf(precioEntrada), String.valueOf(precioEntrada * 1.3), "0"};
+                    String precioEntradaTexto = String.format(java.util.Locale.ROOT, "%.2f", precioEntrada);
+                    String precioVentaTexto = String.format(java.util.Locale.ROOT, "%.2f", precioEntrada * 1.3);
+                    producto = new String[]{id, fila[nombreProducto], fila[marca], fila[categoria], "Sin descripcion",
+                            precioEntradaTexto, precioVentaTexto, "0"};
                     inventario.add(producto);
                 } else if (precio >= 0) {
-                    producto[5] = String.valueOf(precioEntrada);
+                    producto[5] = String.format(java.util.Locale.ROOT, "%.2f", precioEntrada);
+                    producto[6] = String.format(java.util.Locale.ROOT, "%.2f", precioEntrada * 1.3);
                 }
                 recepciones.add(new Recepcion(proveedor, producto[0], producto[1], unidades,
                         String.valueOf(precioEntrada)));
@@ -151,7 +163,11 @@ public class Almacen extends Empleado {
         }
         for (Recepcion recepcion : recepciones) {
             String[] producto = buscarFila(inventario, recepcion.idProducto);
-            producto[7] = String.valueOf(Integer.parseInt(producto[7]) + recepcion.cantidad);
+            long nuevoStock = (long) Integer.parseInt(producto[7]) + (long) recepcion.cantidad;
+            if (nuevoStock > Integer.MAX_VALUE) {
+                return false;
+            }
+            producto[7] = String.valueOf((int) nuevoStock);
             nuevasEntradas.add(filaEntrada(recepcion));
         }
         entradas.addAll(nuevasEntradas);
@@ -162,9 +178,14 @@ public class Almacen extends Empleado {
     private boolean productoValido(Producto producto) {
         return producto != null && producto.getIdProducto() != null && !producto.getIdProducto().isBlank()
                 && producto.getNombre() != null && !producto.getNombre().isBlank()
-                && producto.getMarca() != null && producto.getCategoria() != null
-                && producto.getDescripcion() != null && producto.getStock() >= 0
-                && producto.getPrecioEntrada() >= 0 && producto.getPrecioVenta() >= 0;
+                && ValidadorDatos.textoValido(producto.getNombre())
+                && ValidadorDatos.textoValido(producto.getMarca())
+                && ValidadorDatos.textoValido(producto.getCategoria())
+                && ValidadorDatos.textoValido(producto.getDescripcion())
+                && producto.getStock() >= 0 && producto.getStock() <= Integer.MAX_VALUE
+                && Double.isFinite(producto.getPrecioEntrada()) && Double.isFinite(producto.getPrecioVenta())
+                && producto.getPrecioEntrada() > 0 && producto.getPrecioVenta() > 0
+                && producto.getPrecioVenta() > producto.getPrecioEntrada();
     }
 
     private List<String[]> leerInventario() {
@@ -194,14 +215,30 @@ public class Almacen extends Empleado {
 
     private String[] filaProducto(Producto producto) {
         return new String[]{producto.getIdProducto(), producto.getNombre(), producto.getMarca(),
-                producto.getCategoria(), producto.getDescripcion(), String.valueOf(producto.getPrecioEntrada()),
-                String.valueOf(producto.getPrecioVenta()), String.valueOf(producto.getStock())};
+                producto.getCategoria(), producto.getDescripcion(),
+                String.format(java.util.Locale.ROOT, "%.2f", producto.getPrecioEntrada()),
+                String.format(java.util.Locale.ROOT, "%.2f", producto.getPrecioVenta()),
+                String.valueOf(producto.getStock())};
     }
 
     private boolean registrarEntrada(String proveedor, String idProducto, String nombre, int cantidad, String precio) {
         List<String[]> entradas = leerEntradas();
+        if (proveedor == null || proveedor.isBlank()) {
+            proveedor = primerProveedor();
+        }
+        if (proveedor == null || proveedor.isBlank()) {
+            proveedor = "PROV-01";
+        }
         entradas.add(filaEntrada(new Recepcion(proveedor, idProducto, nombre, cantidad, precio)));
         return motorCSV.escribirCSV(ruta(ARCHIVO_ENTRADAS), entradas, false);
+    }
+
+    private String primerProveedor() {
+        List<String[]> proveedores = motorCSV.leerCSV(ruta("proveedores.csv"));
+        if (proveedores.size() > 1 && proveedores.get(1).length > 0) {
+            return proveedores.get(1)[0].trim();
+        }
+        return "";
     }
 
     private String[] filaEntrada(Recepcion recepcion) {

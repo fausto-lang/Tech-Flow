@@ -651,8 +651,9 @@ class VendedorTest {
         Vendedor vendedor = vendedor();
         MotorCSV csv = new MotorCSV(directorio);
         String ruta = directorio.resolve("ordenes.csv").toString();
-        csv.escribirCSV(ruta, List.of(new String[]{"idOrden", "nombreCliente", "idProducto", "cantidad"},
-                new String[]{"EXT-1", "Cliente", "P1", "3"}));
+        csv.escribirCSV(ruta, List.of(
+                new String[]{"idOrden", "nombreCliente", "idProducto", "cantidad", "ciCliente", "telefonoCliente"},
+                new String[]{"EXT-1", "Cliente", "P1", "3", "12345678", "70123456"}));
         assertTrue(vendedor.ingresarOrdenDesdeArchivo(ruta));
     }
 
@@ -662,8 +663,9 @@ class VendedorTest {
         Vendedor vendedor = vendedor();
         MotorCSV csv = new MotorCSV(directorio);
         String ruta = directorio.resolve("ordenes.csv").toString();
-        csv.escribirCSV(ruta, List.of(new String[]{"idOrden", "nombreCliente", "idProducto", "cantidad"},
-                new String[]{"EXT-1", "Cliente", "P1", "3"}));
+        csv.escribirCSV(ruta, List.of(
+                new String[]{"idOrden", "nombreCliente", "idProducto", "cantidad", "ciCliente", "telefonoCliente"},
+                new String[]{"EXT-1", "Cliente", "P1", "3", "12345678", "70123456"}));
         vendedor.ingresarOrdenDesdeArchivo(ruta);
         assertEquals(10, vendedor.buscarEnInventario("P1").getStock());
     }
@@ -674,8 +676,9 @@ class VendedorTest {
         Vendedor vendedor = vendedor();
         MotorCSV csv = new MotorCSV(directorio);
         String ruta = directorio.resolve("ordenes.csv").toString();
-        csv.escribirCSV(ruta, List.of(new String[]{"idOrden", "nombreCliente", "idProducto", "cantidad"},
-                new String[]{"EXT-1", "Cliente", "P1", "3"}));
+        csv.escribirCSV(ruta, List.of(
+                new String[]{"idOrden", "nombreCliente", "idProducto", "cantidad", "ciCliente", "telefonoCliente"},
+                new String[]{"EXT-1", "Cliente", "P1", "3", "12345678", "70123456"}));
         vendedor.ingresarOrdenDesdeArchivo(ruta);
         assertTrue(csv.leerCSV(csv.rutaDatos("ventas.csv").toString()).get(1)[2].equals("PROFORMA"));
     }
@@ -785,9 +788,9 @@ class VendedorTest {
         MotorCSV csv = new MotorCSV(directorio);
         String ruta = directorio.resolve("ordenes-invalidas.csv").toString();
         csv.escribirCSV(ruta, List.of(
-                new String[]{"idOrden", "nombreCliente", "idProducto", "cantidad"},
-                new String[]{"EXT-1", "Cliente", "P1", "1"},
-                new String[]{"EXT-2", "Cliente", "NO-EXISTE", "1"}));
+                new String[]{"idOrden", "nombreCliente", "idProducto", "cantidad", "ciCliente", "telefonoCliente"},
+                new String[]{"EXT-1", "Cliente", "P1", "1", "12345678", "70123456"},
+                new String[]{"EXT-2", "Cliente", "NO-EXISTE", "1", "12345678", "70123456"}));
         assertFalse(vendedor.ingresarOrdenDesdeArchivo(ruta));
     }
 
@@ -798,9 +801,9 @@ class VendedorTest {
         MotorCSV csv = new MotorCSV(directorio);
         String ruta = directorio.resolve("ordenes-invalidas.csv").toString();
         csv.escribirCSV(ruta, List.of(
-                new String[]{"idOrden", "nombreCliente", "idProducto", "cantidad"},
-                new String[]{"EXT-1", "Cliente", "P1", "1"},
-                new String[]{"EXT-2", "Cliente", "NO-EXISTE", "1"}));
+                new String[]{"idOrden", "nombreCliente", "idProducto", "cantidad", "ciCliente", "telefonoCliente"},
+                new String[]{"EXT-1", "Cliente", "P1", "1", "12345678", "70123456"},
+                new String[]{"EXT-2", "Cliente", "NO-EXISTE", "1", "12345678", "70123456"}));
         vendedor.ingresarOrdenDesdeArchivo(ruta);
         assertEquals(0, csv.leerCSV(csv.rutaDatos("ventas.csv").toString()).size());
     }
@@ -812,9 +815,9 @@ class VendedorTest {
         MotorCSV csv = new MotorCSV(directorio);
         String ruta = directorio.resolve("ordenes-invalidas.csv").toString();
         csv.escribirCSV(ruta, List.of(
-                new String[]{"idOrden", "nombreCliente", "idProducto", "cantidad"},
-                new String[]{"EXT-1", "Cliente", "P1", "1"},
-                new String[]{"EXT-2", "Cliente", "NO-EXISTE", "1"}));
+                new String[]{"idOrden", "nombreCliente", "idProducto", "cantidad", "ciCliente", "telefonoCliente"},
+                new String[]{"EXT-1", "Cliente", "P1", "1", "12345678", "70123456"},
+                new String[]{"EXT-2", "Cliente", "NO-EXISTE", "1", "12345678", "70123456"}));
         vendedor.ingresarOrdenDesdeArchivo(ruta);
         assertEquals(10, vendedor.buscarEnInventario("P1").getStock());
     }
@@ -826,8 +829,8 @@ class VendedorTest {
         MotorCSV csv = new MotorCSV(directorio);
         String ruta = directorio.resolve("ordenes-reordenadas.csv").toString();
         csv.escribirCSV(ruta, List.of(
-                new String[]{"cantidad", "idProducto", "nombreCliente", "idOrden"},
-                new String[]{"2", "P1", "Cliente", "EXT-REORDENADA"}));
+                new String[]{"cantidad", "idProducto", "nombreCliente", "idOrden", "ciCliente", "telefonoCliente"},
+                new String[]{"2", "P1", "Cliente", "EXT-REORDENADA", "12345678", "70123456"}));
         assertTrue(vendedor.ingresarOrdenDesdeArchivo(ruta));
     }
 
@@ -838,8 +841,8 @@ class VendedorTest {
         MotorCSV csv = new MotorCSV(directorio);
         String ruta = directorio.resolve("ordenes-reordenadas.csv").toString();
         csv.escribirCSV(ruta, List.of(
-                new String[]{"cantidad", "idProducto", "nombreCliente", "idOrden"},
-                new String[]{"2", "P1", "Cliente", "EXT-REORDENADA"}));
+                new String[]{"cantidad", "idProducto", "nombreCliente", "idOrden", "ciCliente", "telefonoCliente"},
+                new String[]{"2", "P1", "Cliente", "EXT-REORDENADA", "12345678", "70123456"}));
         vendedor.ingresarOrdenDesdeArchivo(ruta);
         List<String[]> ventas = csv.leerCSV(csv.rutaDatos("ventas.csv").toString());
         assertTrue(ventas.get(1)[1].startsWith("ORD-"));
@@ -852,8 +855,8 @@ class VendedorTest {
         MotorCSV csv = new MotorCSV(directorio);
         String ruta = directorio.resolve("ordenes-reordenadas.csv").toString();
         csv.escribirCSV(ruta, List.of(
-                new String[]{"cantidad", "idProducto", "nombreCliente", "idOrden"},
-                new String[]{"2", "P1", "Cliente", "EXT-REORDENADA"}));
+                new String[]{"cantidad", "idProducto", "nombreCliente", "idOrden", "ciCliente", "telefonoCliente"},
+                new String[]{"2", "P1", "Cliente", "EXT-REORDENADA", "12345678", "70123456"}));
         vendedor.ingresarOrdenDesdeArchivo(ruta);
         List<String[]> ventas = csv.leerCSV(csv.rutaDatos("ventas.csv").toString());
         assertEquals("PROFORMA", ventas.get(1)[2]);
@@ -866,8 +869,8 @@ class VendedorTest {
         MotorCSV csv = new MotorCSV(directorio);
         String ruta = directorio.resolve("ordenes-reordenadas.csv").toString();
         csv.escribirCSV(ruta, List.of(
-                new String[]{"cantidad", "idProducto", "nombreCliente", "idOrden"},
-                new String[]{"2", "P1", "Cliente", "EXT-REORDENADA"}));
+                new String[]{"cantidad", "idProducto", "nombreCliente", "idOrden", "ciCliente", "telefonoCliente"},
+                new String[]{"2", "P1", "Cliente", "EXT-REORDENADA", "12345678", "70123456"}));
         vendedor.ingresarOrdenDesdeArchivo(ruta);
         List<String[]> ventas = csv.leerCSV(csv.rutaDatos("ventas.csv").toString());
         assertEquals("2", ventas.get(1)[7]);

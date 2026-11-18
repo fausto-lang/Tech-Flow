@@ -1010,7 +1010,7 @@ public class AdminController {
         TextField categoria = new TextField();
         categoria.setPromptText("Categoría");
         TextField descripcion = new TextField();
-        descripcion.setPromptText("Descripción (opcional)");
+        descripcion.setPromptText("Descripción obligatoria");
         TextField precioEntrada = new TextField();
         precioEntrada.setPromptText("0.00");
         TextField precioVenta = new TextField();
@@ -1043,10 +1043,12 @@ public class AdminController {
         formulario.getChildren().add(botonesP);
         botonCancelarP.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
         botonGuardar.setOnAction(e -> {
-            if (nombre.getText().isBlank()
+            if (nombre.getText().isBlank() || marca.getText().isBlank()
+                    || categoria.getText().isBlank() || descripcion.getText().isBlank()
                     || precioEntrada.getText().isBlank()
                     || precioVenta.getText().isBlank() || stock.getText().isBlank()) {
-                mostrarAlerta("Datos incompletos", "Completa el nombre, precios y stock.");
+                mostrarAlerta("Datos incompletos",
+                        "Completa nombre, marca, categoría, descripción, precios y stock.");
                 return;
             }
             Producto producto;

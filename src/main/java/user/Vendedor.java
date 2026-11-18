@@ -14,6 +14,7 @@ import java.util.UUID;
 
 import models.Producto;
 import services.MotorCSV;
+import services.ValidadorDatos;
 
 /** Cajero responsable de preparar proformas, confirmar ventas y emitir facturas. */
 public class Vendedor extends Empleado {
@@ -47,24 +48,27 @@ public class Vendedor extends Empleado {
 
     /** Ejecuta una venta de una línea; el segundo argumento es el nombre del cliente. */
     public boolean venderProducto(String codigoProducto, String nombreCliente, int cantidad) {
-        if (!cajaAbierta() || nombreCliente == null || nombreCliente.isBlank() || cantidad <= 0) {
+        if (!cajaAbierta() || !ValidadorDatos.textoValido(nombreCliente) || cantidad <= 0) {
             return false;
         }
         Map<String, Integer> productos = new LinkedHashMap<>();
         productos.put(codigoProducto, cantidad);
-        String idOrden = generarOrdenDeVenta(nombreCliente, productos);
+        String idOrden = generarOrdenDeVenta(nombreCliente, "00000000", "0000000", productos);
         return idOrden != null && confirmarVenta(idOrden);
     }
 
     /** Crea y persiste una proforma con uno o varios productos seleccionados. */
     public String generarOrdenDeVenta(String nombreCliente, Map<String, Integer> productos) {
-        return generarOrdenDeVenta(nombreCliente, "", "", productos);
+        return generarOrdenDeVenta(nombreCliente, "00000000", "0000000", productos);
     }
 
     /** Crea una proforma conservando los datos necesarios para identificar al cliente en la venta. */
     public String generarOrdenDeVenta(String nombreCliente, String ciCliente, String telefonoCliente,
                                       Map<String, Integer> productos) {
-        if (nombreCliente == null || nombreCliente.isBlank() || productos == null || productos.isEmpty()) {
+        if (!ValidadorDatos.textoValido(nombreCliente)
+                || !ValidadorDatos.ciValida(ciCliente)
+                || !ValidadorDatos.telefonoValido(telefonoCliente)
+                || productos == null || productos.isEmpty()) {
             return null;
         }
         String ci = ciCliente == null ? "" : ciCliente.trim();
@@ -87,9 +91,12 @@ public class Vendedor extends Empleado {
             int cantidad = productos.get(producto.getIdProducto());
             double precio = ponerCosto(producto.getPrecioEntrada(), 5.0, producto.getPrecioEntrada() * 0.13);
             double total = precio * cantidad;
-                ventas.add(new String[]{generarIdVenta(), idOrden, "PROFORMA", ci, nombreCliente.trim(),
+                String idVenta = generarIdVenta();
+                ventas.add(new String[]{idVenta, idOrden, "PROFORMA", ci, nombreCliente.trim(),
                     producto.getIdProducto(), producto.getNombre(), String.valueOf(cantidad),
-                    String.valueOf(precio), String.valueOf(total), fecha, getCi(), "", telefono, ""});
+                    String.valueOf(precio), String.valueOf(total), fecha, getCi(),
+                    ci.isBlank() ? "CLI-PENDIENTE" : "CLI-" + ci, telefono,
+                    "GAR-PEND-" + idVenta});
         }
         return motorCSV.escribirCSV(ruta(ARCHIVO_VENTAS), ventas, false) ? idOrden : null;
     }
@@ -146,12 +153,17 @@ public class Vendedor extends Empleado {
         }
         Map<String, Map<String, Integer>> ordenes = new LinkedHashMap<>();
         Map<String, String> clientes = new HashMap<>();
+        Map<String, String> cis = new HashMap<>();
+        Map<String, String> telefonos = new HashMap<>();
         String[] encabezado = filas.get(0);
         int colOrden = columna(encabezado, "idOrden");
         int colCliente = columna(encabezado, "nombreCliente");
         int colProducto = columna(encabezado, "idProducto");
         int colCantidad = columna(encabezado, "cantidad");
-        if (colCliente < 0 || colProducto < 0 || colCantidad < 0) {
+        int colCi = columna(encabezado, "ciCliente");
+        int colTelefono = columna(encabezado, "telefonoCliente");
+        if (colCliente < 0 || colProducto < 0 || colCantidad < 0
+                || colCi < 0 || colTelefono < 0) {
             return false;
         }
         for (int i = 1; i < filas.size(); i++) {
@@ -163,12 +175,18 @@ public class Vendedor extends Empleado {
                     ? fila[colOrden] : "IMPORT-" + i;
             try {
                 int cantidad = Integer.parseInt(fila[colCantidad]);
-                if (cantidad <= 0 || fila[colCliente].isBlank() || fila[colProducto].isBlank()) {
+                if (cantidad <= 0 || fila[colCliente].isBlank() || fila[colProducto].isBlank()
+                        || !ValidadorDatos.textoValido(fila[colCliente])
+                        || colCi >= fila.length || colTelefono >= fila.length
+                        || !ValidadorDatos.ciValida(fila[colCi])
+                        || !ValidadorDatos.telefonoValido(fila[colTelefono])) {
                     return false;
                 }
                 ordenes.computeIfAbsent(id, clave -> new LinkedHashMap<>())
                         .merge(fila[colProducto], cantidad, Integer::sum);
                 clientes.put(id, fila[colCliente]);
+                cis.put(id, fila[colCi]);
+                telefonos.put(id, fila[colTelefono]);
             } catch (NumberFormatException e) {
                 return false;
             }
@@ -182,7 +200,9 @@ public class Vendedor extends Empleado {
             }
         }
         for (Map.Entry<String, Map<String, Integer>> orden : ordenes.entrySet()) {
-            if (generarOrdenDeVenta(clientes.get(orden.getKey()), orden.getValue()) == null) {
+            if (generarOrdenDeVenta(clientes.get(orden.getKey()),
+                    cis.get(orden.getKey()), telefonos.get(orden.getKey()),
+                    orden.getValue()) == null) {
                 return false;
             }
         }
@@ -432,7 +452,9 @@ public class Vendedor extends Empleado {
     }
 
     private String guardarCliente(String nombre, String ci, String telefono) {
-        if (nombre == null || nombre.isBlank()) {
+        if (!ValidadorDatos.textoValido(nombre)
+                || !ValidadorDatos.ciValida(ci)
+                || !ValidadorDatos.telefonoValido(telefono)) {
             return null;
         }
         List<String[]> clientes = motorCSV.leerCSV(ruta(ARCHIVO_CLIENTES));

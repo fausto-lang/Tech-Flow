@@ -16,6 +16,7 @@ import models.Producto;
 import user.Empleado;
 import user.Vendedor;
 import services.MotorCSV;
+import services.ValidadorDatos;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -36,6 +37,10 @@ public class VendedorController {
 
     @FXML
     private TextField campoCliente;
+    @FXML
+    private TextField campoCiCliente;
+    @FXML
+    private TextField campoTelefonoCliente;
 
     @FXML
     private Label lblTotalCarrito;
@@ -378,7 +383,8 @@ public class VendedorController {
             return;
         }
 
-        String idOrden = vendedor.generarOrdenDeVenta(nombreCliente, carrito);
+        String idOrden = vendedor.generarOrdenDeVenta(nombreCliente,
+                campoCiCliente.getText(), campoTelefonoCliente.getText(), carrito);
         if (idOrden == null) {
             mostrarMensaje("No se pudo preparar la venta. Verifica los datos y que haya stock.");
             return;
@@ -393,6 +399,8 @@ public class VendedorController {
             actualizarCarrito();
             actualizarTotalCarrito();
             campoCliente.clear();
+            campoCiCliente.clear();
+            campoTelefonoCliente.clear();
             mostrarCuadroVentaConfirmada(idOrden, nombreCliente, ventaSnapshot, totalVenta);
         } else {
             mostrarMensaje("La venta no se confirmó. La proforma queda pendiente.");
@@ -511,7 +519,8 @@ public class VendedorController {
             ruta = ruta.resolveSibling(ruta.getFileName() + ".txt");
         }
 
-        String idOrden = vendedor.generarOrdenDeVenta(nombreCliente, carrito);
+        String idOrden = vendedor.generarOrdenDeVenta(nombreCliente,
+                campoCiCliente.getText(), campoTelefonoCliente.getText(), carrito);
         if (idOrden == null) {
             mostrarMensaje("No se pudo generar la proforma. Verifica los datos y el stock.");
             return;
@@ -533,9 +542,21 @@ public class VendedorController {
 
     private String validarNombreComprador() {
         String nombreCliente = campoCliente.getText().trim();
-        if (nombreCliente.isEmpty()) {
+        String ciCliente = campoCiCliente.getText().trim();
+        String telefonoCliente = campoTelefonoCliente.getText().trim();
+        if (!ValidadorDatos.textoValido(nombreCliente)) {
             mostrarMensaje("El nombre del comprador es obligatorio.");
             campoCliente.requestFocus();
+            return null;
+        }
+        if (!ValidadorDatos.ciValida(ciCliente)) {
+            mostrarMensaje("El CI del comprador es obligatorio y debe tener al menos 2 caracteres alfanuméricos.");
+            campoCiCliente.requestFocus();
+            return null;
+        }
+        if (!ValidadorDatos.telefonoValido(telefonoCliente)) {
+            mostrarMensaje("El teléfono del comprador es obligatorio y debe tener entre 7 y 15 dígitos.");
+            campoTelefonoCliente.requestFocus();
             return null;
         }
         return nombreCliente;

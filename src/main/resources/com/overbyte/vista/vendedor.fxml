@@ -89,6 +89,10 @@ styleClass="main-window vendedor-window">
                 <VBox spacing="8" styleClass="comprador-panel">
                     <Label text="Nombre del cliente" styleClass="etiqueta"/>
                     <TextField fx:id="campoCliente" promptText="Nombre obligatorio del comprador" styleClass="campo"/>
+                    <Label text="CI del cliente" styleClass="etiqueta"/>
+                    <TextField fx:id="campoCiCliente" promptText="CI obligatorio del comprador" styleClass="campo"/>
+                    <Label text="Teléfono del cliente" styleClass="etiqueta"/>
+                    <TextField fx:id="campoTelefonoCliente" promptText="Teléfono obligatorio del comprador" styleClass="campo"/>
                 </VBox>
                 <Label text="Productos seleccionados" styleClass="venta-subtitulo"/>
                 <ScrollPane fx:id="scrollCarrito" styleClass="rejilla lista-carrito" fitToWidth="true"

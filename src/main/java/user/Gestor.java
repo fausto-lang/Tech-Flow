@@ -11,6 +11,7 @@ import java.util.UUID;
 import models.Producto;
 import models.Proveedor;
 import services.MotorCSV;
+import services.ValidadorDatos;
 
 /** Administrador con acceso a caja, reportes, personal, proveedores e inventario. */
 public class Gestor extends Empleado {
@@ -119,11 +120,16 @@ public class Gestor extends Empleado {
 
     public boolean anadirEmpleado(Empleado empleado) {
         if (empleado == null || vacio(empleado.getCi()) || vacio(empleado.getNombre())
-                || vacio(empleado.getContrasena()) || empleado.getRol() == null) {
+                || !ValidadorDatos.contrasenaValida(empleado.getContrasena()) || empleado.getRol() == null
+                || !ValidadorDatos.identificadorValido(empleado.getCi())
+                || !ValidadorDatos.textoValido(empleado.getNombre())) {
             return false;
         }
         List<String[]> filas = leerConCabecera(ARCHIVO_EMPLEADOS, CABECERA_EMPLEADOS);
         if (existeValor(filas, 0, empleado.getCi())) {
+            return false;
+        }
+        if (existeValor(filas, 1, empleado.getNombre())) {
             return false;
         }
         filas.add(new String[]{empleado.getCi(), empleado.getNombre(), empleado.getRol().name(), empleado.getContrasena()});
@@ -150,7 +156,10 @@ public class Gestor extends Empleado {
     }
 
     public boolean anadirProveedor(Proveedor proveedor) {
-        if (proveedor == null || vacio(proveedor.getCodigoProveedor()) || vacio(proveedor.getNombreProveedor())) {
+        if (proveedor == null || vacio(proveedor.getCodigoProveedor()) || vacio(proveedor.getNombreProveedor())
+                || !ValidadorDatos.textoValido(proveedor.getNombreProveedor())
+                || !ValidadorDatos.identificadorValido(proveedor.getCodigoProveedor())
+                || !ValidadorDatos.telefonoValido(proveedor.getContactoProveedor())) {
             return false;
         }
         List<String[]> filas = leerConCabecera(ARCHIVO_PROVEEDORES, CABECERA_PROVEEDORES);
@@ -175,7 +184,12 @@ public class Gestor extends Empleado {
         if (producto == null || vacio(producto.getIdProducto()) || vacio(producto.getNombre())
                 || producto.getStock() < 0 || !Double.isFinite(producto.getPrecioEntrada())
                 || !Double.isFinite(producto.getPrecioVenta())
-                || producto.getPrecioEntrada() < 0 || producto.getPrecioVenta() < 0) {
+                || producto.getPrecioEntrada() <= 0 || producto.getPrecioVenta() <= 0
+                || producto.getPrecioVenta() <= producto.getPrecioEntrada()
+                || !ValidadorDatos.textoValido(producto.getNombre())
+                || !ValidadorDatos.textoValido(producto.getMarca())
+                || !ValidadorDatos.textoValido(producto.getCategoria())
+                || !ValidadorDatos.textoValido(producto.getDescripcion())) {
             return false;
         }
         List<String[]> filas = leerConCabecera(ARCHIVO_INVENTARIO, CABECERA_INVENTARIO);
@@ -317,8 +331,9 @@ public class Gestor extends Empleado {
 
     private String[] filaProducto(Producto producto) {
         return new String[]{producto.getIdProducto(), producto.getNombre(), producto.getMarca(), producto.getCategoria(),
-                producto.getDescripcion(), String.valueOf(producto.getPrecioEntrada()),
-                String.valueOf(producto.getPrecioVenta()), String.valueOf(producto.getStock())};
+                producto.getDescripcion(), String.format(java.util.Locale.ROOT, "%.2f", producto.getPrecioEntrada()),
+                String.format(java.util.Locale.ROOT, "%.2f", producto.getPrecioVenta()),
+                String.valueOf(producto.getStock())};
     }
 
     private String ruta(String archivo) {
