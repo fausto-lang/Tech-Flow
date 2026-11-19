@@ -34,6 +34,8 @@ public class VendedorController {
 
     @FXML
     private TextField campoBusqueda;
+    @FXML
+    private ComboBox<String> filtroCategoria;
 
     @FXML
     private TextField campoCliente;
@@ -100,6 +102,12 @@ public class VendedorController {
         configurarAnimacionNavegacion(navNuevaVenta);
         configurarAnimacionNavegacion(navCarrito);
         configurarAnimacionNavegacion(navCerrarSesion);
+        FiltrosCategoria.configurar(filtroCategoria);
+        filtroCategoria.setOnAction(event -> {
+            if (!campoBusqueda.getText().isBlank()) {
+                buscarProducto();
+            }
+        });
         mostrarNuevaVenta();
         if (empleado != null) {
             etiquetaVendedor.setText("Cajero: " + empleado.getNombre());
@@ -183,7 +191,19 @@ public class VendedorController {
             mostrarMensaje("No se encontraron productos.");
             return;
         }
+        String seleccion = filtroCategoria != null ? filtroCategoria.getValue() : FiltrosCategoria.TODAS;
+        List<String> idsVisibles = new ArrayList<>();
         for (String idProducto : resultados.keySet()) {
+            Producto producto = vendedor.buscarEnInventario(idProducto);
+            if (producto != null && FiltrosCategoria.coincide(producto.getCategoria(), seleccion)) {
+                idsVisibles.add(idProducto);
+            }
+        }
+        if (idsVisibles.isEmpty()) {
+            mostrarMensaje("No hay productos de esa categoría para «" + termino + "».");
+            return;
+        }
+        for (String idProducto : idsVisibles) {
             Producto producto = vendedor.buscarEnInventario(idProducto);
             if (producto != null) {
                 agregarFilaProducto(tablaProductos, producto);

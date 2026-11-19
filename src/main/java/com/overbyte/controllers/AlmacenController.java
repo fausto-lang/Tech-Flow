@@ -13,6 +13,7 @@ import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import models.Categoria;
 import models.Producto;
 import user.Empleado;
 import user.Almacen;
@@ -50,6 +51,9 @@ public class AlmacenController {
     @FXML
     private VBox tablaInventario;
 
+    @FXML
+    private ComboBox<String> filtroCategoriaInventario;
+
     private Empleado empleado;
     private Almacen almacen;
     private MotorCSV motorCSV;
@@ -70,6 +74,8 @@ public class AlmacenController {
         mensaje.setText("");
         configurarAnimacionNavegacion(navInventario);
         configurarAnimacionNavegacion(navCerrarSesion);
+        FiltrosCategoria.configurar(filtroCategoriaInventario);
+        filtroCategoriaInventario.setOnAction(event -> cargarInventario());
         mostrarInventario();
         if (empleado != null) {
             etiquetaAlmacen.setText("Almacenero: " + empleado.getNombre());
@@ -115,6 +121,9 @@ public class AlmacenController {
     private void cargarInventario() {
         tablaInventario.getChildren().clear();
 
+        String seleccion = filtroCategoriaInventario != null
+                ? filtroCategoriaInventario.getValue() : FiltrosCategoria.TODAS;
+        int mostrados = 0;
         List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("inventario.csv").toString());
         GridPane cabecera = crearCuadriculaInventario();
         cabecera.getStyleClass().add("fila-cabecera");
@@ -132,6 +141,10 @@ public class AlmacenController {
             if (fila.length < 8 || fila[0].equalsIgnoreCase("idProducto")) {
                 continue;
             }
+            if (!FiltrosCategoria.coincide(fila[3], seleccion)) {
+                continue;
+            }
+            mostrados++;
             GridPane filaH = crearCuadriculaInventario();
             filaH.getStyleClass().addAll("fila-datos", "almacen-producto-fila");
             Label id = new Label(fila[0]);
@@ -170,6 +183,11 @@ public class AlmacenController {
             agregarCeldaInventario(filaH, precioV, 5);
             agregarCeldaInventario(filaH, stock, 6);
             tablaInventario.getChildren().add(filaH);
+        }
+        if (mostrados == 0 && !FiltrosCategoria.TODAS.equals(seleccion)) {
+            Label sinResultados = new Label("Sin productos en la categoría «" + seleccion + "».");
+            sinResultados.getStyleClass().add("inventario-vacio");
+            tablaInventario.getChildren().add(sinResultados);
         }
     }
 
@@ -217,8 +235,11 @@ public class AlmacenController {
         nombre.setPromptText("Nombre del producto");
         TextField marca = new TextField();
         marca.setPromptText("Marca");
-        TextField categoria = new TextField();
-        categoria.setPromptText("Categoría");
+        ComboBox<Categoria> categoria = new ComboBox<>();
+        categoria.getItems().setAll(Categoria.values());
+        categoria.setPromptText("Selecciona una categoría");
+        categoria.getStyleClass().add("campo");
+        categoria.setMaxWidth(Double.MAX_VALUE);
         TextField descripcion = new TextField();
         descripcion.setPromptText("Descripción obligatoria");
         TextField precioEntrada = new TextField();
@@ -252,7 +273,7 @@ public class AlmacenController {
         botonCancelarA.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
         botonGuardar.setOnAction(e -> {
             if (nombre.getText().isBlank() || marca.getText().isBlank()
-                    || categoria.getText().isBlank() || descripcion.getText().isBlank()
+                    || categoria.getValue() == null || descripcion.getText().isBlank()
                     || precioEntrada.getText().isBlank()
                     || precioVenta.getText().isBlank() || stock.getText().isBlank()) {
                 mostrarAlerta("Datos incompletos",
@@ -269,7 +290,7 @@ public class AlmacenController {
                     throw new NumberFormatException();
                 }
                 producto = new Producto(id.getText().trim(), nombre.getText().trim(), compra, venta,
-                    descripcion.getText().trim(), unidades, marca.getText().trim(), categoria.getText().trim());
+                    descripcion.getText().trim(), unidades, marca.getText().trim(), categoria.getValue().toString());
             } catch (NumberFormatException ex) {
                 mostrarAlerta("Datos inválidos",
                         "Los precios deben ser números válidos y el stock un entero igual o mayor que cero.");
@@ -699,7 +720,7 @@ public class AlmacenController {
         return true;
     }
 
-    private VBox campoDialogo(String titulo, TextInputControl control) {
+    private VBox campoDialogo(String titulo, Region control) {
         VBox campo = new VBox(5, new Label(titulo), control);
         campo.getChildren().get(0).getStyleClass().add("etiqueta");
         control.getStyleClass().add("campo");

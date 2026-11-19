@@ -18,6 +18,7 @@ import javafx.util.StringConverter;
 import user.Empleado;
 import user.Gestor;
 import user.Rol;
+import models.Categoria;
 import models.Producto;
 import models.Proveedor;
 import services.MotorCSV;
@@ -30,6 +31,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -171,6 +173,14 @@ public class AdminController {
 
         // Tabla de inventario
         List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("inventario.csv").toString());
+        List<String[]> filasValidas = new ArrayList<>();
+        for (int i = 1; i < filas.size(); i++) {
+            String[] fila = filas.get(i);
+            if (fila.length < 8 || fila[0].equalsIgnoreCase("idProducto")) {
+                continue;
+            }
+            filasValidas.add(fila);
+        }
 
         TableView<String[]> tabla = new TableView<>();
         configurarTablaAdmin(tabla);
@@ -203,13 +213,7 @@ public class AdminController {
 
         tabla.getColumns().addAll(colId, colNombre, colMarca, colCategoria, colStock, colPrecioVenta);
 
-        for (int i = 1; i < filas.size(); i++) {
-            String[] fila = filas.get(i);
-            if (fila.length < 8 || fila[0].equalsIgnoreCase("idProducto")) {
-                continue;
-            }
-            tabla.getItems().add(fila);
-        }
+        tabla.getItems().addAll(filasValidas);
 
         tabla.setPrefHeight(400);
         VBox inventarioCompleto = new VBox(12);
@@ -220,9 +224,18 @@ public class AdminController {
             "Todos los productos registrados en el sistema."
         );
         descripcionInventario.getStyleClass().add("inventario-descripcion");
+        ComboBox<String> filtroCategoria = FiltrosCategoria.crear();
+        filtroCategoria.setOnAction(event -> tabla.getItems().setAll(
+            filasValidas.stream()
+                .filter(fila -> FiltrosCategoria.coincide(fila[3], filtroCategoria.getValue()))
+                .toList()));
+        Label etiquetaFiltro = new Label("Categoría");
+        etiquetaFiltro.getStyleClass().add("etiqueta");
+        HBox filaFiltro = new HBox(10, etiquetaFiltro, filtroCategoria);
+        filaFiltro.setAlignment(Pos.CENTER_LEFT);
         VBox.setVgrow(tabla, Priority.ALWAYS);
         inventarioCompleto.getChildren().addAll(
-            tituloInventario, descripcionInventario, tabla
+            tituloInventario, descripcionInventario, filaFiltro, tabla
         );
 
         List<Producto> bajos = gestor.listarProductosProximosAAgotarse();
@@ -1007,8 +1020,11 @@ public class AdminController {
         nombre.setPromptText("Nombre del producto");
         TextField marca = new TextField();
         marca.setPromptText("Marca");
-        TextField categoria = new TextField();
-        categoria.setPromptText("Categoría");
+        ComboBox<Categoria> categoria = new ComboBox<>();
+        categoria.getItems().setAll(Categoria.values());
+        categoria.setPromptText("Selecciona una categoría");
+        categoria.getStyleClass().add("campo");
+        categoria.setMaxWidth(Double.MAX_VALUE);
         TextField descripcion = new TextField();
         descripcion.setPromptText("Descripción obligatoria");
         TextField precioEntrada = new TextField();
@@ -1044,7 +1060,7 @@ public class AdminController {
         botonCancelarP.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
         botonGuardar.setOnAction(e -> {
             if (nombre.getText().isBlank() || marca.getText().isBlank()
-                    || categoria.getText().isBlank() || descripcion.getText().isBlank()
+                    || categoria.getValue() == null || descripcion.getText().isBlank()
                     || precioEntrada.getText().isBlank()
                     || precioVenta.getText().isBlank() || stock.getText().isBlank()) {
                 mostrarAlerta("Datos incompletos",
@@ -1061,7 +1077,7 @@ public class AdminController {
                     throw new NumberFormatException();
                 }
                 producto = new Producto(id.getText().trim(), nombre.getText().trim(), compra, venta,
-                    descripcion.getText().trim(), unidades, marca.getText().trim(), categoria.getText().trim());
+                    descripcion.getText().trim(), unidades, marca.getText().trim(), categoria.getValue().toString());
             } catch (NumberFormatException ex) {
                 mostrarAlerta("Datos inválidos",
                     "Los precios deben ser números válidos y el stock un entero igual o mayor que cero.");
@@ -1079,7 +1095,7 @@ public class AdminController {
             com.overbyte.Navegador.tarjeta("Añadir producto", "Completa los datos del nuevo producto.", formulario));
     }
 
-    private VBox campoEnDialogo(String titulo, TextField campo) {
+    private VBox campoEnDialogo(String titulo, Region campo) {
         VBox contenedor = new VBox(5, etiquetaCampo(titulo), campo);
         HBox.setHgrow(contenedor, Priority.ALWAYS);
         return contenedor;
