@@ -1,5 +1,6 @@
 package services;
 
+import config.ArchivosCSV;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -15,7 +16,6 @@ import user.Vendedor;
 /** Autentica operadores usando el registro persistente de empleados. */
 public class Verificador {
 
-    private static final String ARCHIVO_EMPLEADOS = "empleado.csv";
     private final MotorCSV motorCSV;
     private final Map<String, String> credencialesPrueba = new HashMap<>();
 
@@ -90,7 +90,7 @@ public class Verificador {
 
     public static boolean isCajaAbierta() {
         MotorCSV motor = new MotorCSV();
-        return isCajaAbierta(motor.rutaDatos("caja.csv"));
+        return isCajaAbierta(motor.rutaDatos(ArchivosCSV.CAJA));
     }
 
     public static boolean isCajaAbierta(Path rutaCaja) {
@@ -106,7 +106,7 @@ public class Verificador {
     }
 
     private String rutaEmpleados() {
-        return motorCSV.rutaDatos(ARCHIVO_EMPLEADOS).toString();
+        return motorCSV.rutaDatos(ArchivosCSV.EMPLEADOS).toString();
     }
 
     private int columna(String[] encabezado, String nombre) {

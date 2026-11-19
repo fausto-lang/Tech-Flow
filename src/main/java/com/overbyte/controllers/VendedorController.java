@@ -1,7 +1,7 @@
 package com.overbyte.controllers;
 
-import javafx.animation.ScaleTransition;
-import javafx.animation.TranslateTransition;
+import config.ArchivosCSV;
+import com.overbyte.Navegador;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -11,7 +11,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import models.Producto;
 import user.Empleado;
 import user.Vendedor;
@@ -99,9 +98,9 @@ public class VendedorController {
     private void initialize() {
         mostrarMensaje("");
         actualizarTotalCarrito();
-        configurarAnimacionNavegacion(navNuevaVenta);
-        configurarAnimacionNavegacion(navCarrito);
-        configurarAnimacionNavegacion(navCerrarSesion);
+        AyudasUI.animarNavegacion(navNuevaVenta);
+        AyudasUI.animarNavegacion(navCarrito);
+        AyudasUI.animarNavegacion(navCerrarSesion);
         FiltrosCategoria.configurar(filtroCategoria);
         filtroCategoria.setOnAction(event -> {
             if (!campoBusqueda.getText().isBlank()) {
@@ -137,29 +136,6 @@ public class VendedorController {
         }
     }
 
-    private void configurarAnimacionNavegacion(Button boton) {
-        ScaleTransition escala = new ScaleTransition(Duration.millis(140), boton);
-        TranslateTransition desplazamiento =
-                new TranslateTransition(Duration.millis(140), boton);
-        boton.setOnMouseEntered(event -> {
-            escala.stop();
-            escala.setToX(1.015);
-            escala.setToY(1.015);
-            escala.playFromStart();
-            desplazamiento.stop();
-            desplazamiento.setToX(3);
-            desplazamiento.playFromStart();
-        });
-        boton.setOnMouseExited(event -> {
-            escala.stop();
-            escala.setToX(1);
-            escala.setToY(1);
-            escala.playFromStart();
-            desplazamiento.stop();
-            desplazamiento.setToX(0);
-            desplazamiento.playFromStart();
-        });
-    }
 
     /* ===================== BUSCAR PRODUCTOS ===================== */
 
@@ -459,13 +435,13 @@ public class VendedorController {
         Button cerrar = new Button("Cerrar");
         cerrar.getStyleClass().add("boton-rol");
         guardar.setOnAction(e -> guardarVentaConfirmada(idOrden, nombreCliente, items, total));
-        cerrar.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
+        cerrar.setOnAction(e -> Navegador.cerrarOverlay());
         HBox botones = new HBox(10, guardar, cerrar);
         botones.setAlignment(Pos.CENTER_RIGHT);
         VBox cuerpo = new VBox(10, scroll, totalLabel, botones);
         cuerpo.setMaxWidth(Double.MAX_VALUE);
-        com.overbyte.Navegador.mostrarOverlay(
-                com.overbyte.Navegador.tarjeta("Venta confirmada: " + idOrden,
+        Navegador.mostrarOverlay(
+                Navegador.tarjeta("Venta confirmada: " + idOrden,
                         "Cliente: " + nombreCliente, cuerpo));
     }
 
@@ -476,7 +452,7 @@ public class VendedorController {
         selector.setInitialFileName("venta-" + idOrden + ".txt");
         selector.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("Archivo de texto (*.txt)", "*.txt"));
-        java.io.File archivo = selector.showSaveDialog(com.overbyte.Navegador.ventana());
+        java.io.File archivo = selector.showSaveDialog(Navegador.ventana());
         if (archivo == null) {
             return;
         }
@@ -501,7 +477,7 @@ public class VendedorController {
         contenido.append("\nTOTAL: ").append(String.format(Locale.ROOT, "$%.2f", total));
         try {
             Files.writeString(ruta, contenido.toString(), StandardCharsets.UTF_8);
-            com.overbyte.Navegador.cerrarOverlay();
+            Navegador.cerrarOverlay();
             mostrarMensajeExito("Venta guardada en: " + ruta);
         } catch (IOException ex) {
             mostrarMensaje("No se pudo guardar el TXT: " + ex.getMessage());
@@ -594,7 +570,7 @@ public class VendedorController {
     }
 
     private String crearContenidoProforma(String idOrden, String nombreCliente) {
-        List<String[]> ventas = motorCSV.leerCSV(motorCSV.rutaDatos("ventas.csv").toString());
+        List<String[]> ventas = motorCSV.leerCSV(motorCSV.rutaDatos(ArchivosCSV.VENTAS).toString());
         List<String[]> lineas = new ArrayList<>();
         double total = 0;
         for (String[] venta : ventas) {
@@ -615,7 +591,7 @@ public class VendedorController {
             return null;
         }
 
-        String borde = crearBordeProforma(anchos);
+        String borde = InformeTexto.borde(anchos);
         StringBuilder contenido = new StringBuilder()
             .append("TECH-FLOW | PROFORMA DE VENTA\n")
             .append("Proforma: ").append(idOrden).append('\n')
@@ -624,7 +600,7 @@ public class VendedorController {
                 DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
             )).append("\n\n")
             .append(borde).append('\n')
-            .append(filaProforma(encabezados, anchos)).append('\n')
+            .append(InformeTexto.fila(encabezados, anchos)).append('\n')
             .append(borde).append('\n');
 
         for (String[] venta : lineas) {
@@ -633,7 +609,7 @@ public class VendedorController {
                 String.format(Locale.ROOT, "$%.2f", Double.parseDouble(venta[8])),
                 String.format(Locale.ROOT, "$%.2f", Double.parseDouble(venta[9]))
             };
-            contenido.append(filaProforma(columnas, anchos)).append('\n');
+            contenido.append(InformeTexto.fila(columnas, anchos)).append('\n');
         }
         int anchoTabla = java.util.Arrays.stream(anchos).sum() + anchos.length * 4 + 1;
         contenido.append(borde).append('\n')
@@ -643,35 +619,21 @@ public class VendedorController {
         return contenido.toString();
     }
 
-    private String crearBordeProforma(int[] anchos) {
-        StringBuilder borde = new StringBuilder("+");
-        for (int ancho : anchos) {
-            borde.append("-".repeat(ancho + 2)).append('+');
-        }
-        return borde.toString();
-    }
 
-    private String filaProforma(String[] columnas, int[] anchos) {
-        StringBuilder fila = new StringBuilder("|");
-        for (int i = 0; i < anchos.length; i++) {
-            fila.append(' ').append(String.format("%-" + anchos[i] + "s", columnas[i])).append(" |");
-        }
-        return fila.toString();
-    }
 
     private void mostrarAlertaStockInsuficiente(Producto producto, int cantidadDisponible) {
         String nombreProducto = producto == null ? "El producto seleccionado" : producto.getNombre();
         String mensajeAlerta = nombreProducto + " no tiene suficientes unidades. "
                 + "Cantidad disponible para vender: " + cantidadDisponible + ".";
         mostrarMensaje(mensajeAlerta);
-        com.overbyte.Navegador.avisar("Stock insuficiente", mensajeAlerta);
+        Navegador.avisar("Stock insuficiente", mensajeAlerta);
     }
 
     /* ===================== OTRAS FUNCIONES ===================== */
 
     @FXML
     private void eliminarVenta() {
-        com.overbyte.Navegador.pedirTexto("Anular compra o proforma",
+        Navegador.pedirTexto("Anular compra o proforma",
             "Ingresa el ID de venta u orden que deseas anular:",
             "Ej. VEN-12345678 u ORD-12345678", id -> {
             String referencia = id.trim();
@@ -679,7 +641,7 @@ public class VendedorController {
                 mostrarMensaje("Ingresa el ID de la compra o proforma.");
                 return;
             }
-            com.overbyte.Navegador.confirmar("Confirmar anulación",
+            Navegador.confirmar("Confirmar anulación",
                 "¿Anular la compra o proforma " + referencia + "? Las compras confirmadas devolverán sus unidades al inventario. Esta acción no se puede deshacer.",
                 () -> {
                     if (vendedor.eliminarVenta(referencia)) {
@@ -708,7 +670,7 @@ public class VendedorController {
 
     @FXML
     private void consultarGarantia() {
-        com.overbyte.Navegador.pedirTexto("Consultar garantía",
+        Navegador.pedirTexto("Consultar garantía",
             "Ingresa el código de garantía, venta u orden:",
             "Código:", ref -> {
             List<String> resultado = vendedor.consultarGarantia(ref);
@@ -716,7 +678,7 @@ public class VendedorController {
             for (String linea : resultado) {
                 sb.append(linea).append("\n");
             }
-            com.overbyte.Navegador.avisar("Garantía", sb.toString());
+            Navegador.avisar("Garantía", sb.toString());
         });
     }
 
@@ -727,7 +689,7 @@ public class VendedorController {
         selector.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Archivos CSV y texto", "*.csv", "*.txt"),
                 new FileChooser.ExtensionFilter("Todos los archivos", "*.*"));
-        java.io.File archivo = selector.showOpenDialog(com.overbyte.Navegador.ventana());
+        java.io.File archivo = selector.showOpenDialog(Navegador.ventana());
         if (archivo != null) {
             mostrarVistaPreviaOrden(archivo);
         }
@@ -768,7 +730,7 @@ public class VendedorController {
         Button cancelar = new Button("Cancelar");
         cancelar.getStyleClass().add("boton-rol");
         confirmar.setOnAction(e -> {
-            com.overbyte.Navegador.cerrarOverlay();
+            Navegador.cerrarOverlay();
             boolean ok = vendedor.ingresarOrdenDesdeArchivo(archivo.getAbsolutePath());
             if (ok) {
                 mostrarMensajeExito("Órdenes importadas correctamente.");
@@ -776,22 +738,22 @@ public class VendedorController {
                 mostrarMensaje("No se pudo importar el archivo. Verifica el formato.");
             }
         });
-        cancelar.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
+        cancelar.setOnAction(e -> Navegador.cerrarOverlay());
         HBox botones = new HBox(10, confirmar, cancelar);
         botones.setAlignment(Pos.CENTER_RIGHT);
         VBox cuerpo = new VBox(10, resumen, tabla, botones);
         cuerpo.setMaxWidth(Double.MAX_VALUE);
-        VBox tarjeta = com.overbyte.Navegador.tarjeta("Vista previa de importación",
+        VBox tarjeta = Navegador.tarjeta("Vista previa de importación",
                 "Archivo: " + archivo.getName() + ". Revisa si está completo y confirma para guardar.", cuerpo);
         tarjeta.getStyleClass().remove("overlay-tarjeta");
         tarjeta.getStyleClass().add("overlay-tarjeta--ancha");
-        double anchoVentana = com.overbyte.Navegador.ventana() != null
-                ? com.overbyte.Navegador.ventana().getWidth() : 1100;
+        double anchoVentana = Navegador.ventana() != null
+                ? Navegador.ventana().getWidth() : 1100;
         double ancho = Math.max(880, anchoVentana * 0.92);
         tarjeta.setMinWidth(ancho);
         tarjeta.setPrefWidth(ancho);
         tarjeta.setMaxWidth(ancho);
-        com.overbyte.Navegador.mostrarOverlay(tarjeta);
+        Navegador.mostrarOverlay(tarjeta);
     }
 
     private int indiceColumna(String[] encabezado, String nombre) {
@@ -819,6 +781,6 @@ public class VendedorController {
 
     @FXML
     private void cerrarSesion() {
-        com.overbyte.Navegador.irAlLogin();
+        Navegador.irAlLogin();
     }
 }

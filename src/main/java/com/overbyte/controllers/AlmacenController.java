@@ -1,7 +1,7 @@
 package com.overbyte.controllers;
 
-import javafx.animation.ScaleTransition;
-import javafx.animation.TranslateTransition;
+import config.ArchivosCSV;
+import com.overbyte.Navegador;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,7 +12,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import models.Categoria;
 import models.Producto;
 import user.Empleado;
@@ -72,8 +71,8 @@ public class AlmacenController {
     @FXML
     private void initialize() {
         mensaje.setText("");
-        configurarAnimacionNavegacion(navInventario);
-        configurarAnimacionNavegacion(navCerrarSesion);
+        AyudasUI.animarNavegacion(navInventario);
+        AyudasUI.animarNavegacion(navCerrarSesion);
         FiltrosCategoria.configurar(filtroCategoriaInventario);
         filtroCategoriaInventario.setOnAction(event -> cargarInventario());
         mostrarInventario();
@@ -92,29 +91,6 @@ public class AlmacenController {
         }
     }
 
-    private void configurarAnimacionNavegacion(Button boton) {
-        ScaleTransition escala = new ScaleTransition(Duration.millis(140), boton);
-        TranslateTransition desplazamiento =
-                new TranslateTransition(Duration.millis(140), boton);
-        boton.setOnMouseEntered(event -> {
-            escala.stop();
-            escala.setToX(1.015);
-            escala.setToY(1.015);
-            escala.playFromStart();
-            desplazamiento.stop();
-            desplazamiento.setToX(3);
-            desplazamiento.playFromStart();
-        });
-        boton.setOnMouseExited(event -> {
-            escala.stop();
-            escala.setToX(1);
-            escala.setToY(1);
-            escala.playFromStart();
-            desplazamiento.stop();
-            desplazamiento.setToX(0);
-            desplazamiento.playFromStart();
-        });
-    }
 
     /* ===================== INVENTARIO ===================== */
 
@@ -124,7 +100,7 @@ public class AlmacenController {
         String seleccion = filtroCategoriaInventario != null
                 ? filtroCategoriaInventario.getValue() : FiltrosCategoria.TODAS;
         int mostrados = 0;
-        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("inventario.csv").toString());
+        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos(ArchivosCSV.INVENTARIO).toString());
         GridPane cabecera = crearCuadriculaInventario();
         cabecera.getStyleClass().add("fila-cabecera");
         agregarCeldaInventario(cabecera, new Label("ID"), 0);
@@ -270,13 +246,13 @@ public class AlmacenController {
         HBox botonesA = new HBox(10, botonGuardar, botonCancelarA);
         botonesA.setAlignment(Pos.CENTER_RIGHT);
         formulario.getChildren().add(botonesA);
-        botonCancelarA.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
+        botonCancelarA.setOnAction(e -> Navegador.cerrarOverlay());
         botonGuardar.setOnAction(e -> {
             if (nombre.getText().isBlank() || marca.getText().isBlank()
                     || categoria.getValue() == null || descripcion.getText().isBlank()
                     || precioEntrada.getText().isBlank()
                     || precioVenta.getText().isBlank() || stock.getText().isBlank()) {
-                mostrarAlerta("Datos incompletos",
+                Navegador.avisar("Datos incompletos",
                         "Completa nombre, marca, categoría, descripción, precios y stock.");
                 return;
             }
@@ -292,22 +268,22 @@ public class AlmacenController {
                 producto = new Producto(id.getText().trim(), nombre.getText().trim(), compra, venta,
                     descripcion.getText().trim(), unidades, marca.getText().trim(), categoria.getValue().toString());
             } catch (NumberFormatException ex) {
-                mostrarAlerta("Datos inválidos",
+                Navegador.avisar("Datos inválidos",
                         "Los precios deben ser números válidos y el stock un entero igual o mayor que cero.");
                 return;
             }
-            com.overbyte.Navegador.cerrarOverlay();
+            Navegador.cerrarOverlay();
             if (almacen.ingresarProductoNuevo(producto)) {
                 cargarInventario();
                 mostrarMensaje("El producto se registró correctamente.", true);
-                mostrarAlerta("Producto añadido", "El producto se registró correctamente.");
+                Navegador.avisar("Producto añadido", "El producto se registró correctamente.");
             } else {
                 mostrarMensaje("No se pudo registrar el producto. Verifica los datos.", false);
-                mostrarAlerta("No se pudo añadir", "Verifica los datos e inténtalo nuevamente.");
+                Navegador.avisar("No se pudo añadir", "Verifica los datos e inténtalo nuevamente.");
             }
         });
-        com.overbyte.Navegador.mostrarOverlay(
-            com.overbyte.Navegador.tarjeta("Registrar producto", "Completa los datos para agregar un producto al inventario.", formulario));
+        Navegador.mostrarOverlay(
+            Navegador.tarjeta("Registrar producto", "Completa los datos para agregar un producto al inventario.", formulario));
     }
 
     /* ===================== ENTRADAS Y STOCK ===================== */
@@ -398,21 +374,21 @@ public class AlmacenController {
         contenido.getStyleClass().add("entrada-dialog-content");
         Button cerrar = new Button("Cerrar");
         cerrar.getStyleClass().add("boton-rol");
-        cerrar.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
+        cerrar.setOnAction(e -> Navegador.cerrarOverlay());
         acciones.getChildren().add(cerrar);
 
         actualizarCarritoEntradas(carrito, productos, seleccionados);
         buscar.run();
-        VBox tarjeta = com.overbyte.Navegador.tarjeta("Entradas y stock",
+        VBox tarjeta = Navegador.tarjeta("Entradas y stock",
             "Busca productos por ID, nombre, marca, categoría o descripción y añádelos al carrito.", contenido);
         tarjeta.getStyleClass().remove("overlay-tarjeta");
         tarjeta.getStyleClass().add("overlay-tarjeta--ancha");
         contenido.setMaxWidth(Double.MAX_VALUE);
         contenido.setMinWidth(0);
-        double anchoVentana = com.overbyte.Navegador.ventana() != null
-                ? com.overbyte.Navegador.ventana().getWidth() : 1100;
-        double altoVentana = com.overbyte.Navegador.ventana() != null
-                ? com.overbyte.Navegador.ventana().getHeight() : 620;
+        double anchoVentana = Navegador.ventana() != null
+                ? Navegador.ventana().getWidth() : 1100;
+        double altoVentana = Navegador.ventana() != null
+                ? Navegador.ventana().getHeight() : 620;
         double ancho = Math.max(880, anchoVentana * 0.92);
         double alto = Math.max(460, altoVentana * 0.86);
         tarjeta.setMinWidth(ancho);
@@ -424,7 +400,7 @@ public class AlmacenController {
         panelCarrito.setPrefWidth(ancho * 0.37);
         scrollResultados.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollCarrito.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        com.overbyte.Navegador.mostrarOverlay(tarjeta);
+        Navegador.mostrarOverlay(tarjeta);
     }
 
     private void mostrarResultadosEntradas(VBox contenedor, List<Producto> productos, String termino,
@@ -467,21 +443,21 @@ public class AlmacenController {
                 try {
                     int unidades = Integer.parseInt(cantidad.getText().trim());
                     if (unidades <= 0) {
-                        mostrarAlerta("Cantidad inválida", "La cantidad debe ser mayor a cero.");
+                        Navegador.avisar("Cantidad inválida", "La cantidad debe ser mayor a cero.");
                         return;
                     }
                     int cantidadSeleccionada = seleccionados.getOrDefault(producto.getIdProducto(), 0);
                     if (producto.getStock() < 0
                             || unidades > Integer.MAX_VALUE - producto.getStock()
                             || unidades > Integer.MAX_VALUE - cantidadSeleccionada) {
-                        mostrarAlerta("Cantidad fuera de rango",
+                        Navegador.avisar("Cantidad fuera de rango",
                                 "La cantidad excede el máximo permitido para el stock de este producto.");
                         return;
                     }
                     seleccionados.put(producto.getIdProducto(), cantidadSeleccionada + unidades);
                     actualizarCarritoEntradas(carrito, productos, seleccionados);
                 } catch (NumberFormatException e) {
-                    mostrarAlerta("Cantidad inválida", "Escribe un número entero mayor a cero.");
+                    Navegador.avisar("Cantidad inválida", "Escribe un número entero mayor a cero.");
                 }
             });
             agregarCeldaEntrada(fila, id, 0);
@@ -522,7 +498,7 @@ public class AlmacenController {
 
     private int cargarProductosInventario(List<Producto> productos) {
         productos.clear();
-        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("inventario.csv").toString());
+        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos(ArchivosCSV.INVENTARIO).toString());
         int invalidos = 0;
         for (int i = 1; i < filas.size(); i++) {
             String[] fila = filas.get(i);
@@ -586,7 +562,7 @@ public class AlmacenController {
     private void registrarEntradasSeleccionadas(List<Producto> productos,
             Map<String, Integer> seleccionados, VBox carrito, VBox resultados, String termino) {
         if (seleccionados.isEmpty()) {
-            mostrarAlerta("Carrito vacío", "Añade al menos un producto antes de registrar entradas.");
+            Navegador.avisar("Carrito vacío", "Añade al menos un producto antes de registrar entradas.");
             return;
         }
         int registrados = 0;
@@ -606,15 +582,15 @@ public class AlmacenController {
         mostrarResultadosEntradas(resultados, productos, termino, carrito, seleccionados);
         actualizarCarritoEntradas(carrito, productos, seleccionados);
         if (!errores.isEmpty()) {
-            mostrarAlerta(registrados == 0 ? "No se registraron entradas" : "Entradas parciales",
+            Navegador.avisar(registrados == 0 ? "No se registraron entradas" : "Entradas parciales",
                     (registrados > 0 ? registrados + " producto(s) registrados. " : "")
                     + "No se pudieron procesar: " + String.join(", ", errores) + ".");
             return;
         }
         mostrarMensaje("Se registraron las entradas correctamente.", true);
-        mostrarAlerta("Entradas registradas", "Se actualizaron las existencias de "
+        Navegador.avisar("Entradas registradas", "Se actualizaron las existencias de "
                 + registrados + " producto(s).");
-        com.overbyte.Navegador.cerrarOverlay();
+        Navegador.cerrarOverlay();
     }
 
     private boolean importarEntradasDesdeArchivo() {
@@ -623,7 +599,7 @@ public class AlmacenController {
         selector.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Archivos CSV y texto", "*.csv", "*.txt"),
                 new FileChooser.ExtensionFilter("Todos los archivos", "*.*"));
-        File archivo = selector.showOpenDialog(com.overbyte.Navegador.ventana());
+        File archivo = selector.showOpenDialog(Navegador.ventana());
         if (archivo == null) {
             return false;
         }
@@ -635,7 +611,7 @@ public class AlmacenController {
     private void mostrarVistaPreviaEntradas(File archivo) {
         List<String[]> filas = motorCSV.leerCSV(archivo.getAbsolutePath());
         if (filas.size() < 2) {
-            mostrarAlerta("Archivo vacío", "El archivo no tiene datos para importar.");
+            Navegador.avisar("Archivo vacío", "El archivo no tiene datos para importar.");
             return;
         }
         String[] encabezado = filas.get(0);
@@ -643,7 +619,7 @@ public class AlmacenController {
         int colProducto = indiceColumna(encabezado, "idProducto");
         int colCantidad = indiceColumna(encabezado, "cantidad");
         java.util.Set<String> proveedores = new java.util.HashSet<>();
-        for (String[] fila : motorCSV.leerCSV(motorCSV.rutaDatos("proveedores.csv").toString())) {
+        for (String[] fila : motorCSV.leerCSV(motorCSV.rutaDatos(ArchivosCSV.PROVEEDORES).toString())) {
             if (fila.length > 0) proveedores.add(fila[0].trim().toLowerCase(Locale.ROOT));
         }
         TableView<String[]> tabla = new TableView<>();
@@ -670,33 +646,33 @@ public class AlmacenController {
         Button cancelar = new Button("Cancelar");
         cancelar.getStyleClass().add("boton-rol");
         confirmar.setOnAction(e -> {
-            com.overbyte.Navegador.cerrarOverlay();
+            Navegador.cerrarOverlay();
             if (almacen.ingresarEntradaDesdeArchivo(archivo.getAbsolutePath())) {
                 cargarInventario();
                 mostrarMensaje("Entradas importadas correctamente.", true);
-                mostrarAlerta("Importación completada", "Las entradas se importaron correctamente.");
+                Navegador.avisar("Importación completada", "Las entradas se importaron correctamente.");
             } else {
                 mostrarMensaje("No se pudo importar el archivo.", false);
-                mostrarAlerta("No se pudo importar",
+                Navegador.avisar("No se pudo importar",
                         "Verifica el formato y las columnas del archivo seleccionado.");
             }
         });
-        cancelar.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
+        cancelar.setOnAction(e -> Navegador.cerrarOverlay());
         HBox botones = new HBox(10, confirmar, cancelar);
         botones.setAlignment(Pos.CENTER_RIGHT);
         VBox cuerpo = new VBox(10, resumen, tabla, botones);
         cuerpo.setMaxWidth(Double.MAX_VALUE);
-        VBox tarjeta = com.overbyte.Navegador.tarjeta("Vista previa de importación",
+        VBox tarjeta = Navegador.tarjeta("Vista previa de importación",
                 "Archivo: " + archivo.getName() + ". Revisa si está completo y confirma para guardar.", cuerpo);
         tarjeta.getStyleClass().remove("overlay-tarjeta");
         tarjeta.getStyleClass().add("overlay-tarjeta--ancha");
-        double anchoVentana = com.overbyte.Navegador.ventana() != null
-                ? com.overbyte.Navegador.ventana().getWidth() : 1100;
+        double anchoVentana = Navegador.ventana() != null
+                ? Navegador.ventana().getWidth() : 1100;
         double ancho = Math.max(880, anchoVentana * 0.92);
         tarjeta.setMinWidth(ancho);
         tarjeta.setPrefWidth(ancho);
         tarjeta.setMaxWidth(ancho);
-        com.overbyte.Navegador.mostrarOverlay(tarjeta);
+        Navegador.mostrarOverlay(tarjeta);
     }
 
     private int indiceColumna(String[] encabezado, String nombre) {
@@ -728,9 +704,6 @@ public class AlmacenController {
         return campo;
     }
 
-    private void mostrarAlerta(String titulo, String contenido) {
-        com.overbyte.Navegador.avisar(titulo, contenido);
-    }
 
     private void mostrarMensaje(String texto, boolean correcto) {
         mensaje.setText(texto);
@@ -744,7 +717,7 @@ public class AlmacenController {
 
     @FXML
     private void cerrarSesion() {
-        com.overbyte.Navegador.irAlLogin();
+        Navegador.irAlLogin();
     }
 
 }

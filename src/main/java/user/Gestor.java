@@ -1,5 +1,6 @@
 package user;
 
+import config.ArchivosCSV;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -16,16 +17,8 @@ import services.ValidadorDatos;
 /** Administrador con acceso a caja, reportes, personal, proveedores e inventario. */
 public class Gestor extends Empleado {
 
-    private static final String ARCHIVO_CAJA = "caja.csv";
-    private static final String ARCHIVO_INVENTARIO = "inventario.csv";
-    private static final String ARCHIVO_VENTAS = "ventas.csv";
-    private static final String ARCHIVO_EMPLEADOS = "empleado.csv";
-    private static final String ARCHIVO_PROVEEDORES = "proveedores.csv";
-    private static final String ARCHIVO_ENTRADAS = "entradas.csv";
     private static final String[] CABECERA_EMPLEADOS = {"ci", "nombre", "rol", "contrasena"};
     private static final String[] CABECERA_PROVEEDORES = {"idProveedor", "nombreProveedor", "contactoProveedor"};
-    private static final String[] CABECERA_INVENTARIO = {"idProducto", "nombre", "marca", "categoria",
-            "descripcion", "precioEntrada", "precioVenta", "stock"};
     private static final int STOCK_CRITICO = 5;
 
     private final MotorCSV motorCSV;
@@ -49,7 +42,7 @@ public class Gestor extends Empleado {
 
     /** Muestra ventas confirmadas del día, independientemente del estado de la caja. */
     public void verVentasEIngresosDiarios() {
-        List<String[]> ventas = motorCSV.leerCSV(ruta(ARCHIVO_VENTAS));
+        List<String[]> ventas = motorCSV.leerCSV(ruta(ArchivosCSV.VENTAS));
         double ingresos = 0;
         LocalDate hoy = LocalDate.now();
         System.out.println("--- VENTAS DEL " + hoy + " ---");
@@ -73,7 +66,7 @@ public class Gestor extends Empleado {
     }
 
     public void verInventario() {
-        List<String[]> productos = motorCSV.leerCSV(ruta(ARCHIVO_INVENTARIO));
+        List<String[]> productos = motorCSV.leerCSV(ruta(ArchivosCSV.INVENTARIO));
         System.out.println("--- INVENTARIO ---");
         for (int i = 1; i < productos.size(); i++) {
             String[] fila = productos.get(i);
@@ -105,7 +98,7 @@ public class Gestor extends Empleado {
         LocalDate hoy = LocalDate.now();
         int unidades = 0;
         int registros = 0;
-        for (String[] fila : motorCSV.leerCSV(ruta(ARCHIVO_ENTRADAS))) {
+        for (String[] fila : motorCSV.leerCSV(ruta(ArchivosCSV.ENTRADAS))) {
             if (fila.length > 6 && fila[6].startsWith(hoy.toString())) {
                 try {
                     unidades += Integer.parseInt(fila[4]);
@@ -125,7 +118,7 @@ public class Gestor extends Empleado {
                 || !ValidadorDatos.textoValido(empleado.getNombre())) {
             return false;
         }
-        List<String[]> filas = leerConCabecera(ARCHIVO_EMPLEADOS, CABECERA_EMPLEADOS);
+        List<String[]> filas = leerConCabecera(ArchivosCSV.EMPLEADOS, CABECERA_EMPLEADOS);
         if (existeValor(filas, 0, empleado.getCi())) {
             return false;
         }
@@ -133,14 +126,14 @@ public class Gestor extends Empleado {
             return false;
         }
         filas.add(new String[]{empleado.getCi(), empleado.getNombre(), empleado.getRol().name(), empleado.getContrasena()});
-        return motorCSV.escribirCSV(ruta(ARCHIVO_EMPLEADOS), filas, false);
+        return motorCSV.escribirCSV(ruta(ArchivosCSV.EMPLEADOS), filas, false);
     }
 
     public boolean eliminarEmpleado(String ci) {
         if (vacio(ci)) {
             return false;
         }
-        List<String[]> empleados = leerConCabecera(ARCHIVO_EMPLEADOS, CABECERA_EMPLEADOS);
+        List<String[]> empleados = leerConCabecera(ArchivosCSV.EMPLEADOS, CABECERA_EMPLEADOS);
         String[] objetivo = empleados.stream().skip(1)
                 .filter(fila -> fila.length > 2 && fila[0].equalsIgnoreCase(ci))
                 .findFirst().orElse(null);
@@ -152,7 +145,7 @@ public class Gestor extends Empleado {
                         && fila[2].equalsIgnoreCase(Rol.ADMINISTRADOR.name())).count() <= 1) {
             return false;
         }
-        return eliminarPorClave(ARCHIVO_EMPLEADOS, ci);
+        return eliminarPorClave(ArchivosCSV.EMPLEADOS, ci);
     }
 
     public boolean anadirProveedor(Proveedor proveedor) {
@@ -162,22 +155,22 @@ public class Gestor extends Empleado {
                 || !ValidadorDatos.telefonoValido(proveedor.getContactoProveedor())) {
             return false;
         }
-        List<String[]> filas = leerConCabecera(ARCHIVO_PROVEEDORES, CABECERA_PROVEEDORES);
+        List<String[]> filas = leerConCabecera(ArchivosCSV.PROVEEDORES, CABECERA_PROVEEDORES);
         if (existeValor(filas, 0, proveedor.getCodigoProveedor())) {
             return false;
         }
         filas.add(new String[]{proveedor.getCodigoProveedor(), proveedor.getNombreProveedor(),
                 String.valueOf(proveedor.getContactoProveedor())});
-        return motorCSV.escribirCSV(ruta(ARCHIVO_PROVEEDORES), filas, false);
+        return motorCSV.escribirCSV(ruta(ArchivosCSV.PROVEEDORES), filas, false);
     }
 
     /** Genera un identificador de proveedor que no exista en el CSV. */
     public String generarIdProveedor() {
-        return generarIdentificador(ARCHIVO_PROVEEDORES, "PROV");
+        return generarIdentificador(ArchivosCSV.PROVEEDORES, "PROV");
     }
 
     public boolean eliminarProveedor(String idProveedor) {
-        return eliminarPorClave(ARCHIVO_PROVEEDORES, idProveedor);
+        return eliminarPorClave(ArchivosCSV.PROVEEDORES, idProveedor);
     }
 
     public boolean anadirProducto(Producto producto) {
@@ -192,21 +185,21 @@ public class Gestor extends Empleado {
                 || !ValidadorDatos.textoValido(producto.getDescripcion())) {
             return false;
         }
-        List<String[]> filas = leerConCabecera(ARCHIVO_INVENTARIO, CABECERA_INVENTARIO);
+        List<String[]> filas = leerConCabecera(ArchivosCSV.INVENTARIO, ArchivosCSV.INVENTARIO_ENCABEZADO);
         if (existeValor(filas, 0, producto.getIdProducto())) {
             return false;
         }
         filas.add(filaProducto(producto));
-        return motorCSV.escribirCSV(ruta(ARCHIVO_INVENTARIO), filas, false);
+        return motorCSV.escribirCSV(ruta(ArchivosCSV.INVENTARIO), filas, false);
     }
 
     /** Genera un identificador de producto que no exista en el CSV. */
     public String generarIdProducto() {
-        return generarIdentificador(ARCHIVO_INVENTARIO, "PROD");
+        return generarIdentificador(ArchivosCSV.INVENTARIO, "PROD");
     }
 
     public boolean eliminarProducto(String codigo) {
-        return eliminarPorClave(ARCHIVO_INVENTARIO, codigo);
+        return eliminarPorClave(ArchivosCSV.INVENTARIO, codigo);
     }
 
     /** Persiste un pedido de proveedor y devuelve silenciosamente si los datos no son válidos. */
@@ -215,8 +208,8 @@ public class Gestor extends Empleado {
             return;
         }
         String idPedido = "PED-" + java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        String rutaPedidos = ruta("pedidos.csv");
-        List<String[]> pedidos = leerConCabecera("pedidos.csv",
+        String rutaPedidos = ruta(ArchivosCSV.PEDIDOS);
+        List<String[]> pedidos = leerConCabecera(ArchivosCSV.PEDIDOS,
                 new String[]{"idPedido", "idProveedor", "idProducto", "cantidad", "fechaPedido", "ciEmpleado"});
         for (Producto producto : productos) {
             if (producto != null && producto.getStock() > 0) {
@@ -230,7 +223,7 @@ public class Gestor extends Empleado {
     /** Lista productos con cinco unidades o menos; el umbral queda centralizado para cambiarlo fácilmente. */
     public List<Producto> listarProductosProximosAAgotarse() {
         List<Producto> resultado = new ArrayList<>();
-        for (String[] fila : motorCSV.leerCSV(ruta(ARCHIVO_INVENTARIO))) {
+        for (String[] fila : motorCSV.leerCSV(ruta(ArchivosCSV.INVENTARIO))) {
             if (fila.length < 8 || fila[0].equalsIgnoreCase("idProducto")) {
                 continue;
             }
@@ -250,7 +243,7 @@ public class Gestor extends Empleado {
         if (inicio == null || fin == null || inicio.isAfter(fin)) {
             return;
         }
-        for (String[] fila : motorCSV.leerCSV(ruta(ARCHIVO_VENTAS))) {
+        for (String[] fila : motorCSV.leerCSV(ruta(ArchivosCSV.VENTAS))) {
             if (fila.length <= 10 || !fila[2].equalsIgnoreCase("CONFIRMADA")) {
                 continue;
             }
@@ -274,7 +267,7 @@ public class Gestor extends Empleado {
         filas.add(new String[]{"estado", "fechaApertura", "fechaCierre", "ciEmpleado"});
         filas.add(new String[]{estado, estado.equals("ABIERTA") ? LocalDate.now().toString() : "",
                 estado.equals("CERRADA") ? LocalDate.now().toString() : "", getCi()});
-        return motorCSV.escribirCSV(ruta(ARCHIVO_CAJA), filas, false);
+        return motorCSV.escribirCSV(ruta(ArchivosCSV.CAJA), filas, false);
     }
 
     private boolean eliminarPorClave(String archivo, String clave) {
@@ -302,7 +295,7 @@ public class Gestor extends Empleado {
     }
 
     private boolean existeProveedor(String codigo) {
-        return existeValor(motorCSV.leerCSV(ruta(ARCHIVO_PROVEEDORES)), 0, codigo);
+        return existeValor(motorCSV.leerCSV(ruta(ArchivosCSV.PROVEEDORES)), 0, codigo);
     }
 
     private String generarIdentificador(String archivo, String prefijo) {
@@ -316,7 +309,7 @@ public class Gestor extends Empleado {
     }
 
     private Producto leerProducto(String codigo) {
-        for (String[] fila : motorCSV.leerCSV(ruta(ARCHIVO_INVENTARIO))) {
+        for (String[] fila : motorCSV.leerCSV(ruta(ArchivosCSV.INVENTARIO))) {
             if (fila.length >= 8 && fila[0].equalsIgnoreCase(codigo)) {
                 try {
                     return new Producto(fila[0], fila[1], Double.parseDouble(fila[5]), Double.parseDouble(fila[6]),

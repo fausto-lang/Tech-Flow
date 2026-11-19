@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import config.ArchivosCSV;
 import config.ConfiguracionCSV;
 
 /**
@@ -238,8 +239,8 @@ public class MotorCSV {
         }
         List<String[]> reporte = new ArrayList<>();
         reporte.add(new String[]{"tipo", "identificador", "detalle", "fecha"});
-        agregarAlReporte(reporte, rutaDatos("inventario.csv"), "INVENTARIO");
-        agregarAlReporte(reporte, rutaDatos("ventas.csv"), "VENTA");
+        agregarAlReporte(reporte, rutaDatos(ArchivosCSV.INVENTARIO), "INVENTARIO");
+        agregarAlReporte(reporte, rutaDatos(ArchivosCSV.VENTAS), "VENTA");
         return escribirCSV(rutaDestino, reporte, false);
     }
 

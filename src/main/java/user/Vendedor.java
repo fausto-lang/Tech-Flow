@@ -1,5 +1,6 @@
 package user;
 
+import config.ArchivosCSV;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,10 +20,6 @@ import services.ValidadorDatos;
 /** Cajero responsable de preparar proformas, confirmar ventas y emitir facturas. */
 public class Vendedor extends Empleado {
 
-    private static final String ARCHIVO_INVENTARIO = "inventario.csv";
-    private static final String ARCHIVO_VENTAS = "ventas.csv";
-    private static final String ARCHIVO_CLIENTES = "clientes.csv";
-        private static final String ARCHIVO_GARANTIAS = "garantias.csv";
         private static final int MESES_GARANTIA = 12;
     private static final String[] CABECERA_VENTAS = {"idVenta", "idOrden", "estado", "ciCliente",
             "nombreCliente", "idProducto", "nombreProducto", "cantidad", "precioUnitario",
@@ -98,7 +95,7 @@ public class Vendedor extends Empleado {
                     ci.isBlank() ? "CLI-PENDIENTE" : "CLI-" + ci, telefono,
                     "GAR-PEND-" + idVenta});
         }
-        return motorCSV.escribirCSV(ruta(ARCHIVO_VENTAS), ventas, false) ? idOrden : null;
+        return motorCSV.escribirCSV(ruta(ArchivosCSV.VENTAS), ventas, false) ? idOrden : null;
     }
 
     /** Anula una orden pendiente o una venta confirmada, restituyendo su inventario. */
@@ -134,7 +131,7 @@ public class Vendedor extends Empleado {
                 fila[2] = "ANULADA";
             }
         }
-        return motorCSV.escribirCSV(ruta(ARCHIVO_VENTAS), ventas, false);
+        return motorCSV.escribirCSV(ruta(ArchivosCSV.VENTAS), ventas, false);
     }
 
     /** Genera un identificador de proforma para compatibilidad con el contrato anterior. */
@@ -245,7 +242,7 @@ public class Vendedor extends Empleado {
         if (!crearGarantias(ventas, idOrden, idCliente, ciCliente, nombreCliente, telefonoCliente)) {
             return false;
         }
-        if (!motorCSV.escribirCSV(ruta(ARCHIVO_VENTAS), ventas, false)) {
+        if (!motorCSV.escribirCSV(ruta(ArchivosCSV.VENTAS), ventas, false)) {
             return false;
         }
         System.out.println(generarFactura(idOrden, nombreCliente, lineasFactura(ventas, idOrden)));
@@ -258,8 +255,8 @@ public class Vendedor extends Empleado {
         if (referencia == null || referencia.isBlank()) {
             return List.of("Debe indicar un código de garantía, venta u orden.");
         }
-        List<String[]> garantias = motorCSV.leerCSV(ruta(ARCHIVO_GARANTIAS));
-        List<String[]> ventas = motorCSV.leerCSV(ruta(ARCHIVO_VENTAS));
+        List<String[]> garantias = motorCSV.leerCSV(ruta(ArchivosCSV.GARANTIAS));
+        List<String[]> ventas = motorCSV.leerCSV(ruta(ArchivosCSV.VENTAS));
         for (int i = 1; i < garantias.size(); i++) {
             String[] garantia = garantias.get(i);
             if (garantia.length < CABECERA_GARANTIAS.length
@@ -298,7 +295,7 @@ public class Vendedor extends Empleado {
             return null;
         }
         String termino = terminoBusqueda.trim();
-        for (String[] fila : motorCSV.leerCSV(ruta(ARCHIVO_INVENTARIO))) {
+        for (String[] fila : motorCSV.leerCSV(ruta(ArchivosCSV.INVENTARIO))) {
             if (fila.length < 8 || fila[0].equalsIgnoreCase("idProducto")) {
                 continue;
             }
@@ -358,7 +355,7 @@ public class Vendedor extends Empleado {
             return resultados;
         }
         String criterio = razon.trim().toLowerCase(Locale.ROOT);
-        for (String[] fila : motorCSV.leerCSV(ruta(ARCHIVO_INVENTARIO))) {
+        for (String[] fila : motorCSV.leerCSV(ruta(ArchivosCSV.INVENTARIO))) {
             if (fila.length >= 8 && !fila[0].equalsIgnoreCase("idProducto")
                     && (fila[0].toLowerCase(Locale.ROOT).contains(criterio)
                     || fila[1].toLowerCase(Locale.ROOT).contains(criterio)
@@ -370,7 +367,7 @@ public class Vendedor extends Empleado {
     }
 
     private boolean actualizarStockDesdeVentas(List<String[]> ventas, String id, boolean devolver) {
-        List<String[]> inventario = motorCSV.leerCSV(ruta(ARCHIVO_INVENTARIO));
+        List<String[]> inventario = motorCSV.leerCSV(ruta(ArchivosCSV.INVENTARIO));
         Map<String, Integer> cantidades = new HashMap<>();
         for (String[] fila : ventas) {
             if (fila.length > 7 && (fila[0].equalsIgnoreCase(id) || fila[1].equalsIgnoreCase(id))
@@ -389,7 +386,7 @@ public class Vendedor extends Empleado {
             }
             producto[7] = String.valueOf(devolver ? stock + linea.getValue() : stock - linea.getValue());
         }
-        return !cantidades.isEmpty() && motorCSV.escribirCSV(ruta(ARCHIVO_INVENTARIO), inventario, false);
+        return !cantidades.isEmpty() && motorCSV.escribirCSV(ruta(ArchivosCSV.INVENTARIO), inventario, false);
     }
 
     private String[] buscarFila(List<String[]> filas, String idProducto) {
@@ -402,7 +399,7 @@ public class Vendedor extends Empleado {
     }
 
     private List<String[]> leerVentas() {
-        List<String[]> ventas = motorCSV.leerCSV(ruta(ARCHIVO_VENTAS));
+        List<String[]> ventas = motorCSV.leerCSV(ruta(ArchivosCSV.VENTAS));
         if (ventas.isEmpty()) {
             ventas.add(CABECERA_VENTAS.clone());
             return ventas;
@@ -417,7 +414,7 @@ public class Vendedor extends Empleado {
     }
 
     private boolean cajaAbierta() {
-        List<String[]> caja = motorCSV.leerCSV(ruta("caja.csv"));
+        List<String[]> caja = motorCSV.leerCSV(ruta(ArchivosCSV.CAJA));
         return caja.size() > 1 && caja.get(1).length > 0 && caja.get(1)[0].equalsIgnoreCase("ABIERTA");
     }
 
@@ -457,7 +454,7 @@ public class Vendedor extends Empleado {
                 || !ValidadorDatos.telefonoValido(telefono)) {
             return null;
         }
-        List<String[]> clientes = motorCSV.leerCSV(ruta(ARCHIVO_CLIENTES));
+        List<String[]> clientes = motorCSV.leerCSV(ruta(ArchivosCSV.CLIENTES));
         if (clientes.isEmpty()) {
             clientes.add(new String[]{"idCliente", "nombreCliente"});
         }
@@ -485,7 +482,7 @@ public class Vendedor extends Empleado {
                 if (!telefono.isBlank()) {
                     fila[columnaTelefono] = telefono.trim();
                 }
-                return motorCSV.escribirCSV(ruta(ARCHIVO_CLIENTES), clientes, false)
+                return motorCSV.escribirCSV(ruta(ArchivosCSV.CLIENTES), clientes, false)
                     ? texto(fila, columnaId) : null;
             }
         }
@@ -496,7 +493,7 @@ public class Vendedor extends Empleado {
         nuevoCliente[columnaCi] = ci.trim();
         nuevoCliente[columnaTelefono] = telefono.trim();
         clientes.add(nuevoCliente);
-        return motorCSV.escribirCSV(ruta(ARCHIVO_CLIENTES), clientes, false) ? idCliente : null;
+        return motorCSV.escribirCSV(ruta(ArchivosCSV.CLIENTES), clientes, false) ? idCliente : null;
     }
 
     private int asegurarColumna(List<String[]> filas, String nombre) {
@@ -529,7 +526,7 @@ public class Vendedor extends Empleado {
 
     private boolean crearGarantias(List<String[]> ventas, String idOrden, String idCliente,
                                    String ciCliente, String nombre, String telefono) {
-        List<String[]> garantias = motorCSV.leerCSV(ruta(ARCHIVO_GARANTIAS));
+        List<String[]> garantias = motorCSV.leerCSV(ruta(ArchivosCSV.GARANTIAS));
         if (garantias.isEmpty()) {
             garantias.add(CABECERA_GARANTIAS.clone());
         }
@@ -558,7 +555,7 @@ public class Vendedor extends Empleado {
             }
             venta[14] = idGarantia;
         }
-        return garantias.size() > 1 && motorCSV.escribirCSV(ruta(ARCHIVO_GARANTIAS), garantias, false);
+        return garantias.size() > 1 && motorCSV.escribirCSV(ruta(ArchivosCSV.GARANTIAS), garantias, false);
     }
 
     private String[] buscarGarantia(List<String[]> garantias, String idVenta) {
@@ -572,7 +569,7 @@ public class Vendedor extends Empleado {
 
     private List<String> lineasFactura(List<String[]> ventas, String idOrden) {
         List<String> lineas = new ArrayList<>();
-        List<String[]> garantias = motorCSV.leerCSV(ruta(ARCHIVO_GARANTIAS));
+        List<String[]> garantias = motorCSV.leerCSV(ruta(ArchivosCSV.GARANTIAS));
         for (String[] fila : ventas) {
             if (fila.length > 9 && fila[1].equals(idOrden)) {
                 lineas.add(fila[6] + " x" + fila[7] + " | " + fila[9]);

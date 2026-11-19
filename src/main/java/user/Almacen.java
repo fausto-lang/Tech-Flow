@@ -1,5 +1,6 @@
 package user;
 
+import config.ArchivosCSV;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -14,10 +15,6 @@ import java.util.Locale;
 /** Operador responsable de productos, existencias y registro de entradas. */
 public class Almacen extends Empleado {
 
-    private static final String ARCHIVO_INVENTARIO = "inventario.csv";
-    private static final String ARCHIVO_ENTRADAS = "entradas.csv";
-    private static final String[] CABECERA_INVENTARIO = {"idProducto", "nombre", "marca", "categoria",
-            "descripcion", "precioEntrada", "precioVenta", "stock"};
     private static final String[] CABECERA_ENTRADAS = {"idEntrada", "idProveedor", "idProducto",
             "nombreProducto", "cantidad", "precioUnitario", "fechaEntrada", "ciEmpleado"};
 
@@ -46,7 +43,7 @@ public class Almacen extends Empleado {
             return false;
         }
         inventario.add(filaProducto(producto));
-        if (!motorCSV.escribirCSV(ruta(ARCHIVO_INVENTARIO), inventario, false)) {
+        if (!motorCSV.escribirCSV(ruta(ArchivosCSV.INVENTARIO), inventario, false)) {
             return false;
         }
         return producto.getStock() == 0 || registrarEntrada("", producto.getIdProducto(), producto.getNombre(),
@@ -71,7 +68,7 @@ public class Almacen extends Empleado {
             return false;
         }
         producto[7] = String.valueOf((int) nuevoStock);
-        if (!motorCSV.escribirCSV(ruta(ARCHIVO_INVENTARIO), inventario, false)) {
+        if (!motorCSV.escribirCSV(ruta(ArchivosCSV.INVENTARIO), inventario, false)) {
             return false;
         }
         return registrarEntrada("", producto[0], producto[1], cantidad, producto[5]);
@@ -171,8 +168,8 @@ public class Almacen extends Empleado {
             nuevasEntradas.add(filaEntrada(recepcion));
         }
         entradas.addAll(nuevasEntradas);
-        return motorCSV.escribirCSV(ruta(ARCHIVO_INVENTARIO), inventario, false)
-                && motorCSV.escribirCSV(ruta(ARCHIVO_ENTRADAS), entradas, false);
+        return motorCSV.escribirCSV(ruta(ArchivosCSV.INVENTARIO), inventario, false)
+                && motorCSV.escribirCSV(ruta(ArchivosCSV.ENTRADAS), entradas, false);
     }
 
     private boolean productoValido(Producto producto) {
@@ -189,15 +186,15 @@ public class Almacen extends Empleado {
     }
 
     private List<String[]> leerInventario() {
-        List<String[]> filas = motorCSV.leerCSV(ruta(ARCHIVO_INVENTARIO));
+        List<String[]> filas = motorCSV.leerCSV(ruta(ArchivosCSV.INVENTARIO));
         if (filas.isEmpty()) {
-            filas.add(CABECERA_INVENTARIO.clone());
+            filas.add(ArchivosCSV.INVENTARIO_ENCABEZADO.clone());
         }
         return filas;
     }
 
     private List<String[]> leerEntradas() {
-        List<String[]> filas = motorCSV.leerCSV(ruta(ARCHIVO_ENTRADAS));
+        List<String[]> filas = motorCSV.leerCSV(ruta(ArchivosCSV.ENTRADAS));
         if (filas.isEmpty()) {
             filas.add(CABECERA_ENTRADAS.clone());
         }
@@ -230,11 +227,11 @@ public class Almacen extends Empleado {
             proveedor = "PROV-01";
         }
         entradas.add(filaEntrada(new Recepcion(proveedor, idProducto, nombre, cantidad, precio)));
-        return motorCSV.escribirCSV(ruta(ARCHIVO_ENTRADAS), entradas, false);
+        return motorCSV.escribirCSV(ruta(ArchivosCSV.ENTRADAS), entradas, false);
     }
 
     private String primerProveedor() {
-        List<String[]> proveedores = motorCSV.leerCSV(ruta("proveedores.csv"));
+        List<String[]> proveedores = motorCSV.leerCSV(ruta(ArchivosCSV.PROVEEDORES));
         if (proveedores.size() > 1 && proveedores.get(1).length > 0) {
             return proveedores.get(1)[0].trim();
         }
@@ -248,7 +245,7 @@ public class Almacen extends Empleado {
     }
 
     private boolean existeProveedor(String codigo) {
-        for (String[] fila : motorCSV.leerCSV(ruta("proveedores.csv"))) {
+        for (String[] fila : motorCSV.leerCSV(ruta(ArchivosCSV.PROVEEDORES))) {
             if (fila.length > 0 && fila[0].equalsIgnoreCase(codigo)) {
                 return true;
             }

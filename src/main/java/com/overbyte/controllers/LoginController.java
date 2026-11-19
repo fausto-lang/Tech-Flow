@@ -1,6 +1,5 @@
 package com.overbyte.controllers;
 
-import javafx.animation.ScaleTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -10,7 +9,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.util.Duration;
 
 import com.overbyte.Navegador;
 import services.Verificador;
@@ -62,10 +60,10 @@ public class LoginController {
         configurarBotonRol(btnAdministrador, Rol.ADMINISTRADOR, "Administrador");
         configurarBotonRol(btnCajero, Rol.CAJERO, "Cajero");
         configurarBotonRol(btnAlmacen, Rol.ALMACENERO, "Almacén");
-        configurarAnimacionHover(btnAdministrador);
-        configurarAnimacionHover(btnCajero);
-        configurarAnimacionHover(btnAlmacen);
-        configurarAnimacionHover(btnIniciarSesion);
+        AyudasUI.animarHover(btnAdministrador);
+        AyudasUI.animarHover(btnCajero);
+        AyudasUI.animarHover(btnAlmacen);
+        AyudasUI.animarHover(btnIniciarSesion);
     }
 
     @FXML
@@ -124,19 +122,6 @@ public class LoginController {
         }
     }
 
-    private void configurarAnimacionHover(Button boton) {
-        ScaleTransition animacion = new ScaleTransition(Duration.millis(130), boton);
-        boton.setOnMouseEntered(event -> {
-            animacion.setToX(1.04);
-            animacion.setToY(1.04);
-            animacion.playFromStart();
-        });
-        boton.setOnMouseExited(event -> {
-            animacion.setToX(1);
-            animacion.setToY(1);
-            animacion.playFromStart();
-        });
-    }
 
     @FXML
     private void iniciarSesion() {

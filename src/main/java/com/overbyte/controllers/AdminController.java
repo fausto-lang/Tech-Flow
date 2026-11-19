@@ -1,7 +1,7 @@
 package com.overbyte.controllers;
 
-import javafx.animation.ScaleTransition;
-import javafx.animation.TranslateTransition;
+import config.ArchivosCSV;
+import com.overbyte.Navegador;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -13,7 +13,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import javafx.util.StringConverter;
 import user.Empleado;
 import user.Gestor;
@@ -91,14 +90,14 @@ public class AdminController {
     @FXML
     private void initialize() {
         lblTituloSeccion.setText("Caja");
-        configurarAnimacionNavegacion(navCaja);
-        configurarAnimacionNavegacion(navInventario);
-        configurarAnimacionNavegacion(navVentas);
-        configurarAnimacionNavegacion(navEntradas);
-        configurarAnimacionNavegacion(navEmpleados);
-        configurarAnimacionNavegacion(navProductos);
-        configurarAnimacionNavegacion(navProveedores);
-        configurarAnimacionNavegacion(navCerrarSesion);
+        AyudasUI.animarNavegacion(navCaja);
+        AyudasUI.animarNavegacion(navInventario);
+        AyudasUI.animarNavegacion(navVentas);
+        AyudasUI.animarNavegacion(navEntradas);
+        AyudasUI.animarNavegacion(navEmpleados);
+        AyudasUI.animarNavegacion(navProductos);
+        AyudasUI.animarNavegacion(navProveedores);
+        AyudasUI.animarNavegacion(navCerrarSesion);
         seleccionarPestana(navVentas);
     }
 
@@ -112,7 +111,7 @@ public class AdminController {
 
     private void mostrarDialogoCaja() {
         List<String[]> filasCaja = motorCSV.leerCSV(
-            motorCSV.rutaDatos("caja.csv").toString()
+            motorCSV.rutaDatos(ArchivosCSV.CAJA).toString()
         );
         boolean abierta = filasCaja.size() > 1
                 && filasCaja.get(1).length > 0
@@ -148,16 +147,16 @@ public class AdminController {
         botonCancelar.getStyleClass().add("caja-dialog-cancelar");
         contenido.getChildren().addAll(botonAccion, botonCancelar);
 
-        botonCancelar.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
+        botonCancelar.setOnAction(e -> Navegador.cerrarOverlay());
         botonAccion.setOnAction(e -> {
-            com.overbyte.Navegador.cerrarOverlay();
+            Navegador.cerrarOverlay();
             boolean actualizado = abierta ? gestor.cerrarCaja() : gestor.abrirCaja();
             if (!actualizado) {
-                mostrarAlerta("Error", "No se pudo actualizar el estado de la caja.");
+                Navegador.avisar("Error", "No se pudo actualizar el estado de la caja.");
             }
         });
-        com.overbyte.Navegador.mostrarOverlay(
-            com.overbyte.Navegador.tarjetaCompacta("Gestión de caja", "", contenido));
+        Navegador.mostrarOverlay(
+            Navegador.tarjetaCompacta("Gestión de caja", "", contenido));
     }
 
     /* ----------- INVENTARIO ----------- */
@@ -172,7 +171,7 @@ public class AdminController {
         seccion.setAlignment(Pos.TOP_LEFT);
 
         // Tabla de inventario
-        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("inventario.csv").toString());
+        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos(ArchivosCSV.INVENTARIO).toString());
         List<String[]> filasValidas = new ArrayList<>();
         for (int i = 1; i < filas.size(); i++) {
             String[] fila = filas.get(i);
@@ -337,7 +336,7 @@ public class AdminController {
         seccion.setAlignment(Pos.TOP_LEFT);
         seccion.setMaxWidth(Double.MAX_VALUE);
 
-        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("ventas.csv").toString());
+        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos(ArchivosCSV.VENTAS).toString());
 
         double totalDia = 0;
         int count = 0;
@@ -454,8 +453,8 @@ public class AdminController {
 
         VBox seccion = new VBox(15);
         seccion.setAlignment(Pos.TOP_LEFT);
-        List<String[]> entradas = motorCSV.leerCSV(motorCSV.rutaDatos("entradas.csv").toString());
-        List<String[]> proveedores = motorCSV.leerCSV(motorCSV.rutaDatos("proveedores.csv").toString());
+        List<String[]> entradas = motorCSV.leerCSV(motorCSV.rutaDatos(ArchivosCSV.ENTRADAS).toString());
+        List<String[]> proveedores = motorCSV.leerCSV(motorCSV.rutaDatos(ArchivosCSV.PROVEEDORES).toString());
         TableView<String[]> tabla = new TableView<>();
         configurarTablaAdmin(tabla);
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -601,9 +600,9 @@ public class AdminController {
                 crearContenidoInformeEntradas(tabla.getItems(), costoTotal, registros, unidades),
                 StandardCharsets.UTF_8
             );
-            mostrarAlerta("Informe exportado", "El informe se guardó correctamente en:\n" + ruta);
+            Navegador.avisar("Informe exportado", "El informe se guardó correctamente en:\n" + ruta);
         } catch (IOException e) {
-            mostrarAlerta("Error al exportar", "No se pudo guardar el informe: " + e.getMessage());
+            Navegador.avisar("Error al exportar", "No se pudo guardar el informe: " + e.getMessage());
         }
     }
 
@@ -614,7 +613,7 @@ public class AdminController {
             "ID ENTRADA", "PROVEEDOR", "ID PRODUCTO", "PRODUCTO",
             "FECHA", "UNIDADES", "PRECIO UNIT.", "TOTAL", "REGISTRADO POR"
         };
-        String borde = crearBordeTabla(anchos);
+        String borde = InformeTexto.borde(anchos);
         StringBuilder informe = new StringBuilder()
             .append("TECH-FLOW | INFORME DE ENTRADAS DE PRODUCTOS\n")
             .append("Fecha del informe: ").append(LocalDate.now()).append('\n')
@@ -626,10 +625,10 @@ public class AdminController {
             .append("    Costo acumulado: ")
             .append(String.format(Locale.ROOT, "$%.2f", costoTotal)).append("\n\n")
             .append(borde).append('\n')
-            .append(filaInforme(encabezados, anchos)).append('\n')
+            .append(InformeTexto.fila(encabezados, anchos)).append('\n')
             .append(borde).append('\n');
         for (String[] entrada : entradas) {
-            informe.append(filaInforme(entrada, anchos)).append('\n');
+            informe.append(InformeTexto.fila(entrada, anchos)).append('\n');
         }
         return informe.append(borde).append('\n').append("Fin del informe").toString();
     }
@@ -656,16 +655,16 @@ public class AdminController {
                 crearContenidoInforme(tabla.getItems(), totalDia, cantidadVentas),
                 StandardCharsets.UTF_8
             );
-            mostrarAlerta("Informe exportado", "El informe se guardó correctamente en:\n" + ruta);
+            Navegador.avisar("Informe exportado", "El informe se guardó correctamente en:\n" + ruta);
         } catch (IOException e) {
-            mostrarAlerta("Error al exportar", "No se pudo guardar el informe: " + e.getMessage());
+            Navegador.avisar("Error al exportar", "No se pudo guardar el informe: " + e.getMessage());
         }
     }
 
     private String crearContenidoInforme(List<String[]> ventas, double totalDia, int cantidadVentas) {
         int[] anchos = {14, 20, 26, 16, 8, 12};
         String[] encabezados = {"FOLIO", "CLIENTE", "PRODUCTO", "FECHA Y HORA", "UNIDADES", "TOTAL"};
-        String borde = crearBordeTabla(anchos);
+        String borde = InformeTexto.borde(anchos);
         StringBuilder informe = new StringBuilder();
         String titulo = "TECH-FLOW | INFORME DE VENTAS";
         informe.append(titulo).append('\n');
@@ -677,7 +676,7 @@ public class AdminController {
                 .append("    Total del día: ")
                 .append(String.format(Locale.ROOT, "$%.2f", totalDia)).append("\n\n");
         informe.append(borde).append('\n');
-        informe.append(filaInforme(encabezados, anchos)).append('\n');
+        informe.append(InformeTexto.fila(encabezados, anchos)).append('\n');
         informe.append(borde).append('\n');
         for (String[] venta : ventas) {
             String[] columnas = {
@@ -688,35 +687,11 @@ public class AdminController {
                 valorVenta(venta, 7),
                 formatearTotalVenta(valorVenta(venta, 9))
             };
-            informe.append(filaInforme(columnas, anchos)).append('\n');
+            informe.append(InformeTexto.fila(columnas, anchos)).append('\n');
         }
         informe.append(borde).append('\n');
         informe.append("Fin del informe");
         return informe.toString();
-    }
-
-    private String crearBordeTabla(int[] anchos) {
-        StringBuilder borde = new StringBuilder("+");
-        for (int ancho : anchos) {
-            borde.append("-".repeat(ancho + 2)).append('+');
-        }
-        return borde.toString();
-    }
-
-    private String filaInforme(String[] columnas, int[] anchos) {
-        StringBuilder fila = new StringBuilder("|");
-        for (int i = 0; i < anchos.length; i++) {
-            fila.append(' ').append(ajustarTexto(columnas[i], anchos[i])).append(" |");
-        }
-        return fila.toString();
-    }
-
-    private String ajustarTexto(String texto, int ancho) {
-        String limpio = texto.replace('\n', ' ').replace('\r', ' ').replace('|', '/').trim();
-        if (limpio.length() > ancho) {
-            return limpio.substring(0, ancho - 1) + "…";
-        }
-        return String.format("%-" + ancho + "s", limpio);
     }
 
     private String valorVenta(String[] fila, int indice) {
@@ -749,7 +724,7 @@ public class AdminController {
 
         VBox seccion = new VBox(15);
         seccion.setAlignment(Pos.TOP_LEFT);
-        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("empleado.csv").toString());
+        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos(ArchivosCSV.EMPLEADOS).toString());
 
         TableView<String[]> tabla = new TableView<>();
         configurarTablaAdmin(tabla);
@@ -864,24 +839,24 @@ public class AdminController {
         HBox botones = new HBox(10, botonGuardar, botonCancelar);
         botones.setAlignment(Pos.CENTER_RIGHT);
         formulario.getChildren().add(botones);
-        botonCancelar.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
+        botonCancelar.setOnAction(e -> Navegador.cerrarOverlay());
         botonGuardar.setOnAction(e -> {
             if (ci.getText().isBlank() || nombre.getText().isBlank()
                     || contrasena.getText().isBlank() || rol.getValue() == null) {
-                mostrarAlerta("Datos incompletos", "Completa todos los campos y selecciona un rol.");
+                Navegador.avisar("Datos incompletos", "Completa todos los campos y selecciona un rol.");
                 return;
             }
             Empleado nuevo = new Empleado(ci.getText().trim(), nombre.getText().trim(), contrasena.getText(), rol.getValue());
-            com.overbyte.Navegador.cerrarOverlay();
+            Navegador.cerrarOverlay();
             if (gestor.anadirEmpleado(nuevo)) {
                 mostrarEmpleados();
-                mostrarAlerta("Empleado añadido", "El empleado se registró correctamente.");
+                Navegador.avisar("Empleado añadido", "El empleado se registró correctamente.");
             } else {
-                mostrarAlerta("No se pudo añadir", "Verifica los datos y que el identificador no exista.");
+                Navegador.avisar("No se pudo añadir", "Verifica los datos y que el identificador no exista.");
             }
         });
-        com.overbyte.Navegador.mostrarOverlay(
-            com.overbyte.Navegador.tarjeta("Añadir empleado", "Completa los datos del nuevo usuario.", formulario));
+        Navegador.mostrarOverlay(
+            Navegador.tarjeta("Añadir empleado", "Completa los datos del nuevo usuario.", formulario));
     }
 
     private Label etiquetaCampo(String texto) {
@@ -895,13 +870,13 @@ public class AdminController {
         if (seleccionado == null || seleccionado.length == 0) {
             return;
         }
-        com.overbyte.Navegador.confirmar("Eliminar empleado",
+        Navegador.confirmar("Eliminar empleado",
             "¿Eliminar a " + seleccionado[1] + "? Se quitará el acceso de este empleado al sistema. Esta acción no se puede deshacer.",
             () -> {
                 if (gestor.eliminarEmpleado(seleccionado[0])) {
                     mostrarEmpleados();
                 } else {
-                    mostrarAlerta(
+                    Navegador.avisar(
                         "No se pudo eliminar",
                         "No se puede eliminar el último administrador o el registro cambió."
                     );
@@ -919,7 +894,7 @@ public class AdminController {
 
         VBox seccion = new VBox(15);
         seccion.setAlignment(Pos.TOP_LEFT);
-        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("inventario.csv").toString());
+        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos(ArchivosCSV.INVENTARIO).toString());
 
         TableView<String[]> tabla = new TableView<>();
         configurarTablaAdmin(tabla);
@@ -1057,13 +1032,13 @@ public class AdminController {
         HBox botonesP = new HBox(10, botonGuardar, botonCancelarP);
         botonesP.setAlignment(Pos.CENTER_RIGHT);
         formulario.getChildren().add(botonesP);
-        botonCancelarP.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
+        botonCancelarP.setOnAction(e -> Navegador.cerrarOverlay());
         botonGuardar.setOnAction(e -> {
             if (nombre.getText().isBlank() || marca.getText().isBlank()
                     || categoria.getValue() == null || descripcion.getText().isBlank()
                     || precioEntrada.getText().isBlank()
                     || precioVenta.getText().isBlank() || stock.getText().isBlank()) {
-                mostrarAlerta("Datos incompletos",
+                Navegador.avisar("Datos incompletos",
                         "Completa nombre, marca, categoría, descripción, precios y stock.");
                 return;
             }
@@ -1079,20 +1054,20 @@ public class AdminController {
                 producto = new Producto(id.getText().trim(), nombre.getText().trim(), compra, venta,
                     descripcion.getText().trim(), unidades, marca.getText().trim(), categoria.getValue().toString());
             } catch (NumberFormatException ex) {
-                mostrarAlerta("Datos inválidos",
+                Navegador.avisar("Datos inválidos",
                     "Los precios deben ser números válidos y el stock un entero igual o mayor que cero.");
                 return;
             }
-            com.overbyte.Navegador.cerrarOverlay();
+            Navegador.cerrarOverlay();
             if (gestor.anadirProducto(producto)) {
                 mostrarProductos();
-                mostrarAlerta("Producto añadido", "El producto se registró correctamente.");
+                Navegador.avisar("Producto añadido", "El producto se registró correctamente.");
             } else {
-                mostrarAlerta("No se pudo añadir", "Verifica los datos e inténtalo nuevamente.");
+                Navegador.avisar("No se pudo añadir", "Verifica los datos e inténtalo nuevamente.");
             }
         });
-        com.overbyte.Navegador.mostrarOverlay(
-            com.overbyte.Navegador.tarjeta("Añadir producto", "Completa los datos del nuevo producto.", formulario));
+        Navegador.mostrarOverlay(
+            Navegador.tarjeta("Añadir producto", "Completa los datos del nuevo producto.", formulario));
     }
 
     private VBox campoEnDialogo(String titulo, Region campo) {
@@ -1106,13 +1081,13 @@ public class AdminController {
         if (seleccionado == null || seleccionado.length == 0) {
             return;
         }
-        com.overbyte.Navegador.confirmar("Eliminar producto",
+        Navegador.confirmar("Eliminar producto",
             "¿Eliminar " + seleccionado[1] + "? Se quitará este producto del inventario. Esta acción no se puede deshacer.",
             () -> {
                 if (gestor.eliminarProducto(seleccionado[0])) {
                     mostrarProductos();
                 } else {
-                    mostrarAlerta("No se pudo eliminar", "El producto ya no existe en el inventario.");
+                    Navegador.avisar("No se pudo eliminar", "El producto ya no existe en el inventario.");
                 }
             });
     }
@@ -1127,7 +1102,7 @@ public class AdminController {
 
         VBox seccion = new VBox(15);
         seccion.setAlignment(Pos.TOP_LEFT);
-        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos("proveedores.csv").toString());
+        List<String[]> filas = motorCSV.leerCSV(motorCSV.rutaDatos(ArchivosCSV.PROVEEDORES).toString());
 
         TableView<String[]> tabla = new TableView<>();
         configurarTablaAdmin(tabla);
@@ -1221,10 +1196,10 @@ public class AdminController {
         HBox botonesPr = new HBox(10, botonGuardar, botonCancelarPr);
         botonesPr.setAlignment(Pos.CENTER_RIGHT);
         formulario.getChildren().add(botonesPr);
-        botonCancelarPr.setOnAction(e -> com.overbyte.Navegador.cerrarOverlay());
+        botonCancelarPr.setOnAction(e -> Navegador.cerrarOverlay());
         botonGuardar.setOnAction(e -> {
             if (nombre.getText().isBlank() || contacto.getText().isBlank()) {
-                mostrarAlerta("Datos incompletos", "Completa el nombre y teléfono.");
+                Navegador.avisar("Datos incompletos", "Completa el nombre y teléfono.");
                 return;
             }
             Proveedor proveedor;
@@ -1233,20 +1208,20 @@ public class AdminController {
                 if (telefono <= 0) throw new NumberFormatException();
                 proveedor = new Proveedor(nombre.getText().trim(), codigo.getText().trim(), telefono);
             } catch (NumberFormatException ex) {
-                mostrarAlerta("Teléfono inválido",
+                Navegador.avisar("Teléfono inválido",
                     "Ingresa un teléfono numérico positivo dentro del rango permitido.");
                 return;
             }
-            com.overbyte.Navegador.cerrarOverlay();
+            Navegador.cerrarOverlay();
             if (gestor.anadirProveedor(proveedor)) {
                 mostrarProveedores();
-                mostrarAlerta("Proveedor añadido", "El proveedor se registró correctamente.");
+                Navegador.avisar("Proveedor añadido", "El proveedor se registró correctamente.");
             } else {
-                mostrarAlerta("No se pudo añadir", "Verifica los datos e inténtalo nuevamente.");
+                Navegador.avisar("No se pudo añadir", "Verifica los datos e inténtalo nuevamente.");
             }
         });
-        com.overbyte.Navegador.mostrarOverlay(
-            com.overbyte.Navegador.tarjeta("Añadir proveedor", "Completa los datos del proveedor.", formulario));
+        Navegador.mostrarOverlay(
+            Navegador.tarjeta("Añadir proveedor", "Completa los datos del proveedor.", formulario));
     }
 
     private void eliminarProveedorSeleccionado(TableView<String[]> tabla) {
@@ -1254,13 +1229,13 @@ public class AdminController {
         if (seleccionado == null || seleccionado.length == 0) {
             return;
         }
-        com.overbyte.Navegador.confirmar("Eliminar proveedor",
+        Navegador.confirmar("Eliminar proveedor",
             "¿Eliminar a " + seleccionado[1] + "? Se quitará este proveedor del directorio. Esta acción no se puede deshacer.",
             () -> {
                 if (gestor.eliminarProveedor(seleccionado[0])) {
                     mostrarProveedores();
                 } else {
-                    mostrarAlerta("No se pudo eliminar", "El proveedor ya no existe en el directorio.");
+                    Navegador.avisar("No se pudo eliminar", "El proveedor ya no existe en el directorio.");
                 }
             });
     }
@@ -1269,7 +1244,7 @@ public class AdminController {
 
     @FXML
     private void cerrarSesion() {
-        com.overbyte.Navegador.irAlLogin();
+        Navegador.irAlLogin();
     }
 
     /* ===================== UTILIDADES ===================== */
@@ -1332,33 +1307,5 @@ public class AdminController {
         }
     }
 
-    private void configurarAnimacionNavegacion(Button boton) {
-        ScaleTransition escala = new ScaleTransition(Duration.millis(140), boton);
-        TranslateTransition desplazamiento =
-                new TranslateTransition(Duration.millis(140), boton);
-        boton.setOnMouseEntered(event -> {
-            escala.stop();
-            escala.setToX(1.015);
-            escala.setToY(1.015);
-            escala.playFromStart();
 
-            desplazamiento.stop();
-            desplazamiento.setToX(3);
-            desplazamiento.playFromStart();
-        });
-        boton.setOnMouseExited(event -> {
-            escala.stop();
-            escala.setToX(1);
-            escala.setToY(1);
-            escala.playFromStart();
-
-            desplazamiento.stop();
-            desplazamiento.setToX(0);
-            desplazamiento.playFromStart();
-        });
-    }
-
-    private void mostrarAlerta(String titulo, String mensaje) {
-        com.overbyte.Navegador.avisar(titulo, mensaje);
-    }
 }
