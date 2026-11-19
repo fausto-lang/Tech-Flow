@@ -1,0 +1,20 @@
+\chapter{Revisión y pruebas}
+
+\section{Pruebas existentes}
+Los 516 casos de JUnit 5 cubren: parseo y rutas de \texttt{MotorCSV} (incluidos comillas, delimitador propio, CRLF, Unicode y seguridad de rutas), integridad de los fixtures CSV de \texttt{src/test/resources/}, modelos (\texttt{Producto}, \texttt{Proveedor}, \texttt{Cliente}, \texttt{Inventario}), dominio (\texttt{Vendedor}, \texttt{Gestor}, \texttt{Almacen}) con directorio temporal, y la consola completa (\texttt{MainTest}, 108 casos). Los casos pendientes de implementar están inventariados en \texttt{src/test/java/TESTS\_PENDIENTES.md}.
+
+\section{Ejecución}
+\begin{techbox}
+\texttt{mvn clean test} $\rightarrow$ BUILD SUCCESS, 516/516 pruebas en verde (fallos: 0, errores: 0, omitidas: 0).
+\end{techbox}
+
+\section{Evidencia de smoke test de vistas}
+Las cuatro vistas FXML \texttt{login}, \texttt{admin}, \texttt{vendedor} y \texttt{almacen} se cargan sin errores en un cargador de humo JavaFX ejecutado sobre el classpath del proyecto, garantizando que la inyección de \texttt{fx:id} y la inicialización de cada controlador sobreviven a cada cambio.
+
+\section{Huecos conocidos}
+\begin{itemize}
+\item Sin pruebas tras probar la GUI: las vistas solo se validan por carga, no por interacción automatizada.
+\item Sin caja de datos sintéticos suficiente para validar el filtro de categoría sobre todas las combinaciones de acentos.
+\item Contraseñas en claro en \texttt{empleado.csv} (documentado en el informe de cambios).
+\item Caudal real de \texttt{ventas.csv} inferior a $10^2$ filas: cualquier problema de rendimiento a escala no se ha podido observar.
+\end{itemize}

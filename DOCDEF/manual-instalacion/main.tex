@@ -1,0 +1,64 @@
+\documentclass[12pt,a4paper]{report}
+\input{../estilo.tex}
+\begin{document}
+\TechCover{Manual de instalación}{Puesta en marcha de Tech-Flow en su equipo}{Manual de instalación}
+\tableofcontents\clearpage
+
+\section{Antes de comenzar}
+Este manual explica cómo dejar Tech-Flow funcionando en su equipo, desde la obtención del código hasta la primera ejecución verificada. Está escrito para equipos con Windows 10/11 y Linux; en Linux se han verificado escritorios sencillos y gestores de ventanas en mosaico (bspwm), donde la ventana única encaja naturalmente.
+
+\section{Requisitos técnicos}
+\begin{table}[H]\centering\caption{Requisitos verificados}\begin{tabular}{ll}\toprule
+Componente & Versión verificada\\\midrule
+Java JDK & 17 (zulu-jdk-fx o equivalente con JavaFX)\\
+Apache Maven & 3.x con acceso al repositorio central\\
+JavaFX & 17.0.2 (vía Maven Central)\\
+SO & Linux o Windows 10/11\\
+Espacio libre & ~500 MB (incluido el repositorio local de Maven, \texttt{\textasciitilde/.m2})\\\bottomrule\end{tabular}\end{table}
+
+Opcional: IntelliJ IDEA 2024+ o Eclipse 2023+ si prefiere un IDE con proyecto Maven importado. No se requiere base de datos ni servidor.
+
+\section{1. Obtener el proyecto}
+\begin{itemize}
+\item Con Git: \texttt{git clone https://github.com/fausto-lang/Tech-Flow.git} y \texttt{cd Tech-Flow}.
+\item Sin Git: descargue el ZIP del repositorio y extraiga el contenido en una carpeta sin espacios.
+\end{itemize}
+
+\section{2. Verificar Java y Maven}
+\texttt{java -version} debe reportar 17 o superior (build 17). \texttt{mvn -v} debe mostrar Apache Maven. Si \texttt{mvn -v} falla, instale Maven (Linux: \texttt{sudo apt install maven} o el gestor de su distribución; Windows: oriente \texttt{PATH} a \texttt{\%MAVEN\_HOME\%\textbackslash bin}).
+
+\section{3. Compilar y ejecutar pruebas}
+\begin{itemize}
+\item \texttt{mvn compile} — compila el proyecto completo.
+\item \texttt{mvn test} — ejecuta la suite JUnit 5 (516/516 en verde).
+\end{itemize}
+La primera descarga de dependencias tarda más; las siguientes usan la caché de \texttt{.m2}.
+
+\section{4. Ejecutar Tech-Flow}
+\begin{itemize}
+\item \texttt{mvn javafx:run} — arranca la ventana única en el \texttt{com.overbyte.Main} configurado en el \texttt{pom.xml}.
+\item En Linux el proyecto y la documentación vienen adaptados a bspwm; la ventana se abre con transiciones suaves sin diálogo flotante.
+\end{itemize}
+
+\section{5. Verificar la instalación}
+\begin{enumerate}
+\item Se abre una única ventana con la pantalla de inicio de sesión.
+\item Inicie sesión como administrador de demostración (\texttt{adm} / \texttt{user}).
+\item Abra la caja (panel administrativo). El icono de caja cambia a estado abierto.
+\item Vaya a Inventario y confirme que la tabla carga al menos una fila.
+\item Cierre sesión y vuelva a entrar como cajero demo o almacén demo si fue provisto con su instancia.
+\end{enumerate}
+
+\section{Errores frecuentes}
+\begin{itemize}
+\item \textbf{``java: command not found''}: JDK no instalado o \texttt{JAVA\_HOME} no orientado al 17.
+\item \textbf{``mvn: command not found''}: Maven no instalado o \texttt{PATH} incompleto.
+\item \textbf{``module not found: javafx''}: ejecute \texttt{mvn javafx:run} y no \texttt{java} a secas; el plugin monta el \texttt{--module-path} correcto.
+\item \textbf{``blanco/blanco'' y nada pasa al hacer clic en Entrar}: credenciales o rol incorrectos; el login exige los tres datos consistentes.
+\item \textbf{``Acceso restringido''}: caja cerrada; un administrador debe abrirla antes de vender.
+\end{itemize}
+
+\section{Desinstalación}
+Confirme que ningún proceso \texttt{java} de Tech-Flow está en ejecución, elimine la carpeta del proyecto y limpie \texttt{.m2/repository/org/openjfx} y las rutas de Maven si desea liberar la caché. Los datos en \texttt{data/} se borran junto con el proyecto; realice una copia si los necesita.
+
+\end{document}
