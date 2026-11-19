@@ -244,9 +244,9 @@ class MainTest {
     }
 
     @Test
-    @DisplayName("un nombre de empleado con numeros debe ser rechazado")
-    void nombreEmpleadoConNumerosEsRechazado() {
-        ejecutar("1\nadm\nuser\n5\nCI-TEST-001\nJuan123\nclave123\n1\n0\n0\n");
+    @DisplayName("un nombre de empleado solo con numeros debe ser rechazado")
+    void nombreEmpleadoSoloNumerosEsRechazado() {
+        ejecutar("1\nadm\nuser\n5\nCI-TEST-001\n123456\nclave123\n1\n0\n0\n");
         assertSalidaContiene("No se pudo completar la operacion.");
     }
 
@@ -397,9 +397,9 @@ class MainTest {
     }
 
     @Test
-    @DisplayName("un telefono con letras no confirma una venta")
-    void telefonoConLetras() {
-        ejecutar("2\nVentas Demo\nventas123\n1\nCliente\n1\nProd-01\n1\n2\nCI-EDGE\nabc1234567\n0\n0\n");
+    @DisplayName("un telefono sin digitos suficientes no confirma una venta")
+    void telefonoSinDigitosSuficientes() {
+        ejecutar("2\nVentas Demo\nventas123\n1\nCliente\n1\nProd-01\n1\n2\nCI-EDGE\nabc\n0\n0\n");
         assertSalidaContiene("CI y telefono son obligatorios");
     }
 
@@ -699,9 +699,9 @@ class MainTest {
     }
 
     @Test
-    @DisplayName("rechaza un nombre de proveedor con numeros")
-    void proveedorNombreConNumeros() {
-        ejecutar("1\nadm\nuser\n7\nPROV-EDGE\nProveedor123\n60000000\n0\n0\n");
+    @DisplayName("rechaza un nombre de proveedor solo con numeros")
+    void proveedorNombreSoloNumeros() {
+        ejecutar("1\nadm\nuser\n7\nPROV-EDGE\n123456\n60000000\n0\n0\n");
         assertSalidaContiene("No se pudo completar la operacion.");
     }
 
@@ -831,7 +831,7 @@ class MainTest {
     @DisplayName("una alta rechazada no modifica el archivo de empleados")
     void altaEmpleadoRechazadaNoPersiste() throws Exception {
         String antes = Files.readString(directorioDatos.resolve("empleado.csv"), StandardCharsets.UTF_8);
-        ejecutar("1\nadm\nuser\n5\nCI-NO-PERSISTE\nNombre123\nclave123\n1\n0\n0\n");
+        ejecutar("1\nadm\nuser\n5\nCI-NO-PERSISTE\n12345\nclave123\n1\n0\n0\n");
         String despues = Files.readString(directorioDatos.resolve("empleado.csv"), StandardCharsets.UTF_8);
         assertSalidaContiene("No se pudo completar la operacion.");
         assertEquals(antes, despues);

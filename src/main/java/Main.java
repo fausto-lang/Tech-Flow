@@ -3,6 +3,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 import models.Producto;
+import services.ValidadorDatos;
 import services.Verificador;
 import user.Almacen;
 import user.Empleado;
@@ -182,7 +183,7 @@ public class Main {
             System.out.println("El nombre del cliente no puede estar vacio.");
             return;
         }
-        if (!textoValido(cliente)) {
+        if (!ValidadorDatos.textoValido(cliente)) {
             System.out.println("El nombre del cliente es obligatorio.");
             return;
         }
@@ -201,7 +202,7 @@ public class Main {
                     } else {
                         String ciCliente = leerTexto(scanner, "CI o documento del cliente: ");
                         String telefonoCliente = leerTexto(scanner, "Telefono de contacto: ");
-                        if (!datosClienteValidos(ciCliente, telefonoCliente)) {
+                        if (!ValidadorDatos.ciValida(ciCliente) || !ValidadorDatos.telefonoValido(telefonoCliente)) {
                             System.out.println("CI y telefono son obligatorios; el telefono debe tener entre 7 y 15 digitos.");
                             continue;
                         }
@@ -344,14 +345,6 @@ public class Main {
         }
     }
 
-    private static boolean datosClienteValidos(String ci, String telefono) {
-        if (ci == null || ci.isBlank() || telefono == null
-                || telefono.isBlank() || ci.trim().length() < 1) {
-            return false;
-        }
-        long digitosTelefono = telefono.chars().filter(Character::isDigit).count();
-        return digitosTelefono == telefono.length() && digitosTelefono >= 7 && digitosTelefono <= 15;
-    }
 
     private static void altaEmpleado(Scanner scanner, Gestor gestor) {
         String ci = leerTexto(scanner, "CI: ");
@@ -364,7 +357,7 @@ public class Main {
             return;
         }
         boolean valido = ci.matches("[A-Za-z0-9-]{2,}")
-                && textoValido(nombre) && contrasena.length() >= 6;
+                && ValidadorDatos.textoValido(nombre) && contrasena.length() >= 6;
         informar(valido && gestor.anadirEmpleado(new Empleado(ci, nombre, contrasena, rol)));
     }
 
@@ -397,7 +390,7 @@ public class Main {
             informar(false);
             return;
         }
-        boolean valido = id.matches("[A-Za-z0-9-]{2,}") && textoValido(nombre)
+        boolean valido = id.matches("[A-Za-z0-9-]{2,}") && ValidadorDatos.textoValido(nombre)
                 && String.valueOf(contacto).length() >= 7 && String.valueOf(contacto).length() <= 15;
         informar(valido && gestor.anadirProveedor(new models.Proveedor(nombre, id, contacto)));
     }
@@ -424,8 +417,8 @@ public class Main {
         if (producto == null || producto.getIdProducto() == null
                 || producto.getIdProducto().length() < 2
                 || !producto.getIdProducto().matches("[A-Za-z0-9-]+")
-                || !textoValido(producto.getNombre())
-                || !textoValido(producto.getMarca()) || !textoValido(producto.getCategoria())
+                || !ValidadorDatos.textoValido(producto.getNombre())
+                || !ValidadorDatos.textoValido(producto.getMarca()) || !ValidadorDatos.textoValido(producto.getCategoria())
                 || producto.getDescripcion() == null || producto.getDescripcion().isBlank()
                 || producto.getStock() <= 0 || !Double.isFinite(producto.getPrecioEntrada())
                 || !Double.isFinite(producto.getPrecioVenta())
@@ -438,10 +431,6 @@ public class Main {
         return true;
     }
 
-    private static boolean textoValido(String texto) {
-        return texto != null && texto.matches(".*\\p{L}.*")
-                && texto.matches("[\\p{L} ]+");
-    }
 
     private static String leerTexto(Scanner scanner, String mensaje) {
         return leerTextoExacto(scanner, mensaje).trim();
