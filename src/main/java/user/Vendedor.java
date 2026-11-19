@@ -86,7 +86,7 @@ public class Vendedor extends Empleado {
         for (int i = 0; i < seleccion.size(); i++) {
             Producto producto = seleccion.get(i);
             int cantidad = productos.get(producto.getIdProducto());
-            double precio = ponerCosto(producto.getPrecioEntrada(), 5.0, producto.getPrecioEntrada() * 0.13);
+            double precio = producto.getPrecioVenta();
             double total = precio * cantidad;
                 String idVenta = generarIdVenta();
                 ventas.add(new String[]{idVenta, idOrden, "PROFORMA", ci, nombreCliente.trim(),
@@ -342,10 +342,6 @@ public class Vendedor extends Empleado {
 
     public double calcularCosto(double pCosto, double oCosto, double iva) {
         return pCosto + (oCosto * 0.20) + iva;
-    }
-
-    private double ponerCosto(double pCosto, double oCosto, double iva) {
-        return calcularCosto(pCosto, oCosto, iva);
     }
 
     /** Busca coincidencias parciales por ID, nombre o marca, indexadas por identificador. */

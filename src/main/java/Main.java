@@ -334,7 +334,7 @@ public class Main {
     }
 
     private static double precioUnitario(Vendedor vendedor, Producto producto) {
-        return vendedor.calcularCosto(producto.getPrecioEntrada(), 5.0, producto.getPrecioEntrada() * 0.13);
+        return producto.getPrecioVenta();
     }
 
     private static void consultarGarantia(Scanner scanner, Vendedor vendedor) {
