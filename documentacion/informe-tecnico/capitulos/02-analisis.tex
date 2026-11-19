@@ -1,0 +1,58 @@
+\chapter{Objetivos y requisitos}
+\section{Objetivo general}
+Desarrollar una aplicación de escritorio que apoye la gestión operativa de una tienda de electrónica mediante módulos diferenciados para administración, punto de venta y almacén, con autenticación por roles, persistencia en archivos CSV e interfaz gráfica JavaFX.
+
+\section{Objetivos específicos}
+\begin{enumerate}
+\item Implementar un acceso que valide el nombre, la contraseña y el rol del empleado registrado.
+\item Permitir al administrador abrir y cerrar la caja y supervisar las ventas confirmadas y las entradas registradas.
+\item Proporcionar funciones administrativas para consultar y mantener empleados, productos y proveedores.
+\item Facilitar la consulta del inventario y la identificación de productos con cinco unidades o menos.
+\item Permitir al cajero buscar productos, formar un carrito, generar proformas, confirmar ventas y consultar o anular operaciones.
+\item Registrar las existencias recibidas por el almacén, tanto manualmente como mediante archivos CSV con vista previa.
+\item Mantener los datos de ventas, clientes, garantías, inventario y movimientos mediante archivos CSV legibles y reutilizables.
+\item Proporcionar mensajes de validación, confirmación y error dentro de la interfaz para orientar al usuario durante las operaciones.
+\end{enumerate}
+
+\section{Alcance del sistema}
+El sistema cubre la autenticación de empleados, la gestión de caja, el catálogo e inventario, las entradas de productos, las ventas y proformas, las garantías, los clientes, los proveedores y los pedidos de proveedor. Incluye exportación de informes de ventas y entradas desde el panel administrativo. La solución no incluye una base de datos relacional, sincronización entre sucursales, un servicio web ni un mecanismo externo de copias de seguridad.
+
+\section{Usuarios y necesidades}
+\begin{table}[H]\centering\caption{Usuarios del sistema y necesidades principales}\begin{tabular}{p{.22\textwidth}p{.62\textwidth}}\toprule
+Usuario & Necesidades y responsabilidades\\\midrule
+Administrador & Controlar la caja, supervisar ventas y entradas, consultar inventario y administrar empleados, productos y proveedores.\\
+Cajero & Buscar productos, revisar existencias disponibles, preparar el carrito, registrar ventas o proformas y consultar garantías.\\
+Almacenero & Consultar el catálogo y las existencias, registrar productos nuevos y actualizar el stock mediante entradas manuales o importadas.\\\bottomrule
+\end{tabular}\end{table}
+
+\section{Requisitos funcionales}
+\begin{enumerate}
+\item \textbf{RF-01 Autenticación:} el sistema debe validar nombre, contraseña y rol contra \texttt{empleado.csv}, y abrir el panel correspondiente.
+\item \textbf{RF-02 Gestión de caja:} el administrador debe poder abrir o cerrar la caja y consultar su estado.
+\item \textbf{RF-03 Inventario:} el sistema debe mostrar identificador, nombre, marca, categoría, precios y existencias de los productos.
+\item \textbf{RF-04 Administración:} el administrador debe poder añadir y eliminar empleados, productos y proveedores, respetando las validaciones del dominio.
+\item \textbf{RF-05 Supervisión:} el administrador debe consultar las ventas confirmadas del día, las entradas recibidas y exportar informes de ventas o entradas.
+\item \textbf{RF-06 Venta:} el cajero debe buscar por código, nombre o marca, indicar cantidades válidas y añadir productos al carrito sin superar el stock.
+\item \textbf{RF-07 Confirmación:} el cajero debe registrar una venta confirmada o guardar una proforma; al confirmar, el sistema descuenta existencias y genera garantías.
+\item \textbf{RF-08 Operaciones posteriores:} el cajero debe poder vaciar el carrito, anular una operación, consultar una garantía e importar órdenes CSV.
+\item \textbf{RF-09 Almacén:} el almacenero debe registrar productos nuevos y aumentar existencias de productos existentes, dejando constancia en \texttt{entradas.csv}.
+\item \textbf{RF-10 Importación:} el sistema debe mostrar una vista previa de entradas u órdenes CSV antes de confirmar una importación.
+\end{enumerate}
+
+\section{Requisitos no funcionales}
+\begin{itemize}
+\item \textbf{RNF-01 Plataforma:} aplicación de escritorio ejecutable con Java 17, JavaFX 17.0.2 y Maven.
+\item \textbf{RNF-02 Usabilidad:} las vistas se organizan por rol y los avisos, formularios y confirmaciones aparecen dentro de la ventana principal.
+\item \textbf{RNF-03 Persistencia:} los datos se almacenan en UTF-8 mediante archivos CSV con encabezados y campos entrecomillados cuando es necesario.
+\item \textbf{RNF-04 Integridad:} las operaciones validan campos obligatorios, cantidades, precios, stock y duplicidad de identificadores antes de persistir cambios.
+\item \textbf{RNF-05 Mantenibilidad:} el proyecto separa vistas FXML, controladores, modelos de dominio y servicios de lectura y escritura CSV.
+\item \textbf{RNF-06 Verificabilidad:} el repositorio incluye pruebas JUnit 5 para servicios, modelos y operaciones principales, además de casos pendientes documentados.
+\end{itemize}
+
+\section{Tecnologías y organización}
+\begin{table}[H]\centering\caption{Tecnologías verificadas}\begin{tabular}{ll}\toprule Tecnología & Evidencia\\\midrule
+Java 17 & \texttt{maven.compiler.source/target}\\
+JavaFX 17.0.2 & \texttt{javafx-controls}, \texttt{javafx-fxml}\\
+Maven & \texttt{javafx-maven-plugin}\\
+JUnit 5.10.0 & \texttt{junit-jupiter}\\
+CSV & \texttt{MotorCSV} y \texttt{data/}\\\bottomrule\end{tabular}\end{table}

@@ -1,0 +1,10 @@
+\chapter{Revisión y pruebas}
+\section{Pruebas existentes}
+\texttt{src/test/java} contiene pruebas JUnit 5 de MotorCSV, Vendedor, Gestor, Almacen, Verificador, modelos, roles y configuración. \texttt{TESTS\_PENDIENTES.md} describe cobertura amplia para la mayoría de clases, cobertura parcial de Verificador e Inventario y cuatro fallos preexistentes en MainTest.
+\section{Ejecución}
+\begin{lstlisting}[language=bash]
+mvn test
+\end{lstlisting}
+Los reportes se ubican en \texttt{target/surefire-reports}. Este documento no atribuye resultados no ejecutados durante esta generación.
+\begin{table}[H]\centering\caption{Casos observables}\begin{tabular}{p{.3\textwidth}p{.5\textwidth}}\toprule Caso & Resultado\\\midrule
+Login sin rol & Solicita seleccionar rol.\\Venta con cantidad cero & Solicita una cantidad mayor que cero.\\Stock insuficiente & Muestra aviso y no agrega la cantidad.\\Importación vacía & Informa que no hay datos.\\Entrada válida & Actualiza existencias.\\\bottomrule\end{tabular}\end{table}

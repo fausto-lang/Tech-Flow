@@ -1,0 +1,16 @@
+\chapter{Interfaz y flujos}
+\section{Acceso}
+\texttt{LoginController} exige nombre, rol y contraseña. \texttt{Verificador} valida la sesión y \texttt{Navegador} carga \texttt{admin.fxml}, \texttt{vendedor.fxml} o \texttt{almacen.fxml}.
+\TechFigure{../capturas/01-login.png}{7.3cm}{Interfaz real de inicio de sesión con selección de rol.}{fig:informe-login}
+\textbf{Lectura de la figura.} La pantalla presenta los campos de usuario y contraseña, los tres roles disponibles y el botón principal de acceso. Esta composición coincide con el flujo validado por \texttt{LoginController}.
+\begin{figure}[H]\centering\begin{tikzpicture}[node distance=8mm,box/.style={draw,rounded corners,align=center,minimum width=3cm,minimum height=.7cm},arr/.style={-Latex}]
+\node[box](a){Login};\node[box,right=of a](b){Rol};\node[box,right=of b](c){Credenciales};\node[box,below=of c](d){Panel};\node[box,left=of d](e){Operación};\draw[arr](a)--(b)--(c)--(d)--(e);\draw[arr](e)--++(0,-.7)--++(-5.4,0)|-(a);\end{tikzpicture}\caption{Flujo general de acceso.}\end{figure}
+\section{Paneles}
+El administrador navega por Caja, Inventario, Ventas, Entradas, Empleados, Productos y Proveedores. El vendedor usa Nueva venta y Carrito, y dispone de proformas, garantías, importación de órdenes y anulaciones. El almacenero consulta inventario, registra productos y registra o importa entradas.
+\TechFigure{../capturas/02-admin-caja.png}{7.0cm}{Overlay de gestión de caja en el panel administrativo.}{fig:informe-caja}
+\TechFigure{../capturas/03-admin-ventas.png}{7.0cm}{Panel administrativo de ventas con exportación de informe.}{fig:informe-admin-ventas}
+\TechFigure{../capturas/04-cajero-carrito.png}{7.0cm}{Carrito de venta del punto de venta.}{fig:informe-carrito}
+\TechFigure{../capturas/05-almacen-inventario.png}{7.0cm}{Inventario visualizado desde el panel de almacén.}{fig:informe-inventario}
+\TechFigure{../capturas/06-almacen-entradas.png}{7.0cm}{Registro de entradas y stock con búsqueda de productos.}{fig:informe-entradas}
+\section{Validaciones}
+Se validan campos vacíos, cantidades no positivas, stock insuficiente, carritos vacíos, números inválidos y archivos sin datos. Los avisos se muestran como mensajes o overlays.

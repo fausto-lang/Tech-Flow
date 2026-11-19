@@ -1,0 +1,85 @@
+\documentclass[12pt,a4paper]{article}
+\input{../estilo.tex}
+\begin{document}
+\TechCover{Manual de usuario}{Guía operativa para administración, ventas y almacén}{Manual de usuario}
+\tableofcontents\listoffigures\newpage
+
+\section{Conozca Tech-Flow}
+Tech-Flow es un sistema de escritorio para apoyar la gestión de una tienda de electrónica. Administra empleados, caja, productos, proveedores, clientes, inventario, entradas, ventas y garantías mediante archivos CSV.
+
+La aplicación se organiza en tres experiencias. El administrador supervisa la operación y mantiene los registros principales; el cajero prepara y confirma ventas desde el punto de venta; y el almacenero consulta y actualiza las existencias. Una entrada incrementa el stock de un producto y una venta confirmada descuenta las unidades correspondientes. Cada rol ve únicamente las pantallas relacionadas con su trabajo después de autenticarse.
+
+\begin{techbox}\textbf{Módulos principales.} Administración reúne Caja, Inventario, Ventas, Entradas, Empleados, Productos y Proveedores. Punto de venta reúne Nueva venta y Carrito. Almacén reúne Inventario y las acciones Registrar producto y Entradas y stock.\end{techbox}
+
+\section{Inicio de sesión}
+\TechFigure{../capturas/01-login.png}{8.2cm}{Pantalla de inicio de sesión, selección de rol y cambio de tema.}{fig:usuario-login}
+Esta interfaz identifica al empleado antes de permitir el acceso a las operaciones. Contiene el campo \textbf{Nombre de usuario}, los botones \textbf{Administrador}, \textbf{Cajero} y \textbf{Almacén}, el campo \textbf{Contraseña} y el botón \textbf{INICIAR SESIÓN}. El botón de tema alterna el aspecto claro y oscuro durante la sesión.
+\begin{enumerate}
+\item Escriba el nombre tal como aparece en \texttt{data/empleado.csv}.
+\item Seleccione el rol que corresponde al empleado.
+\item Escriba la contraseña.
+\item Pulse \textbf{INICIAR SESIÓN}.
+\end{enumerate}
+El sistema compara nombre, contraseña y rol con el registro persistente. Si coinciden, abre el panel del rol seleccionado; si no, muestra un mensaje y conserva la pantalla de acceso. Seleccionar un rol no concede permisos adicionales: debe coincidir con el rol almacenado.
+\begin{warningbox}\textbf{Si falla.} Revise que nombre, rol y contraseña estén completos y sean correctos.\end{warningbox}
+
+\section{Rol Administrador}
+\subsection{Gestión de caja}
+\TechFigure{../capturas/02-admin-caja.png}{8.2cm}{Gestión de caja al entrar al panel de administrador.}{fig:usuario-caja}
+\textbf{Propósito.} Establecer si el punto de venta puede confirmar operaciones. Al entrar al panel puede aparecer el overlay \textbf{Gestión de caja}, que informa si la caja está abierta o cerrada. Pulse \textbf{Abrir caja} para habilitar las ventas o \textbf{Cerrar caja} al finalizar la jornada. \textbf{Ahora no} o \textbf{Volver al panel} cierra el aviso sin cambiar el estado.
+
+\subsection{Ventas y reportes}
+\TechFigure{../capturas/03-admin-ventas.png}{8.2cm}{Panel de ventas del administrador y acción de exportación.}{fig:usuario-admin-ventas}
+\textbf{Propósito.} Supervisar las operaciones y mantener los registros de la tienda. La barra lateral permite abrir Caja, Inventario, Ventas, Entradas, Empleados, Productos y Proveedores.
+\begin{itemize}
+\item \textbf{Inventario} muestra el catálogo y separa el inventario completo de los productos con cinco unidades o menos.
+\item \textbf{Ventas} muestra las ventas confirmadas del día, su cliente, producto, unidades, fecha y total; \textbf{Exportar informe} guarda un TXT.
+\item \textbf{Entradas} muestra recepciones, proveedor, producto, fecha, unidades y costo acumulado; también permite exportar un TXT.
+\item \textbf{Empleados}, \textbf{Productos} y \textbf{Proveedores} permiten añadir registros mediante formularios o eliminar el registro seleccionado después de confirmar.
+\end{itemize}
+
+\section{Rol Cajero}
+\subsection{Carrito y venta}
+\TechFigure{../capturas/04-cajero-carrito.png}{8.2cm}{Carrito de venta con producto seleccionado.}{fig:usuario-carrito}
+\textbf{Propósito.} Registrar una venta desde el módulo \textbf{Punto de venta}. En \textbf{Nueva venta}, escriba un código, nombre o marca y pulse \textbf{BUSCAR}. La lista muestra ID, nombre, marca, disponibilidad y precio. Indique una cantidad positiva y pulse \textbf{+}; el sistema evita agregar más unidades que las disponibles.
+
+Abra \textbf{Carrito} para revisar las líneas, retirar productos con \textbf{Quitar}, escribir el nombre obligatorio del cliente y comprobar el total. \textbf{VACIAR CARRITO} elimina la selección.
+\begin{enumerate}
+\item Pulse \textbf{CONFIRMAR VENTA}.
+\item El sistema valida que la caja esté abierta, que el carrito no esté vacío y que exista stock.
+\item Si la operación es correcta, descuenta existencias, registra la venta y muestra un resumen con el identificador de orden y el total.
+\item En el resumen puede pulsar \textbf{GUARDAR .TXT} o \textbf{Cerrar}.
+\end{enumerate}
+\textbf{HACER PROFORMA} guarda una cotización en TXT sin confirmar la venta. \textbf{Anular compra o proforma} permite anular una operación identificada por su venta u orden, y \textbf{Consultar garantía} busca por código de garantía, venta u orden.
+\begin{warningbox}\textbf{Si falla.} Una cantidad mayor al stock disponible no se agrega; reduzca la cantidad o solicite una entrada al almacén.\end{warningbox}
+
+\subsection{Importar una orden}
+Desde \textbf{Importar orden CSV}, seleccione un archivo con columnas de cliente, producto y cantidad. El sistema valida las filas y crea las órdenes correspondientes si los productos existen y tienen unidades suficientes. Un archivo vacío, una cantidad no positiva o un producto inexistente detienen la operación.
+
+\section{Rol Almacén}
+\subsection{Consultar inventario}
+\TechFigure{../capturas/05-almacen-inventario.png}{8.2cm}{Inventario del panel de almacén.}{fig:usuario-inventario}
+\textbf{Propósito.} Consultar los productos que administra el almacén. La tabla muestra ID, producto, marca, categoría, precio de compra, precio de venta y existencias. Los valores de stock de cinco unidades o menos aparecen destacados como existencias bajas.
+
+\subsection{Registrar entradas}
+\TechFigure{../capturas/06-almacen-entradas.png}{8.2cm}{Búsqueda y registro de entradas y stock.}{fig:usuario-entradas}
+\textbf{Propósito.} Incrementar el stock y dejar registro de la recepción. Pulse \textbf{ENTRADAS Y STOCK}; busque por ID, nombre, marca, categoría o descripción. En \textbf{PRODUCTOS DISPONIBLES}, indique una cantidad mayor que cero y pulse \textbf{+}. Revise las líneas en \textbf{ENTRADAS SELECCIONADAS} y pulse \textbf{REGISTRAR ENTRADAS}. El sistema actualiza el inventario y registra cada movimiento en \texttt{entradas.csv}.
+
+Para una recepción externa, pulse \textbf{IMPORTAR ENTRADAS CSV}, seleccione el archivo, revise la vista previa de filas válidas e inválidas y confirme solamente si los datos son correctos. La importación requiere proveedor, producto y cantidad válidos; para productos nuevos también necesita nombre, marca y categoría.
+
+\subsection{Registrar producto}
+Pulse \textbf{REGISTRAR PRODUCTO}. El formulario muestra un identificador generado automáticamente y solicita nombre, marca, categoría, descripción opcional, precio de compra, precio de venta y stock inicial. Pulse \textbf{Guardar producto}; si los datos son válidos, el producto se incorpora al inventario y la entrada inicial queda registrada.
+
+\section{Mensajes y solución de problemas}
+\begin{itemize}
+\item ``Nombre, contraseña o rol incorrectos'': revise las credenciales y el rol seleccionado.
+\item ``La cantidad debe ser mayor a cero'': use un entero positivo.
+\item ``Stock insuficiente'': reduzca la cantidad o registre entradas desde almacén.
+\item ``La caja está cerrada'': solicite al administrador que la abra.
+\item ``Archivo vacío'': seleccione un CSV con encabezado y filas de datos.
+\item ``Datos incompletos'' o ``inválidos'': complete los campos y revise números, proveedores y cantidades.
+\end{itemize}
+
+\section{Cerrar sesión y recomendaciones}
+Pulse \textbf{Cerrar sesión} para volver al inicio de sesión dentro de la misma ventana. Realice copias de seguridad de \texttt{data/}, revise los mensajes antes de repetir una operación y no cierre el programa durante una escritura.
+\end{document}

@@ -1,0 +1,47 @@
+\documentclass[12pt,a4paper]{article}
+\input{../estilo.tex}
+\begin{document}
+\TechCover{MANUAL DE INSTALACIÓN DEMO}{Preparación, compilación y ejecución}{MANUAL DE INSTALACIÓN DEMO}
+\tableofcontents\newpage
+\section{Antes de comenzar}
+Este manual permite preparar Tech-Flow desde una copia limpia del proyecto. Los comandos se han contrastado con el \texttt{pom.xml}, que declara Java 17, JavaFX 17.0.2, JUnit 5.10.0 y el plugin de ejecución JavaFX.
+\begin{techbox}\textbf{Ruta de trabajo.} Todos los comandos deben ejecutarse desde la carpeta raíz que contiene \texttt{pom.xml}, \texttt{src} y \texttt{data}.\end{techbox}
+\section{Requisitos técnicos}
+\begin{table}[H]\centering\caption{Requisitos comprobados}\begin{tabular}{p{.3\textwidth}p{.55\textwidth}}\toprule Componente & Requisito\\\midrule
+Sistema operativo & Windows, macOS o Linux con JDK compatible\\
+Java & JDK 17\\Maven & Apache Maven 3.8 o superior recomendado\\
+Dependencias & Internet durante la primera compilación\\
+Espacio & Aproximadamente 1 GB libre\\\bottomrule\end{tabular}\end{table}
+\section{1. Obtener el proyecto}
+Copie o clone la carpeta \texttt{Tech-Flow}. En Windows PowerShell:
+\begin{lstlisting}
+cd C:\ruta\hasta\trabajo\Tech-Flow
+\end{lstlisting}
+Confirme que existen \texttt{pom.xml}, \texttt{src} y \texttt{data}.
+\section{2. Verificar Java y Maven}
+\begin{lstlisting}
+java -version
+mvn -version
+\end{lstlisting}
+Java debe indicar versión 17. Si Maven no encuentra Java, configure \texttt{JAVA\_HOME} al directorio del JDK.
+\section{3. Compilar y ejecutar pruebas}
+\begin{lstlisting}
+mvn clean test
+\end{lstlisting}
+Los reportes JUnit aparecen en \texttt{target/surefire-reports}.
+\begin{warningbox}\textbf{Importante.} No borre ni sustituya los CSV de \texttt{data/} sin realizar una copia de seguridad.\end{warningbox}
+\section{4. Ejecutar Tech-Flow}
+\begin{lstlisting}
+mvn javafx:run
+\end{lstlisting}
+El plugin utiliza \texttt{com.overbyte.Main}. La ejecución desde la raíz permite localizar los recursos FXML y los datos.
+\section{5. Verificar la instalación}
+Debe aparecer la pantalla de inicio de sesión. Compruebe que los botones de rol y el campo de contraseña responden. Las credenciales deben corresponder a los registros disponibles en \texttt{data/empleado.csv}.
+\TechFigure{../capturas/01-login.png}{7.3cm}{Pantalla que confirma que la aplicación JavaFX inició correctamente.}{fig:instalacion-login}
+\section{Errores frecuentes}
+\begin{description}\item[Java o Maven no encontrados] Instale un JDK 17 y Maven y añada sus ejecutables al PATH.\item[Dependencias fallan] Repita la compilación con Internet disponible.\item[No aparecen datos] Ejecute desde la raíz y confirme \texttt{data/}.\item[JavaFX no inicia] Use \texttt{mvn javafx:run}, no un classpath manual.\end{description}
+\section{Desinstalación}
+Cierre la aplicación y elimine la carpeta del proyecto. La caché local de Maven es opcional: borrarla puede afectar a otros proyectos.
+\section{Evidencias no proporcionadas}
+Se dispone de una captura real del inicio de la aplicación, incluida en la sección \ref{fig:instalacion-login}. No se proporcionaron capturas de la instalación de Java, la terminal con \texttt{mvn clean test} ni la ejecución de \texttt{mvn javafx:run}; esas evidencias deben capturarse en el entorno de instalación utilizado si la universidad las exige.
+\end{document}

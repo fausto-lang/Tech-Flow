@@ -1,0 +1,65 @@
+\chapter{Diseño del sistema}
+\section{Diseño general}
+Tech-Flow se diseñó como una aplicación de escritorio con una única ventana y cuatro vistas principales: inicio de sesión, panel administrativo, punto de venta y panel de almacén. El acceso determina qué vista se carga y qué operaciones quedan disponibles en la navegación. La clase \texttt{Navegador} intercambia las vistas dentro de la misma escena y ofrece overlays para formularios, avisos y confirmaciones.
+
+\section{Arquitectura y organización de módulos}
+La solución sigue una organización próxima al patrón Modelo--Vista--Controlador:
+\begin{itemize}
+\item \textbf{Vista:} archivos \texttt{login.fxml}, \texttt{admin.fxml}, \texttt{vendedor.fxml} y \texttt{almacen.fxml}, junto con \texttt{estilos.css}.
+\item \textbf{Controladores:} \texttt{LoginController}, \texttt{AdminController}, \texttt{VendedorController} y \texttt{AlmacenController}; reciben eventos de la interfaz y coordinan las operaciones.
+\item \textbf{Modelo:} \texttt{Producto}, \texttt{Inventario}, \texttt{Cliente}, \texttt{Proveedor}, \texttt{Empleado} y sus especializaciones \texttt{Gestor}, \texttt{Vendedor} y \texttt{Almacen}.
+\item \textbf{Servicios:} \texttt{MotorCSV} concentra lectura, escritura, importación y exportación; \texttt{Verificador} autentica a los empleados.
+\item \textbf{Navegación:} \texttt{com.overbyte.Main} inicia JavaFX y \texttt{Navegador} administra la ventana, las transiciones y los overlays.
+\end{itemize}
+
+\begin{lstlisting}
+Vista FXML -> Controlador JavaFX -> Modelo/servicio -> Archivos CSV
+       ^              |                  |
+       |              v                  v
+       +------ resultados y mensajes ---+
+\end{lstlisting}
+
+\section{Diseño de interfaces}
+Todas las vistas comparten una barra lateral, un encabezado y un área de contenido. El administrador dispone de Caja, Inventario, Ventas, Entradas, Empleados, Productos y Proveedores. El cajero dispone de Nueva venta y Carrito. El almacenero dispone de Inventario, con acciones para Registrar producto y Entradas y stock. Los formularios no abren ventanas externas: se presentan como overlays sobre la escena principal.
+
+\section{Diseño de los procesos principales}
+\subsection{Autenticación}
+El usuario introduce nombre y contraseña y selecciona uno de los tres roles. \texttt{Verificador} consulta \texttt{empleado.csv}; si las credenciales y el rol coinciden, crea la especialización de empleado correspondiente. \texttt{LoginController} carga entonces el FXML del panel autorizado.
+
+\subsection{Venta}
+El cajero busca productos por identificador, nombre o marca. Cada línea del carrito se mantiene en un \texttt{LinkedHashMap} con el identificador como clave y la cantidad como valor. Al confirmar, \texttt{Vendedor} genera una proforma, valida caja y existencias, descuenta el stock, actualiza la venta como confirmada, registra el cliente y genera las garantías asociadas. La interfaz muestra el resumen y permite guardarlo como TXT.
+
+\subsection{Entradas e inventario}
+El almacenero puede crear un producto con identificador generado o seleccionar un producto existente para aumentar sus existencias. Cada recepción se registra en \texttt{entradas.csv}. En la importación, el archivo se valida, se muestra una vista previa y solamente después de la confirmación se actualizan inventario y entradas.
+
+\subsection{Supervisión administrativa}
+El administrador consulta el estado de la caja, las ventas confirmadas del día, el historial de entradas y el inventario completo o crítico. También puede mantener empleados, productos y proveedores, y exportar informes de ventas y entradas a archivos de texto.
+
+\section{Diseño de persistencia y entidades}
+No se utiliza una base de datos relacional. \texttt{MotorCSV} trabaja con archivos UTF-8 y encabezados que representan las entidades y operaciones del sistema:
+\begin{longtable}{p{.25\textwidth}p{.62\textwidth}}\toprule Archivo & Información persistida\\\midrule
+\endhead
+\texttt{empleado.csv} & Identificador, nombre, rol y contraseña del empleado.\\
+\texttt{inventario.csv} & Producto, marca, categoría, descripción, precios y stock.\\
+\texttt{ventas.csv} & Líneas de venta, orden, estado, cliente, cantidades, totales y garantía.\\
+\texttt{clientes.csv} & Identificador y datos del comprador.\\
+\texttt{garantias.csv} & Venta, producto, fechas, cliente y estado de garantía.\\
+\texttt{entradas.csv} & Recepciones, proveedor, producto, cantidad, precio y empleado.\\
+\texttt{proveedores.csv} & Identificador, nombre y contacto del proveedor.\\
+\texttt{pedidos.csv} & Pedidos de proveedor, productos, cantidades y empleado.\\
+\texttt{caja.csv} & Estado de caja, fechas y empleado responsable.\\\bottomrule
+\end{longtable}
+
+Las relaciones se expresan mediante identificadores: una venta referencia una orden, un producto y, cuando se confirma, un cliente y una garantía; una entrada referencia un proveedor y un producto; los registros de caja, ventas y entradas conservan el identificador del empleado que realizó la operación.
+
+\section{Estructuras de datos y complejidad}
+\begin{longtable}{p{.25\textwidth}p{.62\textwidth}}\toprule Estructura & Uso real\\\midrule
+\endhead
+\texttt{List} & Filas CSV, productos, resultados y líneas de operación.\\
+\texttt{Map<String, Integer>} & Carrito de ventas y entradas seleccionadas; se usa \texttt{LinkedHashMap} para conservar el orden.\\
+\texttt{TableView} & Tablas administrativas de inventario, ventas, entradas, empleados, productos y proveedores.\\
+\texttt{VBox/GridPane} & Filas y secciones dinámicas de los paneles de venta y almacén.\\
+\texttt{enum Rol} & \texttt{ADMINISTRADOR}, \texttt{CAJERO} y \texttt{ALMACENERO}.\\\bottomrule
+\end{longtable}
+
+En los mapas, la búsqueda y actualización de una clave tienen coste promedio $O(1)$. Las búsquedas sobre archivos CSV e inventario recorren listas y tienen coste $O(n)$; la memoria utilizada crece con el número de registros cargados, aproximadamente $O(n)$.

@@ -1,0 +1,6 @@
+\chapter{Patrón MVC}
+El modelo comprende \texttt{models.*}, \texttt{user.*} y servicios. Las vistas son los cuatro FXML. Los controladores son \texttt{LoginController}, \texttt{AdminController}, \texttt{VendedorController} y \texttt{AlmacenController}.
+\begin{figure}[H]\centering\begin{tikzpicture}[node distance=12mm,box/.style={draw,rounded corners,align=center,minimum width=3.8cm,minimum height=.9cm},arr/.style={-Latex}]
+\node[box,fill=blue!8](v){Vistas FXML};\node[box,fill=green!8,right=of v](c){Controladores JavaFX};\node[box,fill=orange!12,right=of c](m){Modelos y servicios};\draw[arr](v)--node[above]{eventos}(c); \draw[arr](c)--node[above]{operaciones}(m); \draw[arr](m)--node[below]{resultados}(c); \draw[arr](c)--node[below]{actualización}(v);\end{tikzpicture}\caption{Arquitectura MVC comprobada.}\end{figure}
+\section{Flujo y valoración}
+FXML enlaza eventos \texttt{@FXML}; el controlador llama al dominio y actualiza la vista. \texttt{Navegador} coordina el cambio de pantalla y overlays. La separación facilita el mantenimiento, aunque los controladores también construyen componentes y validan datos; esta es una recomendación futura, no un cambio realizado.
