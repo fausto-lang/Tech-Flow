@@ -12,7 +12,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import models.Categoria;
 import models.Producto;
 import user.Empleado;
 import user.Almacen;
@@ -211,11 +210,7 @@ public class AlmacenController {
         nombre.setPromptText("Nombre del producto");
         TextField marca = new TextField();
         marca.setPromptText("Marca");
-        ComboBox<Categoria> categoria = new ComboBox<>();
-        categoria.getItems().setAll(Categoria.values());
-        categoria.setPromptText("Selecciona una categoría");
-        categoria.getStyleClass().add("campo");
-        categoria.setMaxWidth(Double.MAX_VALUE);
+        ComboBox<String> categoria = FiltrosCategoria.crearAlta();
         TextField descripcion = new TextField();
         descripcion.setPromptText("Descripción obligatoria");
         TextField precioEntrada = new TextField();
@@ -249,7 +244,7 @@ public class AlmacenController {
         botonCancelarA.setOnAction(e -> Navegador.cerrarOverlay());
         botonGuardar.setOnAction(e -> {
             if (nombre.getText().isBlank() || marca.getText().isBlank()
-                    || categoria.getValue() == null || descripcion.getText().isBlank()
+                    || categoria.getValue() == null || categoria.getValue().trim().isBlank() || descripcion.getText().isBlank()
                     || precioEntrada.getText().isBlank()
                     || precioVenta.getText().isBlank() || stock.getText().isBlank()) {
                 Navegador.avisar("Datos incompletos",
@@ -266,7 +261,7 @@ public class AlmacenController {
                     throw new NumberFormatException();
                 }
                 producto = new Producto(id.getText().trim(), nombre.getText().trim(), compra, venta,
-                    descripcion.getText().trim(), unidades, marca.getText().trim(), categoria.getValue().toString());
+                    descripcion.getText().trim(), unidades, marca.getText().trim(), categoria.getValue().trim());
             } catch (NumberFormatException ex) {
                 Navegador.avisar("Datos inválidos",
                         "Los precios deben ser números válidos y el stock un entero igual o mayor que cero.");
