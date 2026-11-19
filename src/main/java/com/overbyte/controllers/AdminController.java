@@ -11,7 +11,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import user.Empleado;
@@ -21,9 +20,6 @@ import models.Producto;
 import models.Proveedor;
 import services.MotorCSV;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -578,30 +574,16 @@ public class AdminController {
 
     private void exportarInformeEntradas(
             TableView<String[]> tabla, double costoTotal, int registros, int unidades) {
-        FileChooser selector = new FileChooser();
-        selector.setTitle("Guardar informe de entradas");
-        selector.setInitialFileName("informe-entradas-" + LocalDate.now() + ".txt");
-        selector.getExtensionFilters().add(
-            new FileChooser.ExtensionFilter("Informe de texto (*.txt)", "*.txt")
-        );
-        java.io.File archivo = selector.showSaveDialog(contenidoCentro.getScene().getWindow());
-        if (archivo == null) {
+        Path ruta = AyudasArchivo.elegirRutaTxt(contenidoCentro.getScene().getWindow(),
+            "Guardar informe de entradas", "informe-entradas-" + LocalDate.now() + ".txt");
+        if (ruta == null) {
             return;
         }
-
-        try {
-            Path ruta = archivo.toPath();
-            if (!ruta.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".txt")) {
-                ruta = ruta.resolveSibling(ruta.getFileName() + ".txt");
-            }
-            Files.writeString(
-                ruta,
-                crearContenidoInformeEntradas(tabla.getItems(), costoTotal, registros, unidades),
-                StandardCharsets.UTF_8
-            );
+        if (AyudasArchivo.escribirTxt(ruta,
+                crearContenidoInformeEntradas(tabla.getItems(), costoTotal, registros, unidades))) {
             Navegador.avisar("Informe exportado", "El informe se guardó correctamente en:\n" + ruta);
-        } catch (IOException e) {
-            Navegador.avisar("Error al exportar", "No se pudo guardar el informe: " + e.getMessage());
+        } else {
+            Navegador.avisar("Error al exportar", "No se pudo guardar el informe.");
         }
     }
 
@@ -633,30 +615,15 @@ public class AdminController {
     }
 
     private void exportarInformeVentas(TableView<String[]> tabla, double totalDia, int cantidadVentas) {
-        FileChooser selector = new FileChooser();
-        selector.setTitle("Guardar informe de ventas");
-        selector.setInitialFileName("informe-ventas-" + LocalDate.now() + ".txt");
-        selector.getExtensionFilters().add(
-            new FileChooser.ExtensionFilter("Informe de texto (*.txt)", "*.txt")
-        );
-        java.io.File archivo = selector.showSaveDialog(contenidoCentro.getScene().getWindow());
-        if (archivo == null) {
+        Path ruta = AyudasArchivo.elegirRutaTxt(contenidoCentro.getScene().getWindow(),
+            "Guardar informe de ventas", "informe-ventas-" + LocalDate.now() + ".txt");
+        if (ruta == null) {
             return;
         }
-
-        try {
-            Path ruta = archivo.toPath();
-            if (!ruta.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".txt")) {
-                ruta = ruta.resolveSibling(ruta.getFileName() + ".txt");
-            }
-            Files.writeString(
-                ruta,
-                crearContenidoInforme(tabla.getItems(), totalDia, cantidadVentas),
-                StandardCharsets.UTF_8
-            );
+        if (AyudasArchivo.escribirTxt(ruta, crearContenidoInforme(tabla.getItems(), totalDia, cantidadVentas))) {
             Navegador.avisar("Informe exportado", "El informe se guardó correctamente en:\n" + ruta);
-        } catch (IOException e) {
-            Navegador.avisar("Error al exportar", "No se pudo guardar el informe: " + e.getMessage());
+        } else {
+            Navegador.avisar("Error al exportar", "No se pudo guardar el informe.");
         }
     }
 

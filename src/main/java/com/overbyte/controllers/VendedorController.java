@@ -17,9 +17,6 @@ import user.Vendedor;
 import services.MotorCSV;
 import services.ValidadorDatos;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -447,18 +444,9 @@ public class VendedorController {
 
     private void guardarVentaConfirmada(String idOrden, String nombreCliente,
                                         Map<String, Integer> items, double total) {
-        FileChooser selector = new FileChooser();
-        selector.setTitle("Guardar venta");
-        selector.setInitialFileName("venta-" + idOrden + ".txt");
-        selector.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Archivo de texto (*.txt)", "*.txt"));
-        java.io.File archivo = selector.showSaveDialog(Navegador.ventana());
-        if (archivo == null) {
+        Path ruta = AyudasArchivo.elegirRutaTxt(Navegador.ventana(), "Guardar venta", "venta-" + idOrden + ".txt");
+        if (ruta == null) {
             return;
-        }
-        Path ruta = archivo.toPath();
-        if (!ruta.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".txt")) {
-            ruta = ruta.resolveSibling(ruta.getFileName() + ".txt");
         }
         StringBuilder contenido = new StringBuilder()
                 .append("TECH-FLOW | VENTA CONFIRMADA\n")
@@ -475,12 +463,11 @@ public class VendedorController {
                     .append('\n');
         }
         contenido.append("\nTOTAL: ").append(String.format(Locale.ROOT, "$%.2f", total));
-        try {
-            Files.writeString(ruta, contenido.toString(), StandardCharsets.UTF_8);
+        if (AyudasArchivo.escribirTxt(ruta, contenido.toString())) {
             Navegador.cerrarOverlay();
             mostrarMensajeExito("Venta guardada en: " + ruta);
-        } catch (IOException ex) {
-            mostrarMensaje("No se pudo guardar el TXT: " + ex.getMessage());
+        } else {
+            mostrarMensaje("No se pudo guardar el TXT de la venta.");
         }
     }
 
@@ -497,22 +484,10 @@ public class VendedorController {
             return;
         }
 
-        FileChooser selector = new FileChooser();
-        selector.setTitle("Guardar proforma");
-        selector.setInitialFileName("proforma-" + LocalDateTime.now().format(
-            DateTimeFormatter.ofPattern("yyyyMMdd-HHmm")
-        ) + ".txt");
-        selector.getExtensionFilters().add(
-            new FileChooser.ExtensionFilter("Archivo de texto (*.txt)", "*.txt")
-        );
-        java.io.File archivo = selector.showSaveDialog(campoBusqueda.getScene().getWindow());
-        if (archivo == null) {
+        Path ruta = AyudasArchivo.elegirRutaTxt(campoBusqueda.getScene().getWindow(), "Guardar proforma",
+            "proforma-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm")) + ".txt");
+        if (ruta == null) {
             return;
-        }
-
-        Path ruta = archivo.toPath();
-        if (!ruta.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".txt")) {
-            ruta = ruta.resolveSibling(ruta.getFileName() + ".txt");
         }
 
         String idOrden = vendedor.generarOrdenDeVenta(nombreCliente,
@@ -528,11 +503,10 @@ public class VendedorController {
             return;
         }
 
-        try {
-            Files.writeString(ruta, contenidoProforma, StandardCharsets.UTF_8);
+        if (AyudasArchivo.escribirTxt(ruta, contenidoProforma)) {
             mostrarMensajeExito("Proforma " + idOrden + " guardada en: " + ruta);
-        } catch (IOException e) {
-            mostrarMensaje("La proforma se registró, pero no se pudo guardar el TXT: " + e.getMessage());
+        } else {
+            mostrarMensaje("La proforma se registró, pero no se pudo guardar el TXT.");
         }
     }
 
