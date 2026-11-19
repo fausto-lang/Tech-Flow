@@ -1,0 +1,28 @@
+\chapter{Contexto y alcance}
+
+\section{Punto de partida}
+El repositorio estaba en el commit \texttt{620aa0c} (``docs: agregar documentacion Tech-Flow''), versión más reciente de \texttt{origin/main} de \texttt{fausto-lang/Tech-Flow}. Se partía de un sistema funcional (inventario, ventas, caja, entradas, garantías) con entorno de pruebas verde y persistencia CSV, sobre el que se pidió una nueva funcionalidad y, a continuación, una ronda de organización del código.
+
+\section{Objetivo}
+\begin{enumerate}
+\item Añadir un filtro por categorías al catálogo/inventario de las tres pantallas del sistema (administración, almacén y punto de venta), tal como solicitó el docente.
+\item Corregir la inconsistencia del precio de venta detectada durante la revisión.
+\item Refactorizar puntos duplicados y código muerto detectados al leer el proyecto completo.
+\end{enumerate}
+
+\section{Alcance del informe}
+Cubre el trabajo realizado entre \texttt{620aa0c} y \texttt{a618180} (``refactor(console): delegate validation to ValidadorDatos''). Los cambios se realizaron en seis commits:
+
+\begin{table}[H]\centering\caption{Commits incluidos en este informe}
+\begin{tabular}{lp{.72\textwidth}}\toprule
+Commit & Descripción\\\midrule
+\texttt{2fe216f} & feat(gui): add category filter to views and product forms\\
+\texttt{cabca82} & refactor: share controller UI helpers and centralize CSV file names\\
+\texttt{2ecf69d} & refactor(gui): drop Categoria enum, derive filter list from inventory CSV\\
+\texttt{7e73fed} & fix(domain): persist sale price using product precioVenta\\
+\texttt{1f081df} & refactor(controllers): extract shared save-txt helpers\\
+\texttt{a618180} & refactor(console): delegate validation to ValidadorDatos\\\bottomrule
+\end{tabular}\end{table}
+
+\section{Estado resultante}
+La suite JUnit 5 queda en \textbf{516/516 pruebas en verde} y las cuatro vistas FXML se cargan sin errores (verificación en \chaptername\ 4). El árbol de trabajo quedó limpio y todo el trabajo commiteado.

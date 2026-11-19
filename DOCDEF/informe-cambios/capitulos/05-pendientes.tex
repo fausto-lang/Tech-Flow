@@ -1,0 +1,18 @@
+\chapter{Pendientes y recomendaciones}
+
+Los siguientes puntos se identificaron y discutieron durante el trabajo, pero quedaron \textbf{fuera} por decisión del equipo; se documentan como recomendaciones para una próxima iteración.
+
+\section{Seguridad de las credenciales}
+Las contraseñas se almacenan y comparan en texto plano en \texttt{empleado.csv}. Se recomienda aplicar un hash (p. ej. SHA-256 o un derivado con sal), con migración automática en el primer inicio de sesión de cada cuenta. Esto toca \texttt{Verificador}, los datos existentes y los fixtures de prueba.
+
+\section{Datos en el repositorio}
+\texttt{data/*.csv} está versionado y contiene datos de operación reales (ventas, garantías, caja). Cada ejecución ensucia el árbol y provoca conflictos entre máquinas al actualizar. Se recomienda sacar \texttt{data/} de git (con un seed de datos de prueba versionado aparte) y migrar el fixture de \texttt{MainTest} a \texttt{src/test/resources}.
+
+\section{Índices de columna mágicos}
+El dominio y los controladores acceden a las columnas de los CSV con índices numéricos (\texttt{fila[5]}, \texttt{fila[10]}\ldots). Una fase adicional de refactorización podría introducir constantes de esquema por archivo (o un tipo \texttt{LineaVenta}), con un diff amplio pero mecánico.
+
+\section{Reporte de la venta por stdout}
+\texttt{Vendedor.confirmarVenta()} imprime la representación de la factura en \texttt{System.out} además de confirmar la venta. Conviene eliminarlo: la GUI ya muestra el resumen en un overlay y la persistencia es la fuente de verdad.
+
+\section{Pendientes de pruebas}
+El archivo \texttt{src/test/java/TESTS\_PENDIENTES.md} mantiene una lista de casos aún por implementar (p. ej. \texttt{consultarGarantia} con garantía vencida, \texttt{ingresarProductoExistente} negativo, prueba de integración end-to-end con \texttt{techflow.data.dir}).

@@ -1,0 +1,30 @@
+\chapter{Cambios funcionales}\label{chap:cambios}
+
+\section{Filtro por categorías}
+\subsection{Necesidad}
+El docente solicitó añadir un filtro por categorías al sistema. La categoría existe en el esquema del inventario (\texttt{inventario.csv}) pero era un campo de texto libre: nada la acotaba, de modo que el sistema admitía variantes (\texttt{audio}, \texttt{Audios}, \texttt{Perif\'ericos}\ldots).
+
+\subsection{Comportamiento implementado}
+\begin{itemize}
+\item \textbf{Administración} (Inventario, vista ``Inventario completo''): \texttt{ComboBox} de categoría sobre la tabla; al cambiar la selección se rearman las filas visibles. La vista de ``productos por agotarse'' no se filtra.
+\item \textbf{Almacén} (Inventario actual): \texttt{ComboBox} junto a los botones ``Registrar producto'' y ``Entradas y stock''. \texttt{cargarInventario()} omite las filas que no coincidan y muestra el aviso «Sin productos en la categoría» cuando ninguna sobrevive al filtro.
+\item \textbf{Vendedor} (Buscar productos): \texttt{ComboBox} bajo el campo de búsqueda. Al cambiar el filtro se re-ejecuta la búsqueda si hay texto; un conjunto de resultados vacío por categoría se informa de forma diferenciada (\emph{no hay productos de esa categoría} vs. \emph{no se encontraron productos}).
+\item En los tres casos el valor por defecto es \emph{Todas} y la comparación es insensible a mayúsculas y tildes (\emph{Cámaras} y \emph{Camaras} filtran igual).
+\end{itemize}
+
+\subsection{Alta de producto con categorías guiadas}
+En los formularios de alta de producto (Admin y Almacén) el \texttt{TextField} de categoría pasó a un \texttt{ComboBox} editable: ofrece las categorías existentes como sugerencia y admite escribir una nueva, preservando la posibilidad de incorporar categorías inéditas. El valor se persiste con \texttt{trim()}.
+
+\subsection{Decisión sobre el enum: primera versión y retirada}
+Inicialmente se introdujo un enum \texttt{models/Categoria} con las 15 categorías presentes en el inventario (con nombre visible, p. ej. \texttt{CAMARAS -> "Cámaras"}), pensado como fuente de verdad para la interfaz. A petición del equipo se retiró en \texttt{2ecf69d}: el filtro ahora deriva la lista de los valores reales del CSV.
+
+\begin{techbox}
+\textbf{Resultado:} la lista del filtro se construye a partir de la columna \texttt{categoria} de \texttt{inventario.csv}, localizada por encabezado (con respaldo al índice 3 del esquema canónico). Se deduplica normalizando tildes y mayúsculas, se ordena alfabéticamente y tolera filas más cortas que el encabezado. Una categoría nueva en el CSV aparece automáticamente en el filtro, sin tocar el código. El modelo \texttt{Producto.categoria} y el CSV permanecen en \texttt{String}: no hubo migración de datos ni ruptura de la suite existente.
+\end{techbox}
+
+\section{Corrección del precio de venta}
+\subsection{El bug}
+La interfaz mostraba y totalizaba el carrito con \texttt{precioVenta} (p. ej. \texttt{389.99}), pero el dominio persistía al confirmar la venta \texttt{precioEntrada * 1.20 + 13\% de IVA} (p. ej. \texttt{~398.99}). La caja mostraba un total y el CSV/factura guardaban otro; el cajero nunca cobraba lo que veía en pantalla.
+
+\subsection{La corrección}
+\texttt{Vendedor.generarOrdenDeVenta} persiste ahora \texttt{producto.getPrecioVenta()}. La GUI, el CSV y la factura muestran el mismo precio unitario. \texttt{calcularCosto()} se conservó como API pública (sus pruebas no cambian). El punto de entrada de consola (\texttt{Main.java}) aplicaba la misma fórmula desalineada y también pasó a \texttt{precioVenta}. Ningún test asertaba el precio viejo persistido.
