@@ -1,16 +1,203 @@
-\chapter{Interfaz y flujos}
-\section{Acceso}
-\texttt{LoginController} exige nombre, rol y contraseña. \texttt{Verificador} valida la sesión y \texttt{Navegador} carga \texttt{admin.fxml}, \texttt{vendedor.fxml} o \texttt{almacen.fxml}.
-\TechFigure{../capturas/01-login.png}{7.3cm}{Interfaz real de inicio de sesión con selección de rol.}{fig:informe-login}
-\textbf{Lectura de la figura.} La pantalla presenta los campos de usuario y contraseña, los tres roles disponibles y el botón principal de acceso. Esta composición coincide con el flujo validado por \texttt{LoginController}.
-\begin{figure}[H]\centering\begin{tikzpicture}[node distance=8mm,box/.style={draw,rounded corners,align=center,minimum width=3cm,minimum height=.7cm},arr/.style={-Latex}]
-\node[box](a){Login};\node[box,right=of a](b){Rol};\node[box,right=of b](c){Credenciales};\node[box,below=of c](d){Panel};\node[box,left=of d](e){Operación};\draw[arr](a)--(b)--(c)--(d)--(e);\draw[arr](e)--++(0,-.7)--++(-5.4,0)|-(a);\end{tikzpicture}\caption{Flujo general de acceso.}\end{figure}
-\section{Paneles}
-El administrador navega por Caja, Inventario, Ventas, Entradas, Empleados, Productos y Proveedores. El vendedor usa Nueva venta y Carrito, y dispone de proformas, garantías, importación de órdenes y anulaciones. El almacenero consulta inventario, registra productos y registra o importa entradas.
-\TechFigure{../capturas/02-admin-caja.png}{7.0cm}{Overlay de gestión de caja en el panel administrativo.}{fig:informe-caja}
-\TechFigure{../capturas/03-admin-ventas.png}{7.0cm}{Panel administrativo de ventas con exportación de informe.}{fig:informe-admin-ventas}
-\TechFigure{../capturas/04-cajero-carrito.png}{7.0cm}{Carrito de venta del punto de venta.}{fig:informe-carrito}
-\TechFigure{../capturas/05-almacen-inventario.png}{7.0cm}{Inventario visualizado desde el panel de almacén.}{fig:informe-inventario}
-\TechFigure{../capturas/06-almacen-entradas.png}{7.0cm}{Registro de entradas y stock con búsqueda de productos.}{fig:informe-entradas}
-\section{Validaciones}
-Se validan campos vacíos, cantidades no positivas, stock insuficiente, carritos vacíos, números inválidos y archivos sin datos. Los avisos se muestran como mensajes o overlays.
+\subsection{Tecnologías utilizadas}
+\label{subsec:tecnologias}
+
+Las tecnologías listadas a continuación aparecen en el código o en la configuración efectiva del proyecto. No se atribuyen al sistema tecnologías mencionadas únicamente como posibilidades.
+
+\begin{longtable}{|p{2.35cm}|p{4.4cm}|p{6.5cm}|}
+\caption{Tecnologías y herramientas comprobadas.}
+\label{tab:tecnologias}\\
+\hline
+\textbf{Tecnología} & \textbf{Función general} & \textbf{Uso comprobado en Tech-Flow}\\
+\hline
+\endfirsthead
+\hline
+\textbf{Tecnología} & \textbf{Función general} & \textbf{Uso comprobado en Tech-Flow}\\
+\hline
+\endhead
+Java 17 & Lenguaje y plataforma de ejecución. & Implementa el punto de entrada, controladores, modelos, servicios y lógica de dominio. El \texttt{pom.xml} configura fuente y destino 17.\\
+\hline
+Maven & Gestión del ciclo de construcción y dependencias. & Define el artefacto \url{com.overbyte:Tech-Flow:1.0-SNAPSHOT}, las dependencias, compilación, ejecución JavaFX y pruebas.\\
+\hline
+JavaFX 17.0.2 & Herramientas para interfaces gráficas de escritorio. & \texttt{javafx-controls} proporciona controles y \texttt{javafx-fxml} integra vistas FXML con controladores Java.\\
+\hline
+FXML y CSS & Descripción declarativa y estilos de interfaz. & Las vistas bajo recursos se cargan mediante \texttt{FXMLLoader}; las hojas de estilo determinan la apariencia de las escenas.\\
+\hline
+JUnit Jupiter 5.10.0 & Framework de pruebas automatizadas. & Dependencia de alcance \texttt{test}; junto con Maven Surefire 3.2.5 ejecuta las pruebas del proyecto.\\
+\hline
+CSV y API estándar de Java NIO & Formato tabular de texto y operaciones de archivos. & \texttt{MotorCSV} lee y escribe archivos con UTF-8 y \texttt{java.nio.file}; no se declara una biblioteca CSV externa.\\
+\hline
+Git & Control de versiones. & El repositorio conserva commits e historial de modificaciones, utilizados para contrastar la evolución documentada con el código actual.\\
+\hline
+\end{longtable}
+
+\subsection{Diseño de clases del sistema}
+\label{subsec:clases}
+
+La tabla resume las clases principales por responsabilidad. La arquitectura es híbrida: existe una distinción reconocible entre vistas, controladores, dominio y servicios, pero no una capa de persistencia tipada aislada.
+
+\begin{longtable}{|p{3.1cm}|p{9.3cm}|}
+\caption{Responsabilidades de clases principales.}
+\label{tab:clases-principales}\\
+\hline
+\textbf{Clase o grupo} & \textbf{Responsabilidad y colaboración}\\
+\hline
+\endfirsthead
+\hline
+\textbf{Clase o grupo} & \textbf{Responsabilidad y colaboración}\\
+\hline
+\endhead
+\texttt{com.overbyte.}\newline\texttt{Main} & Punto de entrada JavaFX; prepara la ventana, la escena, recursos visuales y navegación inicial hacia la vista de acceso.\\
+\hline
+\texttt{Navegador} & Mantiene referencias a la ventana/escena y facilita la navegación entre vistas durante la sesión.\\
+\hline
+\scriptsize\texttt{LoginController} & Coordina la autenticación y deriva el flujo a la interfaz vinculada al rol autenticado.\\
+\hline
+\scriptsize\texttt{AdminController} & Coordina operaciones y presentación de administración, caja, registros y reportes disponibles.\\
+\hline
+\scriptsize\texttt{VendedorController} & Gestiona eventos de la interfaz de ventas, selección de productos, cantidades y comunicación con la lógica de vendedor.\\
+\hline
+\scriptsize\texttt{AlmacenController} & Coordina la consulta del inventario y los flujos de registro/importación de entradas.\\
+\hline
+\scriptsize\texttt{Vendedor}, \texttt{Almacen}, \texttt{Gestor} & Clases del dominio que ejecutan operaciones de venta, almacén y administración, incluyendo validaciones y cambios de datos.\\
+\hline
+\scriptsize\texttt{Producto}, \texttt{Proveedor}, \texttt{Cliente}, \texttt{Empleado}, \texttt{Rol} & Tipos de dominio y datos de operadores, catálogo, proveedores y clientes. Sus atributos no cubren de forma tipada todos los campos de los CSV.\\
+\hline
+\scriptsize\texttt{Inventario} & Representación en memoria de productos por identificador y datos asociados de inventario. No reemplaza la persistencia CSV utilizada por los flujos de negocio.\\
+\hline
+\scriptsize\texttt{MotorCSV} & Lee y escribe filas CSV, inicializa encabezados y permite agregar, actualizar o eliminar filas.\\
+\hline
+\scriptsize\texttt{ValidadorDatos}, \texttt{ArchivosCSV}, utilidades compartidas & Centralizan validaciones, nombres de archivo y lógica reutilizada por diferentes pantallas/operaciones.\\
+\hline
+\end{longtable}
+
+\paragraph{Comparación con el diagrama histórico.}
+En \texttt{documentacion/capturas} se encontró una imagen titulada \texttt{Diagrama sin título.drawio (1).png}. La imagen representa un diseño previo con las clases \texttt{InyeccionProducto}, \texttt{GestionProducto} y \texttt{VentaProducto}, que utilizan una clase \texttt{Producto}; \texttt{Proveedor} mantiene una lista de productos. El \texttt{Producto} del diagrama tiene un único atributo \texttt{precio}, mientras que el modelo actual diferencia \texttt{precioEntrada} y \texttt{precioVenta}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{\detokenize{../capturas/Diagrama sin título.drawio (1).png}}
+\caption{Diagrama de clases histórico proporcionado en el repositorio. Sus nombres, atributos y operaciones no deben interpretarse como descripción íntegra de la implementación actual.}
+\label{fig:diagrama-historico}
+\end{figure}
+
+En las fuentes actuales no aparecen clases con los nombres \texttt{InyeccionProducto}, \texttt{GestionProducto} ni \texttt{VentaProducto}. Sus responsabilidades se encuentran distribuidas entre clases como \texttt{Almacen}, \texttt{Gestor}, \texttt{Vendedor}, \texttt{MotorCSV} y controladores JavaFX. \texttt{Proveedor} todavía mantiene una colección de productos, pero su API actual no coincide literalmente con la del diagrama; \texttt{Producto} incorpora categoría y descripción, y separa precio de entrada y de venta. La imagen se conserva como evidencia de diseño/evolución, no como UML actualizado. La fecha exacta de elaboración de la captura no puede determinarse solo a partir de la imagen.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.05cm and 1.6cm, every node/.style={draw, rounded corners, align=center, minimum width=2.8cm, minimum height=0.72cm}, >=stealth]
+\node (main) {\texttt{Main}};
+\node (nav) [below=of main] {\texttt{Navegador}};
+\node (login) [below=of nav] {\texttt{LoginController}};
+\node (view) [left=of login] {FXML\\vistas};
+\node (admin) [below left=of login] {\texttt{AdminController}};
+\node (seller) [below=of login] {\texttt{VendedorController}};
+\node (stock) [below right=of login] {\texttt{AlmacenController}};
+\node (domain) [below=of seller, yshift=-0.1cm] {\texttt{Gestor}, \texttt{Vendedor}, \texttt{Almacen}};
+\node (models) [below=of domain] {Modelos de dominio};
+\node (csv) [below=of models] {\texttt{MotorCSV} + CSV};
+\draw[->] (main) -- (nav);
+\draw[->] (nav) -- (login);
+\draw[->] (view) -- (login);
+\draw[->, dashed] (login) -- (admin);
+\draw[->, dashed] (login) -- (seller);
+\draw[->, dashed] (login) -- (stock);
+\draw[->] (admin) -- (domain);
+\draw[->] (seller) -- (domain);
+\draw[->] (stock) -- (domain);
+\draw[->] (domain) -- (models);
+\draw[->] (domain) -- (csv);
+\end{tikzpicture}
+\caption{Dependencias funcionales entre clases principales, no exhaustivas. Las flechas muestran coordinación/uso, no composición UML. Algunos controladores también acceden a CSV directamente.}
+\label{fig:diagrama-clases}
+\end{figure}
+
+La figura actual es una síntesis del código y no se presenta como una captura recibida ni como transcripción del diagrama histórico. La comparación señala diferencias demostrables, pero no atribuye fechas ni una migración directa método por método sin evidencia adicional.
+
+\subsection{Codificación y reglas de negocio}
+\label{subsec:codificacion}
+
+La codificación mantiene datos duraderos en CSV y aplica reglas en las clases del paquete \texttt{user}. Una operación suele resolver la ruta de archivo, leer las filas, validar datos y precondiciones, construir o modificar una o varias filas y finalmente persistir el resultado. La interfaz transforma eventos en llamadas a esas operaciones y presenta el resultado.
+
+El flujo de venta distingue explícitamente preparación y confirmación. Durante la preparación se registran productos y cantidades para formar una proforma; no se reserva ni descuenta stock. En la confirmación, el sistema comprueba caja abierta y existencias, registra los datos de venta y cliente, actualiza inventario y emite garantías con vigencia de doce meses. La anulación de una venta ya confirmada revierte las unidades en inventario. Estas operaciones requieren mantener coherentes varios archivos, pero el formato CSV no proporciona una transacción que confirme o revierta automáticamente todas las escrituras como una unidad.
+
+En el flujo de acceso, \texttt{Verificador} busca el nombre del usuario, la contraseña y el rol solicitado en el registro de empleados; el nombre se compara sin distinguir mayúsculas y minúsculas, y el rol debe coincidir con la selección. Si el archivo de empleados no existe, el servicio inicializa sus encabezados y agrega un usuario administrativo inicial. En el esquema actual la contraseña se conserva como texto legible en \texttt{empleado.csv}; no se observa almacenamiento mediante hash. Esta es una limitación de seguridad de la implementación, no una recomendación de uso para producción.
+
+El flujo de entrada valida los campos requeridos y que el proveedor exista. Para el formato importado, las columnas requeridas son \texttt{idProveedor}, \texttt{idProducto}, \texttt{nombreProducto}, \texttt{marca}, \texttt{categoria}, \texttt{precio} y \texttt{cantidad}. Una línea puede agregar un producto o modificar el registro de uno existente; en el caso existente, el código ajusta el costo de compra y calcula precio de venta como 1,30 veces el precio importado. El nombre \texttt{precio} del archivo de entrada no debe confundirse con las columnas \texttt{precioEntrada} y \texttt{precioVenta} del inventario.
+
+La validación de una proforma en \texttt{Vendedor} comprueba los datos del cliente y que exista al menos un producto seleccionado antes de procesar sus líneas:
+
+\begin{lstlisting}[language=Java,caption={Validaciones iniciales de la generación de una proforma.},label={lst:validacion-proforma}]
+if (!ValidadorDatos.textoValido(nombreCliente)
+        || !ValidadorDatos.ciValida(ciCliente)
+        || !ValidadorDatos.telefonoValido(telefonoCliente)
+        || productos == null || productos.isEmpty()) {
+    return null;
+}
+\end{lstlisting}
+
+Después de esas comprobaciones el método revisa que cada producto exista y que su cantidad sea positiva y no supere el stock. La persistencia de la proforma conserva el inventario; el descuento ocurre en la operación de confirmación, no en esta validación.
+
+Los errores de formato, datos inválidos y precondiciones incumplidas se manejan en los servicios, las validaciones de dominio o los controladores, según el flujo. No existe una única estrategia de errores: ciertas operaciones comunican un resultado booleano o mensaje; el servicio CSV puede devolver una colección vacía o \texttt{false} ante fallos de archivo. Esta última decisión se analiza como limitación porque puede hacer indistinguible un archivo inaccesible de uno vacío.
+
+\subsection{Persistencia de información mediante archivos CSV}
+\label{subsec:persistencia}
+
+\texttt{MotorCSV} concentra operaciones de lectura/escritura y utiliza listas de arreglos de cadenas. La codificación se configura mediante \texttt{ConfiguracionCSV}; el valor actual es UTF-8 y el delimitador predeterminado es la coma. Los nombres de los archivos se centralizan en \texttt{ArchivosCSV}. La ruta de datos predeterminada es relativa al directorio de trabajo (\texttt{data}); la propiedad de sistema \texttt{techflow.data.dir} permite definir otro directorio. La ubicación relativa implica que la carpeta de ejecución debe ser compatible con la ruta elegida.
+
+Las operaciones principales del motor son:
+\begin{itemize}
+    \item \texttt{leerCSV}: lee el contenido y devuelve filas como \texttt{List<String[]>}; respeta campos entrecomillados, comillas escapadas y saltos de línea dentro de un campo.
+    \item \texttt{escribirCSV}: sobrescribe o anexa filas y crea los directorios padre que sean necesarios.
+    \item \texttt{agregarFila}, \texttt{actualizarFila}, \texttt{eliminarFila} y \texttt{eliminarFilaPorClave}: modifican los registros y reescriben el archivo cuando corresponde.
+    \item \texttt{inicializarCSV}: crea/sobrescribe un archivo con la fila de encabezado indicada.
+    \item \texttt{importarDatos}: omite la primera fila del origen y anexa los registros al destino; si el destino no contiene filas, copia también el encabezado del origen.
+    \item \texttt{exportarReporte}: produce un resumen CSV sencillo de filas de inventario y ventas; no es equivalente a cada exportación textual específica de la interfaz.
+\end{itemize}
+
+El escritor entrecomilla campos que contienen delimitadores, comillas o saltos de línea y duplica las comillas internas. El lector interpreta esas convenciones al reconstruir campos. Esto permite manejar comas y saltos de línea dentro de valores sin adoptar una dependencia adicional. Sin embargo, el formato no impone tipos, claves foráneas, restricciones de unicidad ni integridad referencial por sí mismo; esas comprobaciones dependen del código.
+
+\begin{lstlisting}[language=Java,caption={Fragmento real del formateo de una celda CSV.},label={lst:formateo-csv}]
+String valor = fila[i] == null ? "" : fila[i];
+if (valor.contains(delimitador) || valor.contains("\"")
+        || valor.contains("\n") || valor.contains("\r")) {
+    sb.append('"').append(valor.replace("\"", "\"\"")).append('"');
+} else {
+    sb.append(valor);
+}
+\end{lstlisting}
+
+El fragmento corresponde a \texttt{MotorCSV.formatearFila}: transforma valores nulos en campo vacío y aplica el entrecomillado cuando el contenido lo requiere. No reemplaza una validación de esquema, que el CSV genérico no realiza.
+
+El manejo de errores requiere una salvedad importante: cuando la lectura encuentra una ruta nula/vacía, un archivo inexistente o un error de E/S, puede devolver una lista vacía. La escritura devuelve \texttt{false} ante argumentos no válidos o una excepción de E/S. De esta manera el error no siempre se comunica con la causa original, y una lectura fallida puede parecer un archivo legítimamente vacío. Además, las escrituras de venta que afectan a inventario, ventas, clientes y garantías no son atómicas; tampoco se observa bloqueo para escritores concurrentes. Por tanto, los CSV ofrecen una solución simple, legible y suficiente para el contexto local, con limitaciones de consistencia, concurrencia, búsqueda y recuperación.
+
+\subsection{Consultas y operaciones básicas}
+\label{subsec:operaciones}
+
+\begin{longtable}{|p{2.2cm}|p{2.75cm}|p{3.15cm}|p{5.05cm}|}
+\caption{Operaciones del sistema y su tratamiento.}
+\label{tab:operaciones}\\
+\hline
+\textbf{Operación} & \textbf{Entrada} & \textbf{Proceso principal} & \textbf{Resultado y control observado}\\
+\hline
+\endfirsthead
+\hline
+\textbf{Operación} & \textbf{Entrada} & \textbf{Proceso principal} & \textbf{Resultado y control observado}\\
+\hline
+\endhead
+Autentica\-ción & Nombre de usuario, contraseña y rol seleccionado. & Consulta el registro de empleados, compara nombre y contraseña y valida la coincidencia del rol. & Navega a la interfaz del rol válido; las contraseñas se conservan como texto en \texttt{empleado.csv}.\\
+\hline
+Búsqueda de productos & Texto de búsqueda: identificador, nombre o marca según pantalla. & Recorre los productos cargados y filtra resultados para mostrarlos. & Lista de coincidencias; las opciones y filtros varían entre roles.\\
+\hline
+Preparación de venta & Productos, cantidades y datos del comprador. & Valida selección y cantidades y mantiene el carrito antes de confirmar. & Proforma visible; no descuenta ni reserva existencias.\\
+\hline
+Confirmar o anular & Carrito y estado actual de caja/stock; o venta registrada. & Verifica caja y existencias, registra transacción y actualiza archivos vinculados. & Al confirmar, stock disminuye y se registran datos/garantías; al anular una venta confirmada, el stock se restituye.\\
+\hline
+Registro de entrada & Proveedor, producto, precio y cantidad; manualmente o mediante el formato de importación. & Comprueba campos y proveedor, y actualiza/crea producto e historial de entradas. & Registros persistidos; valores inválidos o proveedor inexistente impiden continuar.\\
+\hline
+Consulta administrativa & Sección o período de la pantalla. & Lee y filtra los datos de caja, ventas, entradas, productos u otros registros disponibles. & Tabla/lista o resumen; algunas vistas se limitan al día actual y otras muestran el historial disponible.\\
+\hline
+\end{longtable}
+
+Como ejemplo ilustrativo, si una fila importada de pedido incluye nombre, CI, teléfono, identificador de producto y cantidad válida, la aplicación puede incorporarla a la preparación de una proforma. El ejemplo describe el formato admitido, no afirma que una transacción concreta se haya ejecutado durante la documentación. Asimismo, una entrada con proveedor que no existe no debe tratarse como una entrada completada, aunque la sintaxis del CSV sea válida.
+
+\textbf{Alcance de las consultas.} Las consultas no usan un motor declarativo como SQL: se realizan sobre filas cargadas desde CSV y, cuando corresponde, se filtran mediante recorridos o mapas temporales. Las salidas observables dependen del rol y la pantalla. No se atribuye al sistema una búsqueda global unificada ni consultas analíticas que no aparezcan implementadas.

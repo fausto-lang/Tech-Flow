@@ -1,58 +1,119 @@
-\chapter{Objetivos y requisitos}
-\section{Objetivo general}
-Desarrollar una aplicación de escritorio que apoye la gestión operativa de una tienda de electrónica mediante módulos diferenciados para administración, punto de venta y almacén, con autenticación por roles, persistencia en archivos CSV e interfaz gráfica JavaFX.
+\section{FASE 1. DEFINICIÓN, ANÁLISIS, DISEÑO E IMPLEMENTACIÓN INICIAL}
 
-\section{Objetivos específicos}
-\begin{enumerate}
-\item Implementar un acceso que valide el nombre, la contraseña y el rol del empleado registrado.
-\item Permitir al administrador abrir y cerrar la caja y supervisar las ventas confirmadas y las entradas registradas.
-\item Proporcionar funciones administrativas para consultar y mantener empleados, productos y proveedores.
-\item Facilitar la consulta del inventario y la identificación de productos con cinco unidades o menos.
-\item Permitir al cajero buscar productos, formar un carrito, generar proformas, confirmar ventas y consultar o anular operaciones.
-\item Registrar las existencias recibidas por el almacén, tanto manualmente como mediante archivos CSV con vista previa.
-\item Mantener los datos de ventas, clientes, garantías, inventario y movimientos mediante archivos CSV legibles y reutilizables.
-\item Proporcionar mensajes de validación, confirmación y error dentro de la interfaz para orientar al usuario durante las operaciones.
-\end{enumerate}
+\subsection{Definición del proyecto}
+\label{subsec:definicion}
 
-\section{Alcance del sistema}
-El sistema cubre la autenticación de empleados, la gestión de caja, el catálogo e inventario, las entradas de productos, las ventas y proformas, las garantías, los clientes, los proveedores y los pedidos de proveedor. Incluye exportación de informes de ventas y entradas desde el panel administrativo. La solución no incluye una base de datos relacional, sincronización entre sucursales, un servicio web ni un mecanismo externo de copias de seguridad.
+Tech-Flow es una aplicación de escritorio para apoyar la administración operativa de una tienda de productos electrónicos. Su propósito verificable es reunir en un mismo sistema el acceso por roles, el control de caja, la gestión de productos y proveedores, la consulta de existencias, el registro de entradas de mercancía y el procesamiento de ventas. Los datos se conservan localmente en archivos CSV.
 
-\section{Usuarios y necesidades}
-\begin{table}[H]\centering\caption{Usuarios del sistema y necesidades principales}\begin{tabular}{p{.22\textwidth}p{.62\textwidth}}\toprule
-Usuario & Necesidades y responsabilidades\\\midrule
-Administrador & Controlar la caja, supervisar ventas y entradas, consultar inventario y administrar empleados, productos y proveedores.\\
-Cajero & Buscar productos, revisar existencias disponibles, preparar el carrito, registrar ventas o proformas y consultar garantías.\\
-Almacenero & Consultar el catálogo y las existencias, registrar productos nuevos y actualizar el stock mediante entradas manuales o importadas.\\\bottomrule
-\end{tabular}\end{table}
+El problema abordado es la coordinación de operaciones que afectan a información relacionada. Una venta confirmada cambia el inventario; una entrada de mercancía también lo modifica; las ventas registran datos del comprador y pueden producir garantías. La aplicación centraliza esas operaciones y mantiene sus registros en archivos compartidos dentro de la instalación local. El código no evidencia concurrencia multiusuario, sincronización remota ni administración de varias sucursales.
 
-\section{Requisitos funcionales}
-\begin{enumerate}
-\item \textbf{RF-01 Autenticación:} el sistema debe validar nombre, contraseña y rol contra \texttt{empleado.csv}, y abrir el panel correspondiente.
-\item \textbf{RF-02 Gestión de caja:} el administrador debe poder abrir o cerrar la caja y consultar su estado.
-\item \textbf{RF-03 Inventario:} el sistema debe mostrar identificador, nombre, marca, categoría, precios y existencias de los productos.
-\item \textbf{RF-04 Administración:} el administrador debe poder añadir y eliminar empleados, productos y proveedores, respetando las validaciones del dominio.
-\item \textbf{RF-05 Supervisión:} el administrador debe consultar las ventas confirmadas del día, las entradas recibidas y exportar informes de ventas o entradas.
-\item \textbf{RF-06 Venta:} el cajero debe buscar por código, nombre o marca, indicar cantidades válidas y añadir productos al carrito sin superar el stock.
-\item \textbf{RF-07 Confirmación:} el cajero debe registrar una venta confirmada o guardar una proforma; al confirmar, el sistema descuenta existencias y genera garantías.
-\item \textbf{RF-08 Operaciones posteriores:} el cajero debe poder vaciar el carrito, anular una operación, consultar una garantía e importar órdenes CSV.
-\item \textbf{RF-09 Almacén:} el almacenero debe registrar productos nuevos y aumentar existencias de productos existentes, dejando constancia en \texttt{entradas.csv}.
-\item \textbf{RF-10 Importación:} el sistema debe mostrar una vista previa de entradas u órdenes CSV antes de confirmar una importación.
-\end{enumerate}
+Los usuarios observables en la implementación son tres roles autenticados: administrador, vendedor/cajero y almacenero. El acceso determina la vista y las operaciones disponibles. Para evitar atribuir al equipo una especificación formal que no se conserva, los objetivos siguientes son una síntesis técnica de las capacidades actuales, no una transcripción de requisitos originales:
 
-\section{Requisitos no funcionales}
 \begin{itemize}
-\item \textbf{RNF-01 Plataforma:} aplicación de escritorio ejecutable con Java 17, JavaFX 17.0.2 y Maven.
-\item \textbf{RNF-02 Usabilidad:} las vistas se organizan por rol y los avisos, formularios y confirmaciones aparecen dentro de la ventana principal.
-\item \textbf{RNF-03 Persistencia:} los datos se almacenan en UTF-8 mediante archivos CSV con encabezados y campos entrecomillados cuando es necesario.
-\item \textbf{RNF-04 Integridad:} las operaciones validan campos obligatorios, cantidades, precios, stock y duplicidad de identificadores antes de persistir cambios.
-\item \textbf{RNF-05 Mantenibilidad:} el proyecto separa vistas FXML, controladores, modelos de dominio y servicios de lectura y escritura CSV.
-\item \textbf{RNF-06 Verificabilidad:} el repositorio incluye pruebas JUnit 5 para servicios, modelos y operaciones principales, además de casos pendientes documentados.
+    \item \textbf{Objetivo general:} implementar una herramienta de escritorio que coordine la gestión cotidiana de productos, existencias, caja, compras y ventas, conservando la información en archivos locales.
+    \item \textbf{Objetivos específicos:} autenticar operadores por rol; administrar registros de productos, empleados y proveedores; permitir la consulta y actualización de existencias; registrar ventas y entradas; y ofrecer una interfaz gráfica para ejecutar esas operaciones.
 \end{itemize}
 
-\section{Tecnologías y organización}
-\begin{table}[H]\centering\caption{Tecnologías verificadas}\begin{tabular}{ll}\toprule Tecnología & Evidencia\\\midrule
-Java 17 & \texttt{maven.compiler.source/target}\\
-JavaFX 17.0.2 & \texttt{javafx-controls}, \texttt{javafx-fxml}\\
-Maven & \texttt{javafx-maven-plugin}\\
-JUnit 5.10.0 & \texttt{junit-jupiter}\\
-CSV & \texttt{MotorCSV} y \texttt{data/}\\\bottomrule\end{tabular}\end{table}
+El alcance comprende las operaciones implementadas en las vistas y clases de dominio actuales. No incluye una base de datos transaccional, una API, sincronización en red, procesamiento de pagos externos, contabilidad integral, ni evidencia de despliegue productivo. La importación CSV se limita a los flujos concretos disponibles para pedidos y entradas, no a una importación genérica de todos los archivos del sistema.
+
+\subsection{Análisis del sistema y requerimientos}
+\label{subsec:requerimientos}
+
+La tabla presenta requerimientos funcionales identificados a partir de las rutas de interfaz, clases de negocio y persistencia actuales. Los identificadores RF son etiquetas de análisis creadas para este informe; no se encontraron identificadores originales de requisitos en el repositorio. La columna de evidencia indica el estado verificable en el código, no una certificación de aceptación por usuarios.
+
+\begin{longtable}{|p{1.15cm}|p{4.35cm}|p{7.1cm}|}
+\caption{Requerimientos funcionales inferidos de la implementación actual.}
+\label{tab:requerimientos-funcionales}\\
+\hline
+\textbf{ID} & \textbf{Requerimiento observado} & \textbf{Evidencia en el sistema}\\
+\hline
+\endfirsthead
+\hline
+\textbf{ID} & \textbf{Requerimiento observado} & \textbf{Evidencia en el sistema}\\
+\hline
+\endhead
+RF-01 & Permitir el inicio de sesión de los roles disponibles. & La vista de acceso valida credenciales y deriva a la interfaz correspondiente al rol. Las credenciales se almacenan en \texttt{empleado.csv}.\\
+\hline
+RF-02 & Abrir y cerrar la caja del día. & El administrador controla el estado de caja y el cierre en el flujo de caja; los movimientos se guardan en \texttt{caja.csv}.\\
+\hline
+RF-03 & Mantener registros administrativos de empleados, productos y proveedores. & Las operaciones de gestión se encuentran en las clases de dominio y en las vistas administrativas; su persistencia se realiza mediante CSV.\\
+\hline
+RF-04 & Consultar productos y existencias según las vistas autorizadas. & Administración, almacén y ventas consultan datos de inventario; las opciones de filtro no son idénticas en todos los roles.\\
+\hline
+RF-05 & Preparar una venta, validar artículos y confirmar o anular la operación. & El vendedor administra cantidades del carrito; al confirmar se verifica el estado de caja y el stock. Una proforma no descuenta ni reserva existencias.\\
+\hline
+RF-06 & Asociar datos de cliente y registrar garantías para ventas confirmadas. & La confirmación registra al cliente y crea garantías con vigencia de doce meses. La anulación de una venta confirmada restituye las unidades.\\
+\hline
+RF-07 & Registrar entradas de mercancía de proveedores existentes. & Almacén admite el registro manual y la carga del formato de entrada; una entrada actualiza el inventario.\\
+\hline
+RF-08 & Importar pedidos en el formato admitido y preparar proformas. & El flujo de pedidos exige nombre, CI, teléfono, producto y cantidad; \texttt{idOrden} es opcional para agrupar líneas. El resultado se procesa como proforma.\\
+\hline
+RF-09 & Consultar información de ventas, entradas y garantías. & Las vistas de administración y los registros correspondientes consultan los CSV disponibles. La representación depende de la pantalla y del período que esta consulta.\\
+\hline
+RF-10 & Exportar ciertos informes a texto. & Existen utilidades compartidas de selección de ruta y escritura TXT; esto no equivale a exportación general de todos los datos.\\
+\hline
+\end{longtable}
+
+Los requerimientos no funcionales que pueden sostenerse con evidencia se limitan a características técnicas: el proyecto se configura para Java 17 y JavaFX; usa Maven; ejecuta pruebas con JUnit Jupiter; y guarda datos en CSV UTF-8. La aplicación se inicia como programa de escritorio. No se encontraron objetivos medidos de rendimiento, disponibilidad, accesibilidad, seguridad, capacidad de usuarios ni retención de datos, por lo que no se asignan umbrales a esos atributos.
+
+Las reglas de negocio más visibles son: las ventas requieren una caja abierta y existencias suficientes; la proforma no reserva stock; la confirmación descuenta cantidades; la anulación de una venta confirmada devuelve unidades; las garantías emitidas tienen una vigencia de doce meses; y la importación de entradas requiere un proveedor que ya exista. En la importación de un producto existente, el código actual actualiza el costo de compra y calcula el precio de venta a partir del precio importado con un factor de 1,30. Son reglas derivadas del comportamiento implementado y no se presentan como política comercial externa.
+
+\subsection{Alcance y organización del sistema}
+\label{subsec:organizacion}
+
+La aplicación se organiza principalmente en paquetes de Java bajo \texttt{com.overbyte} y en paquetes de dominio y servicios. La tabla resume las responsabilidades que se observan en el código, sin implicar que cada paquete forme una capa aislada:
+
+\begin{longtable}{|p{3.1cm}|p{9.5cm}|}
+\caption{Organización lógica de los principales paquetes.}
+\label{tab:paquetes}\\
+\hline
+\textbf{Paquete o recurso} & \textbf{Responsabilidad observada}\\
+\hline
+\endfirsthead
+\hline
+\textbf{Paquete o recurso} & \textbf{Responsabilidad observada}\\
+\hline
+\endhead
+\texttt{com.overbyte} & Punto de inicio JavaFX y navegación entre escenas. Existe además una clase \texttt{Main} en el paquete por defecto con un menú de consola.\\
+\hline
+\texttt{com.overbyte.}\newline\texttt{controllers} & Controladores JavaFX: reciben eventos, coordinan operaciones y actualizan componentes. Algunos también leen directamente archivos CSV.\\
+\hline
+\texttt{com.overbyte.}\newline\texttt{vista} & Archivos FXML que describen las pantallas y controles de la interfaz.\\
+\hline
+\texttt{user} & Clases de dominio y reglas de negocio para vendedor, almacén, administración, empleados, clientes y otros conceptos.\\
+\hline
+\texttt{services} & Lectura/escritura CSV, validación y utilidades de apoyo compartidas, además de lógica de verificación.\\
+\hline
+\texttt{models} & Representaciones y colecciones de dominio, entre ellas producto e inventario en memoria.\\
+\hline
+\texttt{data} & Archivos CSV utilizados por la aplicación para conservar registros.\\
+\hline
+\texttt{src/test} & Pruebas automatizadas organizadas por clase o paquete bajo JUnit Jupiter.\\
+\hline
+\end{longtable}
+
+El flujo general parte de \texttt{com.overbyte.Main}, que prepara la ventana y el navegador, carga el FXML de acceso y deja que sus controladores conecten las operaciones del rol seleccionado. Los controladores invocan clases de dominio; estas clases aplican reglas y persisten datos con \texttt{MotorCSV} y rutas centralizadas. Sin embargo, la separación no es absoluta: existen controladores que consultan CSV de forma directa y clases de negocio que combinan reglas con persistencia.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.5cm, every node/.style={draw, rounded corners, align=center, minimum width=2.7cm, minimum height=0.8cm}, >=stealth]
+\node (user) {Usuario};
+\node (view) [right=of user] {Vista JavaFX\\FXML};
+\node (controller) [right=of view] {Controlador};
+\node (domain) [below=of controller] {Dominio\\paquete \texttt{user}};
+\node (services) [left=of domain] {Servicios\\validación y CSV};
+\node (files) [left=of services] {Archivos\\\texttt{data/*.csv}};
+\draw[->] (user) -- (view);
+\draw[->] (view) -- (controller);
+\draw[->] (controller) -- (domain);
+\draw[->] (domain) -- (services);
+\draw[->] (services) -- (files);
+\draw[->] (files) to[bend left=22] (domain);
+\draw[->] (domain) to[bend left=22] (controller);
+\draw[->] (controller) to[bend left=22] (view);
+\end{tikzpicture}
+\caption{Vista general del flujo y las dependencias principales, reconstruida desde el código. Las lecturas directas desde algunos controladores son una excepción a este flujo idealizado.}
+\label{fig:arquitectura-general}
+\end{figure}
+
+La figura sintetiza las dependencias relevantes y no representa un diagrama UML formal de todas las clases. El detalle de responsabilidades, estructuras, persistencia e inicialización se desarrolla en las subsecciones siguientes y en la FASE 3.

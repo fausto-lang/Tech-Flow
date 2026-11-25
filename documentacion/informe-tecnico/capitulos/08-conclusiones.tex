@@ -1,4 +1,102 @@
-\chapter{Resultados y conclusiones}
-Se identificó una aplicación JavaFX con tres paneles por rol, persistencia CSV, gestión de caja, inventario, ventas, proveedores y empleados. Las listas y mapas son adecuadas para filas CSV, búsquedas, carritos y entradas.
-\section{Recomendaciones}
-\begin{itemize}\item Ampliar la cobertura descrita en \texttt{TESTS\_PENDIENTES.md}.\item Añadir pruebas automatizadas de interacción JavaFX.\item Centralizar validaciones repetidas.\item Incorporar respaldo y recuperación de CSV.\item Capturar evidencias visuales verificables en futuras entregas.\end{itemize}
+\section*{RESULTADOS}
+\addcontentsline{toc}{section}{RESULTADOS}
+
+El análisis confirma que Tech-Flow implementa una aplicación de escritorio JavaFX para operaciones de inventario, caja, ventas, entradas y administración de registros. La separación por roles y la persistencia CSV conectan las funciones principales. La descripción de resultados se limita a comportamientos encontrados en el código y a resultados de pruebas ejecutadas; las capturas se interpretan como evidencia visual de instantes particulares.
+
+\begin{longtable}{|p{3.1cm}|p{5.3cm}|p{4.8cm}|}
+\caption{Síntesis de resultados y estado de evidencia.}
+\label{tab:resultados}\\
+\hline
+\textbf{Área} & \textbf{Resultado observado} & \textbf{Límite de la evidencia}\\
+\hline
+\endfirsthead
+\hline
+\textbf{Área} & \textbf{Resultado observado} & \textbf{Límite de la evidencia}\\
+\hline
+\endhead
+Estructura del sistema & Punto de entrada JavaFX, navegación, vistas FXML, controladores, modelos, clases de dominio, servicios y datos CSV. & MVC es aproximado: ciertos controladores acceden a CSV y el dominio combina reglas con persistencia.\\
+\hline
+Operación de ventas & Preparación de proforma, confirmación condicionada por caja/stock, registro de datos de cliente, garantías y reversión de stock al anular ventas confirmadas. & Los cambios sobre varios archivos no forman una transacción atómica; la suite cubre escenarios concretos, no todas las secuencias posibles.\\
+\hline
+Operación de almacén & Registro manual e importado de entradas, validación de proveedor y actualización de inventario. & La importación se limita a los formatos implementados y las restricciones codificadas; no existe importador genérico.\\
+\hline
+Persistencia & Nueve CSV con encabezados verificados y un motor que soporta campos entrecomillados, comillas escapadas y saltos de línea. & Tipos, claves y relaciones se validan en lógica Java; errores de lectura pueden representarse como lista vacía.\\
+\hline
+Pruebas automatizadas & 516 pruebas pasaron: 0 fallos, 0 errores y 0 omitidas en la ejecución registrada de Maven. & No se midió cobertura ni se ejecutó una suite GUI de extremo a extremo.\\
+\hline
+Refactorización & Helpers y constantes compartidas reducen parte de la duplicación; correcciones históricas se reflejan en el código actual. & Permanecen controladores con varias responsabilidades, datos tabulares no tipados y límites de consistencia/error de CSV.\\
+\hline
+Interfaz gráfica & Capturas de acceso, administración/caja, ventas, carrito e inventario/entradas, además de FXML y controladores actuales. & Las imágenes reflejan estados puntuales; la captura del carrito no muestra todos los campos que exige el FXML actual.\\
+\hline
+\end{longtable}
+
+\subsection*{Evolución y consistencia documental}
+
+El contraste entre código, historial Git, documentos anteriores y capturas evidencia evolución del diseño. El diagrama de clases encontrado representa un modelo previo con las clases \texttt{InyeccionProducto}, \texttt{GestionProducto} y \texttt{VentaProducto}; esas clases no se encuentran en las fuentes actuales. El modelo \texttt{Producto} actual separa precio de entrada y de venta, y las responsabilidades de compra/venta se distribuyen en las clases de dominio actuales.
+
+El historial registra la retirada del filtro de categoría de la vista del vendedor, mientras se mantienen filtros en otras áreas; por ello, capturas o descripciones anteriores no deben extenderse a la versión vigente. También se encuentran extracciones de utilidades y correcciones en el uso del precio de venta. Estas referencias históricas explican cambios, pero el código actual es la fuente principal para el estado final. La captura de ventas muestra cero operaciones en ese instante, no una ausencia general de ventas. La captura del carrito muestra solo el nombre del cliente, a diferencia del formulario vigente, que requiere CI y teléfono además del nombre.
+
+\subsection*{Fuentes verificables del análisis}
+
+\begin{longtable}{|p{5.7cm}|p{7.3cm}|}
+\caption{Rutas principales del repositorio utilizadas como evidencia.}
+\label{tab:fuentes-repositorio}\\
+\hline
+\textbf{Fuente} & \textbf{Aspecto contrastado}\\
+\hline
+\endfirsthead
+\hline
+\textbf{Fuente} & \textbf{Aspecto contrastado}\\
+\hline
+\endhead
+\path{pom.xml} & Versiones de Java, JavaFX, JUnit y configuración Maven.\\
+\hline
+\path{src/main/java/com/overbyte/Main.java} y \path{src/main/java/com/overbyte/Navegador.java} & Inicio de la GUI, preparación de ventana y navegación.\\
+\hline
+\path{src/main/java/com/overbyte/controllers/} & Controladores, eventos, autenticación e integración de vistas.\\
+\hline
+\path{src/main/resources/com/overbyte/vista/} & Vistas FXML y estructura declarativa de la interfaz.\\
+\hline
+\path{src/main/java/user/}, \path{src/main/java/models/}, \path{src/main/java/services/} & Reglas de negocio, modelos y persistencia/validación.\\
+\hline
+\path{src/test/java/} & Casos JUnit y condiciones verificadas.\\
+\hline
+\path{data/*.csv} & Encabezados y datos persistidos en el estado del repositorio.\\
+\hline
+\path{documentacion/capturas/} y el historial Git & Evidencia visual de pantallas/diseño anterior y evolución de las fuentes.\\
+\hline
+\end{longtable}
+
+\subsection*{Evidencias incorporadas}
+
+Se incorporaron seis capturas de interfaz existentes: inicio de sesión; administración con diálogo de caja cerrada; ventas del día; carrito del cajero; inventario de almacén; y preparación de entradas. También se incorporó la imagen histórica del diagrama de clases y se añadió una figura de síntesis actual basada en el código. No se modificaron las imágenes originales. No se encontró una captura específica de ejecución de pruebas ni se presenta una captura como resultado de prueba funcional.
+
+\subsection*{Aspectos pendientes por falta de evidencia}
+
+\begin{itemize}
+    \item No se encontró una especificación original formal que permita distinguir los requisitos aprobados por usuarios de los que se sintetizaron a partir del código. Los RF de este informe son identificadores analíticos.
+    \item No se pudo establecer la fecha exacta o el commit de la imagen del diagrama de clases histórico.
+    \item No hay evidencia reejecutable suficiente para afirmar que todo el proyecto se desarrolló formalmente mediante TDD.
+    \item Los escenarios de la FASE 3 no se ejecutaron desde una sesión GUI durante esta revisión. Las pruebas JUnit verifican partes del dominio, no la interacción gráfica completa.
+    \item El registro de cambios menciona una comprobación anterior de carga de vistas JavaFX, pero no se encontró el código fuente de esa prueba para repetirla.
+    \item No se documentan indicadores de cobertura, rendimiento, disponibilidad ni pruebas con usuarios; por ello no se proporcionan porcentajes ni métricas de esas categorías.
+\end{itemize}
+
+\section*{CONCLUSIONES}
+\addcontentsline{toc}{section}{CONCLUSIONES}
+
+La FASE 1 muestra que el sistema resuelve una necesidad operativa concreta mediante una aplicación de escritorio que relaciona catálogo, existencias, ventas, clientes, garantías, caja y entradas. Los paquetes y clases actuales permiten identificar vistas, controladores, dominio, servicios y modelos, aunque esas responsabilidades no están completamente desacopladas. El análisis del alcance evita atribuir al proyecto servicios en red, bases de datos o capacidades no presentes.
+
+Las estructuras de datos cumplen funciones distintas. Las listas y arreglos representan y procesan filas CSV; los mapas sirven para asociar productos con cantidades o agrupar líneas; las colecciones del modelo y de JavaFX apoyan el trabajo temporal y la presentación. Esta solución es directa y suficiente para el tamaño y el contexto local observados, pero la búsqueda lineal, los tipos representados como cadenas y la ausencia de transacciones limitan la integridad y evolución de los datos.
+
+La persistencia CSV facilita inspeccionar y transportar registros sin infraestructura adicional. \texttt{MotorCSV} resuelve operaciones básicas y el manejo de campos entrecomillados, pero no proporciona restricciones relacionales, bloqueo concurrente ni confirmación atómica de cambios en varios archivos. La lectura que puede ocultar un error de E/S tras una lista vacía también dificulta diagnosticar fallos. Son limitaciones estructurales que deben tenerse en cuenta antes de ampliar el uso o el volumen de datos.
+
+La FASE 2 aporta evidencia concreta de pruebas automatizadas: la ejecución registrada aprobó 516 pruebas sin fallos, errores ni omisiones. Los casos existentes cubren reglas importantes como no descontar stock al generar proformas, impedir ventas con caja cerrada, validar entradas y parsear campos CSV complejos. El resultado fortalece la confianza en los comportamientos probados, pero no equivale a cobertura completa ni a una aceptación funcional de la GUI. Tampoco se puede afirmar TDD formal sin evidencia del orden de desarrollo.
+
+El análisis de calidad identificó responsabilidades mezcladas en algunos controladores, dependencia del orden de columnas CSV y concentración de operaciones en \texttt{MotorCSV}. Las utilidades extraídas y las constantes compartidas reducen duplicaciones específicas; las validaciones reutilizadas y las correcciones históricas mejoran consistencia. Al mismo tiempo, el informe distingue esas mejoras parciales de los problemas que permanecen, evitando presentar una refactorización como solución total.
+
+La FASE 3 confirma que MVC sirve para describir la organización dominante, pero su aplicación es aproximada: JavaFX separa vistas FXML y controladores, mientras que las clases de dominio gestionan reglas y persistencia, y ciertos controladores consultan CSV directamente. La secuencia de inicialización depende del ciclo de \texttt{FXMLLoader}; la asignación del empleado autenticado ocurre después de la inicialización de la vista del rol. Documentar este orden previene suposiciones erróneas al mantener o probar las pantallas.
+
+La interfaz gráfica vuelve accesibles las operaciones por rol y presenta vistas para caja, ventas, inventario y entradas. Las capturas muestran esas pantallas y resultan útiles para explicar su propósito, pero sus estados no prueban operaciones completadas. La diferencia entre los campos visibles en la captura del carrito y los que exige el FXML actual muestra por qué es necesario contrastar las imágenes con el código vigente. Los escenarios planteados definen una base reproducible para una futura validación manual o automatizada de extremo a extremo.
+
+Como mejoras futuras, fundamentadas en las limitaciones observadas, pueden considerarse: separar el acceso a datos de los controladores y de la lógica de negocio; representar filas con entidades/DTO tipados; comunicar errores de E/S con resultados explícitos; validar e integrar los cambios relacionados mediante transacciones o un almacenamiento con garantías de consistencia; y añadir pruebas de interfaz que recorran los flujos principales. Esas propuestas son trabajo pendiente y no se describen como funcionalidades ya implementadas. La conclusión central es que Tech-Flow cuenta con una base funcional y una suite de pruebas sustancial para su dominio, mientras que la fidelidad de los datos, el desacoplamiento y la validación gráfica completa son los principales aspectos a fortalecer.

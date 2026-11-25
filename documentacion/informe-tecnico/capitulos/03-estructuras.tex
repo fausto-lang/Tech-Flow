@@ -1,65 +1,108 @@
-\chapter{Diseño del sistema}
-\section{Diseño general}
-Tech-Flow se diseñó como una aplicación de escritorio con una única ventana y cuatro vistas principales: inicio de sesión, panel administrativo, punto de venta y panel de almacén. El acceso determina qué vista se carga y qué operaciones quedan disponibles en la navegación. La clase \texttt{Navegador} intercambia las vistas dentro de la misma escena y ofrece overlays para formularios, avisos y confirmaciones.
+\subsection{Estructuras de datos aplicadas}
+\label{subsec:estructuras}
 
-\section{Arquitectura y organización de módulos}
-La solución sigue una organización próxima al patrón Modelo--Vista--Controlador:
-\begin{itemize}
-\item \textbf{Vista:} archivos \texttt{login.fxml}, \texttt{admin.fxml}, \texttt{vendedor.fxml} y \texttt{almacen.fxml}, junto con \texttt{estilos.css}.
-\item \textbf{Controladores:} \texttt{LoginController}, \texttt{AdminController}, \texttt{VendedorController} y \texttt{AlmacenController}; reciben eventos de la interfaz y coordinan las operaciones.
-\item \textbf{Modelo:} \texttt{Producto}, \texttt{Inventario}, \texttt{Cliente}, \texttt{Proveedor}, \texttt{Empleado} y sus especializaciones \texttt{Gestor}, \texttt{Vendedor} y \texttt{Almacen}.
-\item \textbf{Servicios:} \texttt{MotorCSV} concentra lectura, escritura, importación y exportación; \texttt{Verificador} autentica a los empleados.
-\item \textbf{Navegación:} \texttt{com.overbyte.Main} inicia JavaFX y \texttt{Navegador} administra la ventana, las transiciones y los overlays.
-\end{itemize}
+Las estructuras observadas reflejan una decisión práctica: los archivos CSV son la persistencia principal y, durante cada operación, sus filas se cargan y recorren como colecciones Java. No todas las estructuras participan en todos los flujos; por ejemplo, el mapa del modelo \texttt{Inventario} ofrece una representación en memoria, mientras que las clases de venta y almacén también consultan directamente las filas del archivo.
 
-\begin{lstlisting}
-Vista FXML -> Controlador JavaFX -> Modelo/servicio -> Archivos CSV
-       ^              |                  |
-       |              v                  v
-       +------ resultados y mensajes ---+
-\end{lstlisting}
-
-\section{Diseño de interfaces}
-Todas las vistas comparten una barra lateral, un encabezado y un área de contenido. El administrador dispone de Caja, Inventario, Ventas, Entradas, Empleados, Productos y Proveedores. El cajero dispone de Nueva venta y Carrito. El almacenero dispone de Inventario, con acciones para Registrar producto y Entradas y stock. Los formularios no abren ventanas externas: se presentan como overlays sobre la escena principal.
-
-\section{Diseño de los procesos principales}
-\subsection{Autenticación}
-El usuario introduce nombre y contraseña y selecciona uno de los tres roles. \texttt{Verificador} consulta \texttt{empleado.csv}; si las credenciales y el rol coinciden, crea la especialización de empleado correspondiente. \texttt{LoginController} carga entonces el FXML del panel autorizado.
-
-\subsection{Venta}
-El cajero busca productos por identificador, nombre o marca. Cada línea del carrito se mantiene en un \texttt{LinkedHashMap} con el identificador como clave y la cantidad como valor. Al confirmar, \texttt{Vendedor} genera una proforma, valida caja y existencias, descuenta el stock, actualiza la venta como confirmada, registra el cliente y genera las garantías asociadas. La interfaz muestra el resumen y permite guardarlo como TXT.
-
-\subsection{Entradas e inventario}
-El almacenero puede crear un producto con identificador generado o seleccionar un producto existente para aumentar sus existencias. Cada recepción se registra en \texttt{entradas.csv}. En la importación, el archivo se valida, se muestra una vista previa y solamente después de la confirmación se actualizan inventario y entradas.
-
-\subsection{Supervisión administrativa}
-El administrador consulta el estado de la caja, las ventas confirmadas del día, el historial de entradas y el inventario completo o crítico. También puede mantener empleados, productos y proveedores, y exportar informes de ventas y entradas a archivos de texto.
-
-\section{Diseño de persistencia y entidades}
-No se utiliza una base de datos relacional. \texttt{MotorCSV} trabaja con archivos UTF-8 y encabezados que representan las entidades y operaciones del sistema:
-\begin{longtable}{p{.25\textwidth}p{.62\textwidth}}\toprule Archivo & Información persistida\\\midrule
+\begin{longtable}{|p{2.6cm}|p{3.3cm}|p{3.4cm}|p{3.3cm}|}
+\caption{Estructuras de datos verificadas y su contribución.}
+\label{tab:estructuras-datos}\\
+\hline
+\textbf{Estructura} & \textbf{Ubicación / forma} & \textbf{Uso y operaciones} & \textbf{Ventajas y límites}\\
+\hline
+\endfirsthead
+\hline
+\textbf{Estructura} & \textbf{Ubicación / forma} & \textbf{Uso y operaciones} & \textbf{Ventajas y límites}\\
+\hline
 \endhead
-\texttt{empleado.csv} & Identificador, nombre, rol y contraseña del empleado.\\
-\texttt{inventario.csv} & Producto, marca, categoría, descripción, precios y stock.\\
-\texttt{ventas.csv} & Líneas de venta, orden, estado, cliente, cantidades, totales y garantía.\\
-\texttt{clientes.csv} & Identificador y datos del comprador.\\
-\texttt{garantias.csv} & Venta, producto, fechas, cliente y estado de garantía.\\
-\texttt{entradas.csv} & Recepciones, proveedor, producto, cantidad, precio y empleado.\\
-\texttt{proveedores.csv} & Identificador, nombre y contacto del proveedor.\\
-\texttt{pedidos.csv} & Pedidos de proveedor, productos, cantidades y empleado.\\
-\texttt{caja.csv} & Estado de caja, fechas y empleado responsable.\\\bottomrule
+Arreglo (\texttt{String[]}) & Filas CSV entregadas por \texttt{MotorCSV}. & Cada posición representa una columna del encabezado; permite leer, construir y modificar una fila de longitud fija para escribirla de nuevo. & Acceso por índice simple y compacto. Los tipos y el significado de cada índice no están expresados por el propio arreglo; un índice incorrecto puede asociar un valor con otra columna.\\
+\hline
+Lista dinámica & Servicios CSV y operaciones de dominio; las filas se manejan como \texttt{List<String[]>}. & Conserva secuencialmente filas leídas; permite recorrer, agregar, quitar y reescribir registros. & Tamaño dinámico y recorrido directo. Buscar una fila por identificador mediante recorrido es O(n); no ofrece restricciones relacionales ni persistencia por sí misma.\\
+\hline
+Mapa ordenado & Carrito del vendedor y agrupación por orden mediante \texttt{LinkedHashMap}. & Relaciona un identificador de producto con una cantidad; en importaciones también agrupa líneas por \texttt{idOrden}. Mantiene el orden de inserción al iterar. & Búsqueda promedio cercana a O(1) y orden estable. Un mapa por producto no representa por separado varias líneas con el mismo identificador; la clave debe ser válida y única para el propósito.\\
+\hline
+Mapa hash & Modelo de inventario y consultas auxiliares del dominio/autenticación. & Mediante \texttt{HashMap}, indexa productos por identificador y cantidades vendidas; otros mapas conservan datos de clientes y credenciales de prueba. & Búsqueda promedio cercana a O(1). El orden de iteración no está garantizado y la estructura vive en memoria; no sustituye al CSV como almacenamiento persistente.\\
+\hline
+Conjunto & Selección de proveedores durante el flujo de entradas (\texttt{Set<String>}). & Conserva identificadores únicos para evitar repetir proveedores en una lista de selección. & Evita duplicados de clave de forma natural. No conserva un orden general salvo que se elija una implementación que lo garantice.\\
+\hline
+Enumeración (\texttt{Rol}) & Modelo de roles. & Representa un conjunto cerrado de roles y se usa para seleccionar comportamiento/interfaz según el usuario autenticado. & Limita valores a constantes conocidas y facilita comparaciones. No modela por sí sola permisos granulares.\\
+\hline
 \end{longtable}
 
-Las relaciones se expresan mediante identificadores: una venta referencia una orden, un producto y, cuando se confirma, un cliente y una garantía; una entrada referencia un proveedor y un producto; los registros de caja, ventas y entradas conservan el identificador del empleado que realizó la operación.
+En las operaciones sobre CSV, el patrón más frecuente es carga, recorrido, cambio de una fila y escritura del conjunto resultante. La lectura y la búsqueda por clave tienen por ello un costo lineal respecto al número de registros del archivo. Para los volúmenes del proyecto, este enfoque evita una dependencia de base de datos; a cambio, implica cargar datos y reescribir archivos, y no proporciona transacciones ni índices persistentes.
 
-\section{Estructuras de datos y complejidad}
-\begin{longtable}{p{.25\textwidth}p{.62\textwidth}}\toprule Estructura & Uso real\\\midrule
+El carrito modela la selección temporal de productos antes de confirmar la venta; las filas del CSV modelan registros persistentes. Esta distinción es importante: modificar un mapa o una lista durante la preparación de una proforma no reduce existencias mientras no se ejecute la confirmación correspondiente. No se encontraron árboles, colas ni pilas empleadas como estructuras de datos del dominio. Un contenedor visual con nombre parecido no constituye evidencia de que se use una pila algorítmica.
+
+\subsection{Tipos de datos e información utilizada}
+\label{subsec:datos}
+
+Las entidades persistentes principales se representan en CSV. Algunas poseen clases Java con atributos tipados; ventas, garantías, caja y varios movimientos se manipulan también como arreglos de cadenas y posiciones de columna. Por tanto, las columnas almacenan texto, aunque determinados campos se conviertan en el código a enteros, números decimales, fechas o estados para efectuar cálculos y validaciones.
+
+\begin{longtable}{|p{2.4cm}|p{3.2cm}|p{3.1cm}|p{3.9cm}|}
+\caption{Entidades, tipos conceptuales y relaciones principales.}
+\label{tab:entidades}\\
+\hline
+\textbf{Entidad} & \textbf{Atributos representativos} & \textbf{Tipos usados conceptualmente} & \textbf{Relaciones observadas}\\
+\hline
+\endfirsthead
+\hline
+\textbf{Entidad} & \textbf{Atributos representativos} & \textbf{Tipos usados conceptualmente} & \textbf{Relaciones observadas}\\
+\hline
 \endhead
-\texttt{List} & Filas CSV, productos, resultados y líneas de operación.\\
-\texttt{Map<String, Integer>} & Carrito de ventas y entradas seleccionadas; se usa \texttt{LinkedHashMap} para conservar el orden.\\
-\texttt{TableView} & Tablas administrativas de inventario, ventas, entradas, empleados, productos y proveedores.\\
-\texttt{VBox/GridPane} & Filas y secciones dinámicas de los paneles de venta y almacén.\\
-\texttt{enum Rol} & \texttt{ADMINISTRADOR}, \texttt{CAJERO} y \texttt{ALMACENERO}.\\\bottomrule
+Producto & Identificador, nombre, marca, categoría, descripción, precio de entrada, precio de venta, stock. & Cadenas para identificadores y texto; \texttt{double} para precios; \texttt{int} para stock. & Las líneas de venta, entrada, pedido y garantía referencian el producto por identificador.\\
+\hline
+Empleado & CI, nombre, rol y contraseña. & Cadenas; el rol se interpreta mediante \texttt{Rol}. & El CI del empleado aparece como responsable en caja y movimientos.\\
+\hline
+Cliente & Identificador, nombre, CI y teléfono. & Cadenas; CI y teléfono se conservan como texto para no imponer operaciones aritméticas sobre ellos. & Ventas y garantías conservan identificadores y datos del comprador.\\
+\hline
+Proveedor & Identificador, nombre y contacto. & Cadenas para identificador y nombre; \texttt{int} en el atributo de contacto del modelo; el archivo conserva campos como texto. & Entradas y pedidos registran el identificador de proveedor.\\
+\hline
+Venta & Identificador de venta/orden, estado, cliente, producto, cantidades, precio, total, fecha y empleado. & Identificadores y estado como cadenas; cantidad entera; importes decimales; fechas como texto formateado. & Una venta puede contener varias líneas por orden; las garantías enlazan la operación y el producto.\\
+\hline
+Entrada y pedido & Identificadores, proveedor, producto, cantidad, precio/fecha y empleado. & Cadenas para identificadores/fecha; cantidades enteras; precio decimal cuando aplica. & Cada registro remite a un producto y proveedor; el empleado identifica quién realizó la operación.\\
+\hline
+Garantía & Identificadores de garantía, venta, orden, cliente y producto; vigencia y estado. & Cadenas de identificación/estado; fechas representadas en texto. & Se produce a partir de una venta confirmada y referencia al comprador y al producto.\\
+\hline
+Caja & Estado, fecha de apertura, fecha de cierre y CI del empleado. & Cadenas en el archivo; estado interpretado como condición operativa. & Registra la apertura/cierre asociada al empleado y condiciona la confirmación de ventas.\\
+\hline
 \end{longtable}
 
-En los mapas, la búsqueda y actualización de una clave tienen coste promedio $O(1)$. Las búsquedas sobre archivos CSV e inventario recorren listas y tienen coste $O(n)$; la memoria utilizada crece con el número de registros cargados, aproximadamente $O(n)$.
+En los modelos Java, \texttt{Producto} y \texttt{Proveedor} agrupan atributos de dominio y \texttt{Inventario} ofrece colecciones en memoria. No todos los CSV tienen una clase de entidad equivalente, ni todas las operaciones crean primero un objeto tipado. Por ejemplo, las filas de venta y garantía se leen y escriben mediante el formato de columnas definido por el servicio CSV.
+
+Los precios y totales del modelo se manejan con \texttt{double}. Esta representación permite cálculos numéricos directos, pero no ofrece por sí sola aritmética decimal exacta para importes monetarios; el repositorio no muestra una sustitución general por \texttt{BigDecimal}.
+
+\subsubsection{Formato de los archivos CSV}
+
+Los nueve archivos presentes bajo \texttt{data} y sus encabezados actuales son los siguientes. Los encabezados describen nombres y orden de columnas; el formato CSV almacena cada campo como texto. Las conversiones semánticas dependen de la operación que lee el registro.
+
+\begin{longtable}{|p{2.6cm}|p{10cm}|}
+\caption{Archivos de datos y encabezados comprobados en el repositorio.}
+\label{tab:csv-headers}\\
+\hline
+\textbf{Archivo} & \textbf{Encabezado en el orden actual}\\
+\hline
+\endfirsthead
+\hline
+\textbf{Archivo} & \textbf{Encabezado en el orden actual}\\
+\hline
+\endhead
+\texttt{empleado.csv} & \texttt{ci}, \texttt{nombre}, \texttt{rol}, \texttt{contrasena}\\
+\hline
+\scriptsize\texttt{inventario.csv} & \texttt{idProducto}, \texttt{nombre}, \texttt{marca}, \texttt{categoria}, \texttt{descripcion}, \texttt{precioEntrada}, \texttt{precioVenta}, \texttt{stock}\\
+\hline
+\texttt{ventas.csv} & \texttt{idVenta}, \texttt{idOrden}, \texttt{estado}, \texttt{ciCliente}, \texttt{nombreCliente}, \texttt{idProducto}, \texttt{nombreProducto}, \texttt{cantidad}, \texttt{precioUnitario}, \texttt{total}, \texttt{fechaVenta}, \texttt{ciEmpleado}, \texttt{idCliente}, \texttt{telefonoCliente}, \texttt{idGarantia}\\
+\hline
+\texttt{clientes.csv} & \texttt{idCliente}, \texttt{nombreCliente}, \texttt{ci}, \texttt{telefono}\\
+\hline
+\scriptsize\texttt{garantias.csv} & \texttt{idGarantia}, \texttt{idVenta}, \texttt{idOrden}, \texttt{idCliente}, \texttt{ciCliente}, \texttt{nombreCliente}, \texttt{telefonoCliente}, \texttt{idProducto}, \texttt{nombreProducto}, \texttt{fechaInicio}, \texttt{fechaFin}, \texttt{estado}, \texttt{ciEmpleado}\\
+\hline
+\texttt{entradas.csv} & \texttt{idEntrada}, \texttt{idProveedor}, \texttt{idProducto}, \texttt{nombreProducto}, \texttt{cantidad}, \texttt{precioUnitario}, \texttt{fechaEntrada}, \texttt{ciEmpleado}\\
+\hline
+\scriptsize\texttt{proveedores.csv} & \texttt{idProveedor}, \texttt{nombreProveedor}, \texttt{contactoProveedor}\\
+\hline
+\texttt{pedidos.csv} & \texttt{idPedido}, \texttt{idProveedor}, \texttt{idProducto}, \texttt{cantidad}, \texttt{fechaPedido}, \texttt{ciEmpleado}\\
+\hline
+\texttt{caja.csv} & \texttt{estado}, \texttt{fechaApertura}, \texttt{fechaCierre}, \texttt{ciEmpleado}\\
+\hline
+\end{longtable}
+
+La persistencia contiene datos de identificación y contacto, estados operativos y cantidades/importes vinculados a las transacciones. Durante una ejecución también se mantienen datos temporales, como la selección actual del carrito, las filas cargadas para filtrar una tabla, los resultados de búsquedas y el estado de navegación/tema. Estos valores temporales no se deben confundir con registros guardados en CSV.

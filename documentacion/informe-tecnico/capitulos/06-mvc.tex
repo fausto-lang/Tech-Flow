@@ -1,6 +1,65 @@
-\chapter{Patrón MVC}
-El modelo comprende \texttt{models.*}, \texttt{user.*} y servicios. Las vistas son los cuatro FXML. Los controladores son \texttt{LoginController}, \texttt{AdminController}, \texttt{VendedorController} y \texttt{AlmacenController}.
-\begin{figure}[H]\centering\begin{tikzpicture}[node distance=12mm,box/.style={draw,rounded corners,align=center,minimum width=3.8cm,minimum height=.9cm},arr/.style={-Latex}]
-\node[box,fill=blue!8](v){Vistas FXML};\node[box,fill=green!8,right=of v](c){Controladores JavaFX};\node[box,fill=orange!12,right=of c](m){Modelos y servicios};\draw[arr](v)--node[above]{eventos}(c); \draw[arr](c)--node[above]{operaciones}(m); \draw[arr](m)--node[below]{resultados}(c); \draw[arr](c)--node[below]{actualización}(v);\end{tikzpicture}\caption{Arquitectura MVC comprobada.}\end{figure}
-\section{Flujo y valoración}
-FXML enlaza eventos \texttt{@FXML}; el controlador llama al dominio y actualiza la vista. \texttt{Navegador} coordina el cambio de pantalla y overlays. La separación facilita el mantenimiento, aunque los controladores también construyen componentes y validan datos; esta es una recomendación futura, no un cambio realizado.
+\section{FASE 3. APLICACIÓN DEL PATRÓN MVC, INTERFACES GRÁFICAS Y VALIDACIÓN FINAL}
+
+\subsection{Fundamentos del patrón Modelo--Vista--Controlador}
+\label{subsec:mvc-teoria}
+
+Modelo--Vista--Controlador (MVC) es un patrón arquitectónico que separa tres responsabilidades. La separación permite comprender y modificar la presentación, la coordinación de eventos y el estado/reglas de negocio con menor dependencia mutua, siempre que las fronteras se mantengan de manera consistente.
+
+\begin{itemize}
+    \item \textbf{Modelo (Model):} representa los datos y las reglas de negocio. Puede incluir entidades, servicios y acceso a persistencia. El modelo no debería depender de controles visuales.
+    \item \textbf{Vista (View):} presenta información y controles al usuario. Recoge interacciones visuales y muestra resultados, pero idealmente no contiene reglas de negocio.
+    \item \textbf{Controlador (Controller):} interpreta las acciones de la vista, solicita operaciones al modelo y determina qué resultados o cambios deben reflejarse en la interfaz.
+\end{itemize}
+
+El patrón busca reducir responsabilidades mezcladas y el acoplamiento directo entre presentación y datos. No exige que cada proyecto use exactamente las mismas clases o secuencia de inicialización; su aplicación debe describirse según las dependencias reales.
+
+\subsubsection{Integración real de MVC en Tech-Flow}
+\label{subsec:mvc-real}
+
+Tech-Flow tiene una organización \textbf{compatible con una separación MVC aproximada}, no una implementación estricta. Los FXML forman la descripción de las vistas; los controladores JavaFX reciben eventos, coordinan pantallas y actualizan controles; las clases de paquetes como \texttt{user} y \texttt{models} aportan reglas y representaciones de dominio; y \texttt{MotorCSV} junto a los archivos CSV resuelve parte de la persistencia. No existe una capa repositorio/DAO tipada única entre todas las operaciones y los archivos.
+
+La frontera presenta excepciones observables. Parte de la lógica de negocio y persistencia reside en las clases de dominio; algunos controladores también leen archivos directamente para alimentar tablas o filtros. En consecuencia, la vista no es siempre un elemento exclusivamente declarativo, ni todas las operaciones atraviesan la misma ruta. La descripción MVC explica responsabilidades dominantes, no una separación absoluta.
+
+\paragraph{Secuencia real de inicialización.}
+
+El arranque de la GUI sigue esta secuencia general, de acuerdo con \texttt{com.overbyte.Main}, \texttt{Navegador} y \texttt{LoginController}:
+
+\begin{enumerate}
+    \item JavaFX invoca \texttt{start(Stage)} de \texttt{com.overbyte.Main}.
+    \item \texttt{Main} llama a \texttt{Navegador.iniciar(stage)} y conecta la acción de Escape con el cierre del overlay.
+    \item \texttt{Main} carga \texttt{login.fxml} con \texttt{FXMLLoader}. En ese proceso JavaFX construye los nodos, inyecta los campos declarados en \texttt{LoginController} y ejecuta \texttt{initialize()}.
+    \item Cuando la vista está cargada, \texttt{Navegador.mostrar(login, "Iniciar sesión")} la instala y presenta en la ventana principal.
+    \item Después de validar credenciales y rol, \texttt{LoginController} carga el FXML del rol. El cargador inicializa su controlador y, a continuación, el controlador de acceso llama a \texttt{setEmpleado(...)} en el controlador de rol.
+    \item Las acciones posteriores se manejan en el controlador de la vista activa, que coordina con la clase de dominio correspondiente y actualiza la presentación.
+\end{enumerate}
+
+Así, la inicialización de JavaFX no debe describirse como «modelo, luego vista, luego controlador»: el FXML carga e inicializa su controlador durante el proceso de construcción de la vista, mientras que los datos del empleado autenticado se inyectan después de resolver el acceso. Esta secuencia importa porque un \texttt{initialize()} no puede asumir que el controlador ya recibió el empleado cuando la asignación ocurre después.
+
+\paragraph{Flujo de interacción.}
+
+El flujo general para una operación de interfaz puede representarse así. Los pasos se ilustran con una interacción de venta; las comprobaciones exactas dependen de si se prepara una proforma o se confirma la operación.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.5cm, every node/.style={draw, rounded corners, align=center, minimum width=2.3cm, minimum height=0.7cm}, >=stealth]
+\node (user) {Usuario};
+\node (view) [right=of user] {Vista\\FXML};
+\node (controller) [right=of view] {Controlador\\JavaFX};
+\node (domain) [right=of controller] {Dominio\\\texttt{Vendedor}};
+\node (csv) [below=of domain] {\texttt{MotorCSV}};
+\node (files) [left=of csv] {CSV\\inventario/ventas};
+\draw[->] (user) -- node[above,draw=none]{acción} (view);
+\draw[->] (view) -- node[above,draw=none]{evento} (controller);
+\draw[->] (controller) -- node[above,draw=none]{solicitud} (domain);
+\draw[->] (domain) -- node[right,draw=none]{leer/escribir} (csv);
+\draw[->] (csv) -- (files);
+\draw[->] (files) to[bend right=18] (domain);
+\draw[->] (domain) to[bend right=27] (controller);
+\draw[->] (controller) to[bend right=35] (view);
+\draw[->] (view) to[bend right=42] (user);
+\end{tikzpicture}
+\caption{Secuencia funcional simplificada de una operación coordinada desde la GUI. Algunas consultas actuales omiten el dominio y leen CSV directamente desde el controlador.}
+\label{fig:secuencia-mvc}
+\end{figure}
+
+En una confirmación, el modelo valida precondiciones y coordina cambios sobre registros de venta, inventario, cliente y garantía. La vista recibe el resultado a través del controlador. Dado que las operaciones de archivos múltiples no son transaccionales, la figura muestra la intención de flujo y no implica atomicidad de persistencia.

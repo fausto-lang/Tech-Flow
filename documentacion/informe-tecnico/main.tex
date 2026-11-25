@@ -1,9 +1,28 @@
-\documentclass[12pt,a4paper]{report}
+\documentclass[12pt,a4paper]{article}
 \input{../estilo.tex}
+\rhead{\textcolor{techpurple}{\textbf{Informe técnico}}}
+\usetikzlibrary{babel}
+\renewcommand{\thesection}{\arabic{section}}
+\renewcommand{\thesubsection}{\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+\makeatletter
+\renewcommand{\l@subsection}{\@dottedtocline{2}{1.5em}{2.8em}}
+\renewcommand{\l@subsubsection}{\@dottedtocline{3}{4em}{4.2em}}
+\makeatother
 \begin{document}
-\TechCover{Informe técnico}{Arquitectura, estructuras de datos y operación del sistema}{Informe técnico}
+\hypersetup{pageanchor=false}
+\TechCover{Informe técnico}{Desarrollo del sistema organizado por fases}{Informe técnico}
+\pagenumbering{roman}
 \tableofcontents\listoffigures\listoftables\clearpage
-\input{capitulos/01-introduccion}\input{capitulos/02-analisis}\input{capitulos/03-estructuras}
-\input{capitulos/04-interfaz}\input{capitulos/05-pruebas}\input{capitulos/06-mvc}
-\input{capitulos/07-javafx}\input{capitulos/08-conclusiones}
+\pagenumbering{arabic}
+\hypersetup{pageanchor=true}
+\setcounter{section}{0}
+\input{capitulos/01-introduccion}
+\input{capitulos/02-analisis}
+\input{capitulos/03-estructuras}
+\input{capitulos/04-interfaz}
+\input{capitulos/05-pruebas}
+\input{capitulos/06-mvc}
+\input{capitulos/07-javafx}
+\input{capitulos/08-conclusiones}
 \end{document}

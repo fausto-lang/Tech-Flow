@@ -6,3 +6,17 @@ target/
 users/gui.log
 run-gui.sh
 gui_run.log
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.out
+*.synctex.gz
+*.toc
+documentacion/**/main.pdf
