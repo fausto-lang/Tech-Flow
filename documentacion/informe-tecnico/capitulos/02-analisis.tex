@@ -1,13 +1,14 @@
-\section{FASE 1. DEFINICIÓN, ANÁLISIS, DISEÑO E IMPLEMENTACIÓN INICIAL}
+\section{FASE 1. APLICACIÓN DE ESTRUCTURAS DE DATOS}
 
 \subsection{Definición del proyecto}
 \label{subsec:definicion}
 
-Tech-Flow es una aplicación de escritorio para apoyar la administración operativa de una tienda de productos electrónicos. Su propósito verificable es reunir en un mismo sistema el acceso por roles, el control de caja, la gestión de productos y proveedores, la consulta de existencias, el registro de entradas de mercancía y el procesamiento de ventas. Los datos se conservan localmente en archivos CSV.
+Tech-Flow es una aplicación de escritorio para apoyar la administración operativa de una tienda de productos electrónicos. Su propósito es reunir en un mismo sistema el acceso por roles, el control de caja, la gestión de productos y proveedores, la consulta de existencias, el registro de entradas de mercancía y el procesamiento de ventas. Los datos se conservan localmente en archivos CSV.
 
 El problema abordado es la coordinación de operaciones que afectan a información relacionada. Una venta confirmada cambia el inventario; una entrada de mercancía también lo modifica; las ventas registran datos del comprador y pueden producir garantías. La aplicación centraliza esas operaciones y mantiene sus registros en archivos compartidos dentro de la instalación local. El código no evidencia concurrencia multiusuario, sincronización remota ni administración de varias sucursales.
 
-Los usuarios observables en la implementación son tres roles autenticados: administrador, vendedor/cajero y almacenero. El acceso determina la vista y las operaciones disponibles. Para evitar atribuir al equipo una especificación formal que no se conserva, los objetivos siguientes son una síntesis técnica de las capacidades actuales, no una transcripción de requisitos originales:
+El sistema cuenta con tres roles de usuario autenticados: administrador, vendedor/cajero y almacenero. El acceso determina la vista y las operaciones disponibles. A partir del alcance y las funcionalidades del sistema,
+se establecen los siguientes objetivos:
 
 \begin{itemize}
     \item \textbf{Objetivo general:} implementar una herramienta de escritorio que coordine la gestión cotidiana de productos, existencias, caja, compras y ventas, conservando la información en archivos locales.
@@ -22,14 +23,14 @@ El alcance comprende las operaciones implementadas en las vistas y clases de dom
 La tabla presenta requerimientos funcionales identificados a partir de las rutas de interfaz, clases de negocio y persistencia actuales. Los identificadores RF son etiquetas de análisis creadas para este informe; no se encontraron identificadores originales de requisitos en el repositorio. La columna de evidencia indica el estado verificable en el código, no una certificación de aceptación por usuarios.
 
 \begin{longtable}{|p{1.15cm}|p{4.35cm}|p{7.1cm}|}
-\caption{Requerimientos funcionales inferidos de la implementación actual.}
+\caption{Requerimientos funcionales del sistema.}
 \label{tab:requerimientos-funcionales}\\
 \hline
-\textbf{ID} & \textbf{Requerimiento observado} & \textbf{Evidencia en el sistema}\\
+\textbf{ID} & \textbf{Requerimiento funcional} & \textbf{Evidencia en el sistema}\\
 \hline
 \endfirsthead
 \hline
-\textbf{ID} & \textbf{Requerimiento observado} & \textbf{Evidencia en el sistema}\\
+\textbf{ID} & \textbf{Requerimiento funcional} & \textbf{Evidencia en el sistema}\\
 \hline
 \endhead
 RF-01 & Permitir el inicio de sesión de los roles disponibles. & La vista de acceso valida credenciales y deriva a la interfaz correspondiente al rol. Las credenciales se almacenan en \texttt{empleado.csv}.\\
@@ -67,11 +68,11 @@ La aplicación se organiza principalmente en paquetes de Java bajo \texttt{com.o
 \caption{Organización lógica de los principales paquetes.}
 \label{tab:paquetes}\\
 \hline
-\textbf{Paquete o recurso} & \textbf{Responsabilidad observada}\\
+\textbf{Paquete o recurso} & \textbf{Responsabilidad}\\
 \hline
 \endfirsthead
 \hline
-\textbf{Paquete o recurso} & \textbf{Responsabilidad observada}\\
+\textbf{Paquete o recurso} & \textbf{Responsabilidad}\\
 \hline
 \endhead
 \texttt{com.overbyte} & Punto de inicio JavaFX y navegación entre escenas. Existe además una clase \texttt{Main} en el paquete por defecto con un menú de consola.\\

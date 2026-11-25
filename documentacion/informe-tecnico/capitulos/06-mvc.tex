@@ -1,6 +1,6 @@
-\section{FASE 3. APLICACIÓN DEL PATRÓN MVC, INTERFACES GRÁFICAS Y VALIDACIÓN FINAL}
+\section{FASE 3. APLICACIÓN DEL PATRÓN MVC E INTERFACES GRÁFICAS}
 
-\subsection{Fundamentos del patrón Modelo--Vista--Controlador}
+\subsection{Patrón Modelo--Vista--Controlador}
 \label{subsec:mvc-teoria}
 
 Modelo--Vista--Controlador (MVC) es un patrón arquitectónico que separa tres responsabilidades. La separación permite comprender y modificar la presentación, la coordinación de eventos y el estado/reglas de negocio con menor dependencia mutua, siempre que las fronteras se mantengan de manera consistente.
@@ -13,14 +13,14 @@ Modelo--Vista--Controlador (MVC) es un patrón arquitectónico que separa tres r
 
 El patrón busca reducir responsabilidades mezcladas y el acoplamiento directo entre presentación y datos. No exige que cada proyecto use exactamente las mismas clases o secuencia de inicialización; su aplicación debe describirse según las dependencias reales.
 
-\subsubsection{Integración real de MVC en Tech-Flow}
+\subsubsection{Aplicación de MVC en Tech-Flow}
 \label{subsec:mvc-real}
 
-Tech-Flow tiene una organización \textbf{compatible con una separación MVC aproximada}, no una implementación estricta. Los FXML forman la descripción de las vistas; los controladores JavaFX reciben eventos, coordinan pantallas y actualizan controles; las clases de paquetes como \texttt{user} y \texttt{models} aportan reglas y representaciones de dominio; y \texttt{MotorCSV} junto a los archivos CSV resuelve parte de la persistencia. No existe una capa repositorio/DAO tipada única entre todas las operaciones y los archivos.
+Tech-Flow aplica el patrón MVC mediante una separación parcial de las responsabilidades del modelo, la vista y el controlador. Los FXML forman la descripción de las vistas; los controladores JavaFX reciben eventos, coordinan pantallas y actualizan controles; las clases de paquetes como \texttt{user} y \texttt{models} aportan reglas y representaciones de dominio; y \texttt{MotorCSV} junto a los archivos CSV resuelve parte de la persistencia. No existe una capa repositorio/DAO tipada única entre todas las operaciones y los archivos.
 
 La frontera presenta excepciones observables. Parte de la lógica de negocio y persistencia reside en las clases de dominio; algunos controladores también leen archivos directamente para alimentar tablas o filtros. En consecuencia, la vista no es siempre un elemento exclusivamente declarativo, ni todas las operaciones atraviesan la misma ruta. La descripción MVC explica responsabilidades dominantes, no una separación absoluta.
 
-\paragraph{Secuencia real de inicialización.}
+\paragraph{Secuencia de inicialización.}
 
 El arranque de la GUI sigue esta secuencia general, de acuerdo con \texttt{com.overbyte.Main}, \texttt{Navegador} y \texttt{LoginController}:
 

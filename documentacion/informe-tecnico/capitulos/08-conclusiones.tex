@@ -1,5 +1,4 @@
-\section*{RESULTADOS}
-\addcontentsline{toc}{section}{RESULTADOS}
+\subsubsection{Resultados}
 
 El análisis confirma que Tech-Flow implementa una aplicación de escritorio JavaFX para operaciones de inventario, caja, ventas, entradas y administración de registros. La separación por roles y la persistencia CSV conectan las funciones principales. La descripción de resultados se limita a comportamientos encontrados en el código y a resultados de pruebas ejecutadas; las capturas se interpretan como evidencia visual de instantes particulares.
 
@@ -30,13 +29,17 @@ Interfaz gráfica & Capturas de acceso, administración/caja, ventas, carrito e 
 \hline
 \end{longtable}
 
-\subsection*{Evolución y consistencia documental}
+\paragraph{Evolución y consistencia documental}
 
-El contraste entre código, historial Git, documentos anteriores y capturas evidencia evolución del diseño. El diagrama de clases encontrado representa un modelo previo con las clases \texttt{InyeccionProducto}, \texttt{GestionProducto} y \texttt{VentaProducto}; esas clases no se encuentran en las fuentes actuales. El modelo \texttt{Producto} actual separa precio de entrada y de venta, y las responsabilidades de compra/venta se distribuyen en las clases de dominio actuales.
-
+El diagrama de clases actualizado permite identificar
+las principales clases del sistema, sus responsabilidades
+y relaciones. El modelo \texttt{Producto} diferencia
+el precio de entrada y el precio de venta, mientras
+que las responsabilidades de compra, venta y administración
+se distribuyen entre las clases de dominio correspondientes.
 El historial registra la retirada del filtro de categoría de la vista del vendedor, mientras se mantienen filtros en otras áreas; por ello, capturas o descripciones anteriores no deben extenderse a la versión vigente. También se encuentran extracciones de utilidades y correcciones en el uso del precio de venta. Estas referencias históricas explican cambios, pero el código actual es la fuente principal para el estado final. La captura de ventas muestra cero operaciones en ese instante, no una ausencia general de ventas. La captura del carrito muestra solo el nombre del cliente, a diferencia del formulario vigente, que requiere CI y teléfono además del nombre.
 
-\subsection*{Fuentes verificables del análisis}
+\paragraph{Fuentes verificables del análisis}
 
 \begin{longtable}{|p{5.7cm}|p{7.3cm}|}
 \caption{Rutas principales del repositorio utilizadas como evidencia.}
@@ -67,23 +70,35 @@ El historial registra la retirada del filtro de categoría de la vista del vende
 \hline
 \end{longtable}
 
-\subsection*{Evidencias incorporadas}
+\paragraph{Evidencias incorporadas}
 
-Se incorporaron seis capturas de interfaz existentes: inicio de sesión; administración con diálogo de caja cerrada; ventas del día; carrito del cajero; inventario de almacén; y preparación de entradas. También se incorporó la imagen histórica del diagrama de clases y se añadió una figura de síntesis actual basada en el código. No se modificaron las imágenes originales. No se encontró una captura específica de ejecución de pruebas ni se presenta una captura como resultado de prueba funcional.
+Se incorporaron seis capturas de interfaz: inicio de
+sesión; administración con diálogo de caja cerrada;
+ventas del día; carrito del cajero; inventario de
+almacén; y preparación de entradas.
 
-\subsection*{Aspectos pendientes por falta de evidencia}
+También se incorporó el diagrama UML actualizado del
+sistema y una captura de la ejecución de las 516
+pruebas automatizadas mediante JUnit y Maven.
+
+Además, se documentaron ejemplos de refactorización
+con fragmentos de código anteriores y posteriores a
+las modificaciones registradas en el historial Git.
+
+\paragraph{Aspectos pendientes por falta de evidencia}
 
 \begin{itemize}
     \item No se encontró una especificación original formal que permita distinguir los requisitos aprobados por usuarios de los que se sintetizaron a partir del código. Los RF de este informe son identificadores analíticos.
-    \item No se pudo establecer la fecha exacta o el commit de la imagen del diagrama de clases histórico.
     \item No hay evidencia reejecutable suficiente para afirmar que todo el proyecto se desarrolló formalmente mediante TDD.
-    \item Los escenarios de la FASE 3 no se ejecutaron desde una sesión GUI durante esta revisión. Las pruebas JUnit verifican partes del dominio, no la interacción gráfica completa.
+    \item Los escenarios de la FASE 3 no se ejecutaron
+en su totalidad desde la interfaz gráfica. Las pruebas
+JUnit verifican partes del dominio, no la interacción
+gráfica completa.
     \item El registro de cambios menciona una comprobación anterior de carga de vistas JavaFX, pero no se encontró el código fuente de esa prueba para repetirla.
     \item No se documentan indicadores de cobertura, rendimiento, disponibilidad ni pruebas con usuarios; por ello no se proporcionan porcentajes ni métricas de esas categorías.
 \end{itemize}
 
-\section*{CONCLUSIONES}
-\addcontentsline{toc}{section}{CONCLUSIONES}
+\subsubsection{Conclusiones}
 
 La FASE 1 muestra que el sistema resuelve una necesidad operativa concreta mediante una aplicación de escritorio que relaciona catálogo, existencias, ventas, clientes, garantías, caja y entradas. Los paquetes y clases actuales permiten identificar vistas, controladores, dominio, servicios y modelos, aunque esas responsabilidades no están completamente desacopladas. El análisis del alcance evita atribuir al proyecto servicios en red, bases de datos o capacidades no presentes.
 

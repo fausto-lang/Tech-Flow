@@ -70,49 +70,67 @@ La tabla resume las clases principales por responsabilidad. La arquitectura es h
 \hline
 \end{longtable}
 
-\paragraph{Comparación con el diagrama histórico.}
-En \texttt{documentacion/capturas} se encontró una imagen titulada \texttt{Diagrama sin título.drawio (1).png}. La imagen representa un diseño previo con las clases \texttt{InyeccionProducto}, \texttt{GestionProducto} y \texttt{VentaProducto}, que utilizan una clase \texttt{Producto}; \texttt{Proveedor} mantiene una lista de productos. El \texttt{Producto} del diagrama tiene un único atributo \texttt{precio}, mientras que el modelo actual diferencia \texttt{precioEntrada} y \texttt{precioVenta}.
+
+\subsubsection{Diagrama UML de clases}
+
+El diagrama de clases de Tech-Flow representa la estructura
+del sistema mediante sus principales clases de dominio,
+atributos, métodos y relaciones. Su diseño permite organizar
+las responsabilidades de administración, ventas, almacén,
+autenticación y persistencia de información.
 
 \begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{\detokenize{../capturas/Diagrama sin título.drawio (1).png}}
-\caption{Diagrama de clases histórico proporcionado en el repositorio. Sus nombres, atributos y operaciones no deben interpretarse como descripción íntegra de la implementación actual.}
-\label{fig:diagrama-historico}
+    \centering
+    \includegraphics[
+        width=\textwidth,
+        height=0.85\textheight,
+        keepaspectratio
+    ]{../capturas/diagrama-clases-actual.jpeg}
+    \caption{Diagrama UML de clases de Tech-Flow.}
+    \label{fig:diagrama-clases}
 \end{figure}
 
-En las fuentes actuales no aparecen clases con los nombres \texttt{InyeccionProducto}, \texttt{GestionProducto} ni \texttt{VentaProducto}. Sus responsabilidades se encuentran distribuidas entre clases como \texttt{Almacen}, \texttt{Gestor}, \texttt{Vendedor}, \texttt{MotorCSV} y controladores JavaFX. \texttt{Proveedor} todavía mantiene una colección de productos, pero su API actual no coincide literalmente con la del diagrama; \texttt{Producto} incorpora categoría y descripción, y separa precio de entrada y de venta. La imagen se conserva como evidencia de diseño/evolución, no como UML actualizado. La fecha exacta de elaboración de la captura no puede determinarse solo a partir de la imagen.
+\subsubsection{Relaciones entre clases}
 
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}[node distance=1.05cm and 1.6cm, every node/.style={draw, rounded corners, align=center, minimum width=2.8cm, minimum height=0.72cm}, >=stealth]
-\node (main) {\texttt{Main}};
-\node (nav) [below=of main] {\texttt{Navegador}};
-\node (login) [below=of nav] {\texttt{LoginController}};
-\node (view) [left=of login] {FXML\\vistas};
-\node (admin) [below left=of login] {\texttt{AdminController}};
-\node (seller) [below=of login] {\texttt{VendedorController}};
-\node (stock) [below right=of login] {\texttt{AlmacenController}};
-\node (domain) [below=of seller, yshift=-0.1cm] {\texttt{Gestor}, \texttt{Vendedor}, \texttt{Almacen}};
-\node (models) [below=of domain] {Modelos de dominio};
-\node (csv) [below=of models] {\texttt{MotorCSV} + CSV};
-\draw[->] (main) -- (nav);
-\draw[->] (nav) -- (login);
-\draw[->] (view) -- (login);
-\draw[->, dashed] (login) -- (admin);
-\draw[->, dashed] (login) -- (seller);
-\draw[->, dashed] (login) -- (stock);
-\draw[->] (admin) -- (domain);
-\draw[->] (seller) -- (domain);
-\draw[->] (stock) -- (domain);
-\draw[->] (domain) -- (models);
-\draw[->] (domain) -- (csv);
-\end{tikzpicture}
-\caption{Dependencias funcionales entre clases principales, no exhaustivas. Las flechas muestran coordinación/uso, no composición UML. Algunos controladores también acceden a CSV directamente.}
-\label{fig:diagrama-clases}
-\end{figure}
+Las principales relaciones del modelo de clases son:
 
-La figura actual es una síntesis del código y no se presenta como una captura recibida ni como transcripción del diagrama histórico. La comparación señala diferencias demostrables, pero no atribuye fechas ni una migración directa método por método sin evidencia adicional.
+\begin{itemize}
 
+    \item \textbf{Herencia:} las clases \texttt{Gestor},
+    \texttt{Vendedor} y \texttt{Almacen} especializan
+    la clase \texttt{Empleado}, reutilizando sus atributos
+    y comportamientos comunes.
+
+    \item \textbf{Asociación:} la clase \texttt{Empleado}
+    utiliza la enumeración \texttt{Rol} para identificar
+    los tipos de usuarios del sistema.
+
+    \item \textbf{Gestión de productos:} las clases
+    \texttt{Inventario} y \texttt{Proveedor} mantienen
+    colecciones de objetos de tipo \texttt{Producto}.
+
+    \item \textbf{Persistencia:} las clases
+    \texttt{Gestor}, \texttt{Vendedor}, \texttt{Almacen}
+    y \texttt{Verificador} utilizan \texttt{MotorCSV}
+    para gestionar el acceso a los archivos CSV.
+
+    \item \textbf{Validación:} la clase
+    \texttt{ValidadorDatos} centraliza las comprobaciones
+    necesarias para validar la información del sistema.
+
+    \item \textbf{Configuración:} la clase
+    \texttt{ConfiguracionCSV} define los parámetros
+    utilizados en el procesamiento de archivos CSV.
+
+\end{itemize}
+
+La organización de estas clases aplica los principios
+de la programación orientada a objetos, favoreciendo
+la encapsulación, la reutilización de código y la
+distribución de responsabilidades entre los componentes
+del sistema. Las clases del dominio se integran con los
+controladores JavaFX para ejecutar las operaciones
+disponibles en las interfaces gráficas.
 \subsection{Codificación y reglas de negocio}
 \label{subsec:codificacion}
 

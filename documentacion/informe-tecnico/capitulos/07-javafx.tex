@@ -1,4 +1,4 @@
-\subsection{Tecnologías utilizadas para la interfaz gráfica}
+\subsection{Interfaces gráficas con JavaFX}
 \label{subsec:gui-tecnologias}
 
 La interfaz de escritorio utiliza JavaFX 17.0.2 con FXML y CSS. JavaFX aporta la ventana, escenas, controles, eventos y tablas; FXML declara la jerarquía visual y enlaza nodos con clases controladoras; CSS aplica los estilos compartidos. El plugin Maven de JavaFX configura \texttt{com.overbyte.Main} como clase de inicio para la ejecución mediante Maven. Existe además otro \texttt{Main} en el paquete por defecto con un menú de consola y una opción para iniciar la GUI; no es el punto de entrada configurado en el plugin JavaFX.
@@ -9,7 +9,7 @@ El método de inicio de la aplicación prepara la ventana y el navegador, y carg
 
 El tamaño inicial de la ventana y las dimensiones mínimas se definen en la aplicación; no debe interpretarse que la ventana sea invariable si el usuario puede redimensionarla. La GUI emplea estilos consistentes y una paleta visual predominante en violeta, como se aprecia en las capturas. No se halló un framework adicional de componentes ni una herramienta automática de interacción gráfica dentro de las dependencias de Maven.
 
-\subsubsection{Diseño de interfaces y capturas disponibles}
+\subsubsection{Diseño de interfaces gráficas}
 
 Las imágenes siguientes son capturas que ya estaban en el repositorio. Se incorporan sin alteración y se describen como estados visuales puntuales. Una captura no prueba que una acción representada por un botón se haya ejecutado correctamente. Para la captura del carrito existe además una diferencia con el FXML actual: la vista vigente solicita nombre, CI y teléfono, mientras que la imagen muestra solo el campo de nombre; no se puede determinar la fecha exacta de la imagen, por lo que no se le asigna una versión concreta.
 
@@ -128,7 +128,9 @@ EU-06 & Rechazar entrada inválida & Proveedor inexistente, cantidad negativa o 
 
 Los casos EU-02 a EU-06 no deben considerarse una prueba visual aprobada solo porque existan pruebas unitarias relacionadas. La verificación de usuario deberá ejecutarse en una instalación aislada con datos de prueba, comprobar el mensaje y los controles, y confirmar el contenido final de los CSV. La captura del carrito tampoco valida el formulario actual completo, dado que no muestra dos campos presentes en el FXML revisado.
 
-\subsection{Resultados de la validación y evidencias disponibles}
+\subsection{Resultados y conclusiones}
+
+\subsubsection{Resultados de la validación y evidencias disponibles}
 
 La evidencia disponible permite distinguir tres niveles. Primero, el código y las pruebas JUnit comprueban reglas de dominio y persistencia bajo condiciones controladas. Segundo, las capturas muestran pantallas representadas y ciertos estados visuales concretos. Tercero, no hay en el repositorio una suite automatizada de interacción gráfica que valide de extremo a extremo los formularios, la navegación y la actualización visual. Por eso, los escenarios de usuario quedan especificados, pero su estado de ejecución en GUI es \textit{no ejecutado en esta revisión}.
 

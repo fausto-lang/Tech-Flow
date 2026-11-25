@@ -1,10 +1,10 @@
 \subsection{Estructuras de datos aplicadas}
 \label{subsec:estructuras}
 
-Las estructuras observadas reflejan una decisión práctica: los archivos CSV son la persistencia principal y, durante cada operación, sus filas se cargan y recorren como colecciones Java. No todas las estructuras participan en todos los flujos; por ejemplo, el mapa del modelo \texttt{Inventario} ofrece una representación en memoria, mientras que las clases de venta y almacén también consultan directamente las filas del archivo.
+Las estructuras de datos utilizadas responden a las necesidades del sistema: los archivos CSV son la persistencia principal y, durante cada operación, sus filas se cargan y recorren como colecciones Java. No todas las estructuras participan en todos los flujos; por ejemplo, el mapa del modelo \texttt{Inventario} ofrece una representación en memoria, mientras que las clases de venta y almacén también consultan directamente las filas del archivo.
 
 \begin{longtable}{|p{2.6cm}|p{3.3cm}|p{3.4cm}|p{3.3cm}|}
-\caption{Estructuras de datos verificadas y su contribución.}
+\caption{Estructuras de datos utilizadas y su contribución.}
 \label{tab:estructuras-datos}\\
 \hline
 \textbf{Estructura} & \textbf{Ubicación / forma} & \textbf{Uso y operaciones} & \textbf{Ventajas y límites}\\
@@ -30,7 +30,8 @@ Enumeración (\texttt{Rol}) & Modelo de roles. & Representa un conjunto cerrado 
 
 En las operaciones sobre CSV, el patrón más frecuente es carga, recorrido, cambio de una fila y escritura del conjunto resultante. La lectura y la búsqueda por clave tienen por ello un costo lineal respecto al número de registros del archivo. Para los volúmenes del proyecto, este enfoque evita una dependencia de base de datos; a cambio, implica cargar datos y reescribir archivos, y no proporciona transacciones ni índices persistentes.
 
-El carrito modela la selección temporal de productos antes de confirmar la venta; las filas del CSV modelan registros persistentes. Esta distinción es importante: modificar un mapa o una lista durante la preparación de una proforma no reduce existencias mientras no se ejecute la confirmación correspondiente. No se encontraron árboles, colas ni pilas empleadas como estructuras de datos del dominio. Un contenedor visual con nombre parecido no constituye evidencia de que se use una pila algorítmica.
+El carrito modela la selección temporal de productos antes de confirmar la venta; las filas del CSV modelan registros persistentes. Esta distinción es importante: modificar un mapa o una lista durante la preparación de una proforma no reduce existencias mientras no se ejecute la confirmación correspondiente. Las principales estructuras de datos utilizadas en el
+dominio del sistema son arreglos, listas, mapas y conjuntos.
 
 \subsection{Tipos de datos e información utilizada}
 \label{subsec:datos}
@@ -41,11 +42,11 @@ Las entidades persistentes principales se representan en CSV. Algunas poseen cla
 \caption{Entidades, tipos conceptuales y relaciones principales.}
 \label{tab:entidades}\\
 \hline
-\textbf{Entidad} & \textbf{Atributos representativos} & \textbf{Tipos usados conceptualmente} & \textbf{Relaciones observadas}\\
+\textbf{Entidad} & \textbf{Atributos representativos} & \textbf{Tipos usados conceptualmente} & \textbf{Relaciones}\\
 \hline
 \endfirsthead
 \hline
-\textbf{Entidad} & \textbf{Atributos representativos} & \textbf{Tipos usados conceptualmente} & \textbf{Relaciones observadas}\\
+\textbf{Entidad} & \textbf{Atributos representativos} & \textbf{Tipos usados conceptualmente} & \textbf{Relaciones }\\
 \hline
 \endhead
 Producto & Identificador, nombre, marca, categoría, descripción, precio de entrada, precio de venta, stock. & Cadenas para identificadores y texto; \texttt{double} para precios; \texttt{int} para stock. & Las líneas de venta, entrada, pedido y garantía referencian el producto por identificador.\\
@@ -75,7 +76,7 @@ Los precios y totales del modelo se manejan con \texttt{double}. Esta representa
 Los nueve archivos presentes bajo \texttt{data} y sus encabezados actuales son los siguientes. Los encabezados describen nombres y orden de columnas; el formato CSV almacena cada campo como texto. Las conversiones semánticas dependen de la operación que lee el registro.
 
 \begin{longtable}{|p{2.6cm}|p{10cm}|}
-\caption{Archivos de datos y encabezados comprobados en el repositorio.}
+\caption{Archivos de datos y sus encabezados.}
 \label{tab:csv-headers}\\
 \hline
 \textbf{Archivo} & \textbf{Encabezado en el orden actual}\\

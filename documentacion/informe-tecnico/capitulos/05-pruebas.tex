@@ -7,8 +7,18 @@ Las pruebas de software aportan evidencia observable sobre si una operación res
 
 La suite está organizada en 16 clases de prueba y cubre clases de interfaz/control, modelos, servicios y dominio. Entre ellas se encuentran pruebas para \texttt{MotorCSV}, \texttt{IntegridadCSV}, \texttt{Verificador}, \texttt{Almacen}, \texttt{Vendedor}, \texttt{Gestor}, \texttt{Empleado}, \texttt{Producto}, \texttt{Proveedor}, \texttt{Inventario}, \texttt{Cliente}, \texttt{Rol}, \texttt{Main} y filtros de categorías. Varias clases utilizan \texttt{@TempDir} para aislar los archivos de prueba y evitar modificar los CSV ordinarios.
 
-La ejecución registrada para el estado revisado fue \texttt{mvn -f Tech-Flow\textbackslash pom.xml test}, desde la carpeta que contiene \texttt{Tech-Flow}. El resultado fue \textbf{516 pruebas, 0 fallos, 0 errores y 0 omitidas}. Esta cifra es el resultado de esa ejecución documentada; no representa cobertura de código ni demuestra que todas las combinaciones posibles estén verificadas. La tarea actual solo modifica documentación y no altera la suite de Java.
+La ejecución registrada para el estado revisado fue \texttt{mvn -f Tech-Flow\textbackslash pom.xml test}, desde la carpeta que contiene \texttt{Tech-Flow}. El resultado fue \textbf{516 pruebas, 0 fallos, 0 errores y 0 omitidas}. Esta cifra es el resultado de esa ejecución documentada; no representa cobertura de código ni demuestra que todas las combinaciones posibles estén verificadas.
+El 25 de noviembre de 2026 se ejecutaron nuevamente
+las pruebas mediante el comando \texttt{mvn test},
+obteniendo un total de 516 pruebas aprobadas, sin
+fallos, errores ni pruebas omitidas.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{../capturas/pruebas-junit.png}
+    \caption{Resultado de la ejecución de pruebas con JUnit y Maven.}
+    \label{fig:pruebas-junit}
+\end{figure}
 \subsubsection{Configuración del entorno de pruebas}
 
 El \texttt{pom.xml} declara \texttt{org.junit.jupiter:junit-jupiter:5.10.0} con alcance \texttt{test}, Maven Compiler Plugin 3.11.0 con fuente/destino Java 17 y Maven Surefire 3.2.5. Las pruebas siguen convenciones JUnit 5 como \texttt{@Test}, aserciones y, en casos de persistencia, directorios temporales. No se encontró una configuración para pruebas automatizadas de interfaz con TestFX, Selenium, Playwright u otra herramienta equivalente.
@@ -60,7 +70,7 @@ UT-12 & \texttt{Integridad\allowbreak CSVTest}\newline\texttt{ventaConfirmada\al
 
 Una prueba de dominio comprueba explícitamente la diferencia entre crear una proforma y confirmar la venta:
 
-\begin{lstlisting}[language=Java,caption={Prueba real: una proforma no descuenta existencias.},label={lst:test-proforma}]
+\begin{lstlisting}[language=Java,caption={Prueba unitaria: una proforma no descuenta existencias.},label={lst:test-proforma}]
 @Test
 void proformaNoDescuentaStock() {
     Vendedor vendedor = vendedor();
@@ -79,15 +89,77 @@ El desarrollo guiado por pruebas (Test-Driven Development, TDD) propone el ciclo
 
 En el repositorio hay pruebas adecuadas para verificar comportamientos de dominio y persistencia, pero no se halló evidencia histórica suficiente para afirmar que el proyecto completo se construyera siguiendo TDD de manera estricta. La existencia de pruebas y el registro de correcciones no demuestran por sí solos el orden temporal Red--Green--Refactor. Por tanto, este informe explica el método y describe la cobertura disponible, pero no atribuye formalmente esa metodología a todo el proceso.
 
-\subsection{Bad Smells y refactorizaciones verificables}
+\paragraph{Pruebas durante el desarrollo del sistema.}
+
+Durante el desarrollo de Tech-Flow se incorporaron
+pruebas unitarias y se ampliaron los casos de validación
+de manera progresiva.
+
+El historial de versiones registra la implementación
+de la clase Venta junto con sus pruebas en el commit
+\texttt{cdb2d4c} del 12 de septiembre de 2026.
+
+Posteriormente, en el commit \texttt{a91551f} del
+3 de noviembre de 2026, se incorporaron pruebas
+adicionales para la validación de datos y la
+integridad de los archivos CSV.
+
+Estas pruebas constituyen una base para verificar
+el comportamiento del sistema durante las
+correcciones y refactorizaciones posteriores.
+
+\subsection{Bad Smells y refactorización}
 \label{subsec:bad-smells}
 
 Un Bad Smell es una señal de que una estructura puede dificultar el cambio, la comprensión o la prueba del software. No implica automáticamente un fallo funcional. En esta sección se separan problemas aún presentes de refactorizaciones con evidencia histórica; no se atribuye una mejora al proyecto si solo se observa la situación actual.
 
+
+\paragraph{Bad Smell identificado: código duplicado (Duplicated Code).}
+
+\textbf{Clase afectada:} \texttt{Main.java}.
+
+\textbf{Situación inicial:} la aplicación de consola
+utilizaba métodos propios para validar los nombres y
+datos de los clientes, mientras que la interfaz gráfica
+utilizaba la clase compartida \texttt{ValidadorDatos}.
+
+\begin{lstlisting}[language=Java,caption={Validación antes de la refactorización.}]
+private static boolean textoValido(String texto) {
+    return texto != null && texto.matches(".*\\p{L}.*")
+            && texto.matches("[\\p{L} ]+");
+}
+\end{lstlisting}
+
+\textbf{Refactorización aplicada:} se eliminaron los
+métodos locales de validación y se delegó esta
+responsabilidad a la clase \texttt{ValidadorDatos}.
+
+\begin{lstlisting}[language=Java,caption={Validación después de la refactorización.}]
+if (!ValidadorDatos.textoValido(cliente)) {
+    System.out.println("El nombre del cliente es obligatorio.");
+    return;
+}
+\end{lstlisting}
+
+\textbf{Beneficios:} se reduce la duplicación de código,
+se facilita el mantenimiento y se unifican los criterios
+de validación entre la consola y la interfaz gráfica.
+
+La modificación también permitió aceptar nombres
+alfanuméricos, por lo que se actualizaron los casos de
+prueba correspondientes.
+
+\textbf{Verificación:} las 516 pruebas automatizadas
+aprobaron en la ejecución del 25 de noviembre de 2026.
+
+\textbf{Referencia:} commit \texttt{a618180} del
+18 de noviembre de 2026, registrado en el historial Git
+del proyecto.
+
 \paragraph{Bad Smell identificado: responsabilidades mezcladas en controladores.}
 \textbf{Clase o método afectado:} \texttt{AdminController}, \texttt{VendedorController} y \texttt{AlmacenController}.
 
-\textbf{Situación inicial y evidencia:} los controladores gestionan eventos y componentes gráficos, y algunos también realizan lecturas directas de CSV o contienen lógica de presentación de informes. El diseño actual conserva estas responsabilidades en más de un lugar; no existe una capa DAO/repositorio tipada que medie todos los accesos.
+\textbf{Situación inicial:} los controladores gestionan eventos y componentes gráficos, y algunos también realizan lecturas directas de CSV o contienen lógica de presentación de informes. El diseño actual conserva estas responsabilidades en más de un lugar; no existe una capa DAO/repositorio tipada que medie todos los accesos.
 
 \textbf{Consecuencias:} el acoplamiento entre JavaFX y el formato/índice de columnas dificulta probar la interfaz separadamente, modificar el esquema CSV y reutilizar las consultas.
 
@@ -96,6 +168,74 @@ Un Bad Smell es una señal de que una estructura puede dificultar el cambio, la 
 \textbf{Situación posterior y beneficios:} determinadas operaciones repetidas cuentan con puntos compartidos y los nombres de archivos se centralizan. La separación sigue siendo parcial; no se afirma una arquitectura por capas estricta.
 
 \textbf{Verificación:} las pruebas de regresión del estado actual pasan en la ejecución registrada. Esto comprueba comportamientos cubiertos, no la eliminación completa del acoplamiento.
+
+
+\paragraph{Refactorización mediante extracción de métodos compartidos.}
+
+\textbf{Clases afectadas:} \texttt{AdminController} y
+\texttt{VendedorController}.
+
+\textbf{Bad Smell:} código duplicado (Duplicated Code).
+
+\textbf{Situación inicial:} los controladores repetían
+las instrucciones necesarias para seleccionar una ruta,
+comprobar la extensión del archivo y guardar informes,
+ventas y proformas en formato TXT.
+
+\begin{lstlisting}[language=Java,caption={Selección de archivo antes de la refactorización.}]
+FileChooser selector = new FileChooser();
+selector.setTitle("Guardar venta");
+selector.setInitialFileName("venta-" + idOrden + ".txt");
+selector.getExtensionFilters().add(
+    new FileChooser.ExtensionFilter(
+        "Archivo de texto (*.txt)", "*.txt"));
+java.io.File archivo =
+    selector.showSaveDialog(Navegador.ventana());
+if (archivo == null) {
+    return;
+}
+\end{lstlisting}
+
+\textbf{Refactorización aplicada:} se creó la clase
+\texttt{AyudasArchivo}, que centraliza la selección
+de rutas y la escritura de archivos de texto mediante
+los métodos \texttt{elegirRutaTxt} y \texttt{escribirTxt}.
+
+\begin{lstlisting}[language=Java,caption={Selección de archivo después de la refactorización.}]
+Path ruta = AyudasArchivo.elegirRutaTxt(
+    Navegador.ventana(),
+    "Guardar venta",
+    "venta-" + idOrden + ".txt");
+
+if (ruta == null) {
+    return;
+}
+\end{lstlisting}
+
+La escritura de archivos también se centralizó en
+el siguiente método:
+
+\begin{lstlisting}[language=Java,caption={Método compartido para escribir archivos TXT.}]
+static boolean escribirTxt(Path ruta, String contenido) {
+    try {
+        Files.writeString(ruta, contenido,
+            StandardCharsets.UTF_8);
+        return true;
+    } catch (IOException e) {
+        System.err.println("No se pudo guardar "
+            + ruta + ": " + e.getMessage());
+        return false;
+    }
+}
+\end{lstlisting}
+
+\textbf{Beneficios:} se reduce la duplicación de código,
+se facilita la reutilización de métodos y se simplifican
+las responsabilidades de los controladores.
+
+\textbf{Referencia:} commit \texttt{1f081df} del
+18 de noviembre de 2026, registrado en el historial
+Git del proyecto.
 
 \paragraph{Bad Smell identificado: dependencia de índices y cadenas para representar datos tabulares.}
 \textbf{Clase o método afectado:} operaciones de \texttt{MotorCSV}, \texttt{Vendedor}, \texttt{Almacen}, \texttt{Gestor} y controladores que manipulan filas.
@@ -121,7 +261,7 @@ Un Bad Smell es una señal de que una estructura puede dificultar el cambio, la 
 
 \textbf{Verificación:} las pruebas \texttt{MotorCSVTest} incluyen campos complejos, UTF-8, saltos de línea, rutas inválidas y actualización/eliminación; la ejecución registrada aprobó la suite. Esas pruebas no resuelven por sí mismas la ambigüedad del contrato de errores.
 
-\paragraph{Correcciones y evolución verificadas.}
+\paragraph{Correcciones y evolución del sistema.}
 El historial Git y los documentos históricos consultados registran extracciones de helpers y centralización de nombres CSV, además de correcciones en el precio de venta para emplear el campo \texttt{precioVenta}. El código actual refleja esa representación. También se retiró la enumeración de categorías como tipo de dominio y la categoría se conserva como texto. La utilidad de filtrado de categorías sigue empleándose en vistas administrativas/de almacén, mientras que el filtro ya no forma parte de la vista actual del vendedor. Este último cambio es una modificación funcional de interfaz, no se presenta como una mera refactorización.
 
 Un registro histórico consultado anota una comprobación de carga de vistas JavaFX, pero no se localizó una prueba automatizada fuente equivalente que permita repetirla desde la suite actual. Se conserva como antecedente documental, no como prueba reejecutada. Las capturas GUI disponibles sirven como evidencia visual estática y no certifican el funcionamiento de todos los controles.
